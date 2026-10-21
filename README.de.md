@@ -4,6 +4,14 @@
 
 NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links öffnet und Downloads an SABnzbd übergibt. Nach deiner Kategorieauswahl sucht sie bei Bedarf nacheinander über NZBIndex, NZBKing und BinSearch. Sobald SABnzbd die Übergabe bestätigt, schließt sich das Fenster. Die App bleibt in der Menüleiste erreichbar.
 
+## Bildschirmfotos
+
+| Hauptfenster | Verbindungseinstellungen |
+| --- | --- |
+| ![NZBPort-Hauptfenster](docs/screenshots/nzbport-main.png) | ![NZBPort-Verbindungseinstellungen](docs/screenshots/nzbport-settings.png) |
+
+Die private Serveradresse im ersten Screenshot wurde unkenntlich gemacht.
+
 ## Voraussetzungen und Installation
 
 - Ein Mac mit Apple Silicon und macOS 26 oder neuer.

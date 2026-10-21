@@ -21,3 +21,11 @@
 .env.*
 *.p12
 *.key
+
+# Screenshots approved for public documentation.
+!/docs/
+/docs/*
+!/docs/screenshots/
+/docs/screenshots/*
+!/docs/screenshots/nzbport-main.png
+!/docs/screenshots/nzbport-settings.png
