@@ -9,7 +9,20 @@ NZBPort is a small macOS menu bar app that opens `nzblnk:` links and sends downl
 - Apple Silicon Mac with macOS 26 or later.
 - A running SABnzbd server and its full API key.
 
-Download the DMG or ZIP from [Releases](https://github.com/Schrotty74/NZBPort/releases). Open the DMG and drag NZBPort into Applications, or extract the ZIP and move the app there. The app is ad hoc signed, without Apple notarization. macOS may block it; review the source and use the system's Privacy & Security settings to allow it only if you trust this build.
+Download the DMG or ZIP from [Releases](https://github.com/Schrotty74/NZBPort/releases). Open the DMG and drag NZBPort into Applications, or extract the ZIP and move the app there. The app is ad hoc signed and is not notarized by Apple. If macOS blocks the first launch, follow the Gatekeeper steps below.
+
+### Gatekeeper: opening NZBPort for the first time
+
+Only approve a build downloaded from the official [NZBPort GitHub Releases](https://github.com/Schrotty74/NZBPort/releases), and only if you trust it.
+
+1. After moving the app to Applications, try to open `NZBPort.app` normally once so macOS registers the blocked launch.
+2. Open **System Settings → Privacy & Security** and scroll down to **Security**.
+3. Click **Open Anyway** for NZBPort.
+4. Confirm with **Open** and authenticate if macOS asks you to.
+
+**Open Anyway** is available only for a limited time after the blocked launch attempt. If it is missing, try opening the app again and return to these settings. This creates an exception for NZBPort and does not disable Gatekeeper system-wide.
+
+See [Apple’s instructions for opening apps safely](https://support.apple.com/en-us/102445).
 
 ## Setup
 

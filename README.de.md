@@ -9,7 +9,20 @@ NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links öffnet und 
 - Ein Mac mit Apple Silicon und macOS 26 oder neuer.
 - Ein laufender SABnzbd-Server und dessen vollständiger API-Key.
 
-Lade die DMG oder ZIP unter [Releases](https://github.com/Schrotty74/NZBPort/releases) herunter. Öffne die DMG und ziehe NZBPort in „Applications“, oder entpacke die ZIP und verschiebe die App nach „Programme“. Die App ist ad hoc signiert und nicht von Apple notarisiert. macOS kann sie deshalb blockieren. Prüfe den Quellcode und erlaube das Öffnen in „Datenschutz & Sicherheit“ nur, wenn du diesem Build vertraust.
+Lade die DMG oder ZIP unter [Releases](https://github.com/Schrotty74/NZBPort/releases) herunter. Öffne die DMG und ziehe NZBPort in „Applications“, oder entpacke die ZIP und verschiebe die App nach „Programme“. Die App ist ad hoc signiert und nicht von Apple notarisiert. Falls macOS den ersten Start blockiert, folge den Gatekeeper-Schritten unten.
+
+### Gatekeeper: NZBPort zum ersten Mal öffnen
+
+Erlaube nur einen Build aus den offiziellen [NZBPort-GitHub-Releases](https://github.com/Schrotty74/NZBPort/releases), dem du vertraust.
+
+1. Verschiebe die App nach „Programme“ und versuche einmal, `NZBPort.app` normal zu öffnen, damit macOS den blockierten Start registriert.
+2. Öffne **Systemeinstellungen → Datenschutz & Sicherheit** und scrolle zum Bereich **Sicherheit**.
+3. Klicke bei NZBPort auf **Dennoch öffnen**.
+4. Bestätige mit **Öffnen** und authentifiziere dich, falls macOS dich dazu auffordert.
+
+**Dennoch öffnen** erscheint nur für begrenzte Zeit nach dem blockierten Startversuch. Fehlt die Schaltfläche, versuche erneut, die App zu öffnen, und kehre zu diesen Einstellungen zurück. Dadurch wird eine Ausnahme für NZBPort angelegt; Gatekeeper bleibt systemweit aktiviert.
+
+Siehe auch [Apples Anleitung zum sicheren Öffnen von Apps](https://support.apple.com/de-de/102445).
 
 ## Einrichten
 
