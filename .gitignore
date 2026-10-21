@@ -1,0 +1,23 @@
+# Publish only the source, build inputs, tests and public project documents.
+/*
+!/.gitignore
+!/LICENSE
+!/Package.swift
+!/README.md
+!/README.de.md
+!/SECURITY.md
+!/Sources/
+!/Tests/
+!/Scripts/
+!/Resources/
+/Resources/*
+!/Resources/Info.plist
+!/Resources/NZBPort.icon/
+.DS_Store
+*.swp
+*.bak
+*.orig
+.env
+.env.*
+*.p12
+*.key
