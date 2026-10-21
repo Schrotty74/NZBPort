@@ -12,14 +12,14 @@ public actor SABClient {
         let data = try await request(
             connection,
             fields: [("mode", "get_cats")],
-            failureMessage: "SABnzbd konnte die Kategorien nicht abrufen."
+            failureMessage: "SABnzbd could not retrieve the categories."
         )
         let payload = try decode(data, as: CategoriesResponse.self)
         if let error = payload.error {
             throw RelayError.message("SABnzbd: \(error)")
         }
         guard let categories = payload.categories else {
-            throw RelayError.message("SABnzbd hat eine ungültige Antwort auf die Kategorieabfrage gesendet.")
+            throw RelayError.message("SABnzbd returned an invalid response to the category request.")
         }
         var seen = Set<String>()
         return categories.filter { seen.insert($0).inserted }
@@ -44,21 +44,21 @@ public actor SABClient {
         let data = try await request(
             connection,
             fields: fields,
-            failureMessage: "Die Verbindung zu SABnzbd wurde unterbrochen. Der Downloadstatus ist unklar; bitte die SABnzbd-Warteschlange prüfen."
+            failureMessage: "The connection to SABnzbd was interrupted. The download status is unknown; check the SABnzbd queue."
         )
         let payload = try decode(data, as: AddURLResponse.self)
         if let error = payload.error {
             throw RelayError.message("SABnzbd: \(error)")
         }
         guard payload.status == true, let ids = payload.nzoIDs, !ids.isEmpty else {
-            throw RelayError.message("SABnzbd hat den Download nicht bestätigt. Bitte die SABnzbd-Warteschlange prüfen.")
+            throw RelayError.message("SABnzbd did not confirm the download. Check the SABnzbd queue.")
         }
     }
 
     private func request(
         _ connection: ServerConnection,
         fields: [(String, String)],
-        failureMessage: String
+        failureMessage: String.LocalizationValue
     ) async throws -> Data {
         var request = URLRequest(url: connection.endpoint)
         request.timeoutInterval = 25
@@ -70,7 +70,7 @@ public actor SABClient {
         do {
             let result = try await transport.perform(request)
             guard (200..<300).contains(result.status) else {
-                throw RelayError.message("SABnzbd antwortete mit HTTP-Status \(result.status).")
+                throw RelayError.message("SABnzbd returned HTTP status \(result.status).")
             }
             return result.data
         } catch is CancellationError {
@@ -90,7 +90,7 @@ public actor SABClient {
         do {
             return try JSONDecoder().decode(type, from: data)
         } catch {
-            throw RelayError.message("SABnzbd hat eine ungültige JSON-Antwort gesendet.")
+            throw RelayError.message("SABnzbd returned an invalid JSON response.")
         }
     }
 }

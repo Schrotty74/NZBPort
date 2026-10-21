@@ -4,12 +4,16 @@ import SwiftUI
 struct RelayBackground: View {
     let style: BackgroundStyle
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorTheme) private var colorTheme
 
     var body: some View {
         if reduceTransparency || style == .opaque {
-            RelayTheme.solidBackground
+            Color(nsColor: colorTheme.windowColor)
         } else {
-            NativeMaterial(material: RelayTheme.material(for: style))
+            ZStack {
+                NativeMaterial(material: RelayTheme.material(for: style))
+                Color(nsColor: colorTheme.windowColor).opacity(colorTheme == .standard ? 0 : 0.16)
+            }
         }
     }
 }

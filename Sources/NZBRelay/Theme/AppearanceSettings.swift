@@ -1,3 +1,4 @@
+import RelayCore
 import AppKit
 import SwiftUI
 import Observation
@@ -6,7 +7,7 @@ enum AppAppearance: String, CaseIterable, Identifiable {
     case system, light, dark
     var id: String { rawValue }
     var title: String {
-        switch self { case .system: "System"; case .light: "Hell"; case .dark: "Dunkel" }
+        switch self { case .system: L("System"); case .light: L("Hell"); case .dark: L("Dunkel") }
     }
     var native: NSAppearance? {
         switch self {
@@ -24,10 +25,9 @@ enum BackgroundStyle: String, CaseIterable, Identifiable {
     case system, translucent, opaque
     var id: String { rawValue }
     var title: String {
-        switch self { case .system: "System"; case .translucent: "Transparent"; case .opaque: "Deckend" }
+        switch self { case .system: L("System"); case .translucent: L("Transparent"); case .opaque: L("Deckend") }
     }
 }
-
 
 // Appearance preferences are independent of the SABnzbd connection and download flow.
 @MainActor @Observable
@@ -41,6 +41,12 @@ final class AppearanceSettings {
     var background: BackgroundStyle {
         didSet { defaults.set(background.rawValue, forKey: "backgroundStyle") }
     }
+    var theme: ColorTheme {
+        didSet {
+            defaults.set(theme.rawValue, forKey: "colorTheme")
+            onModeChange?()
+        }
+    }
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored var onModeChange: (() -> Void)?
 
@@ -48,5 +54,6 @@ final class AppearanceSettings {
         self.defaults = defaults
         mode = AppAppearance(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .system
         background = BackgroundStyle(rawValue: defaults.string(forKey: "backgroundStyle") ?? "") ?? .system
+        theme = ColorTheme(rawValue: defaults.string(forKey: "colorTheme") ?? "") ?? .standard
     }
 }

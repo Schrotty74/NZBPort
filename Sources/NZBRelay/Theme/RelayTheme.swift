@@ -1,10 +1,13 @@
 import AppKit
 import SwiftUI
 
+extension EnvironmentValues {
+    @Entry var colorTheme: ColorTheme = .standard
+}
+
 /// Central visual values. Keep download and connection logic out of this file.
 @MainActor
 enum RelayTheme {
-    static let accent = Color(red: 0.16, green: 0.38, blue: 0.85)
     static let solidBackground = Color(nsColor: .windowBackgroundColor)
 
     static let windowSize = NSSize(width: 500, height: 560)

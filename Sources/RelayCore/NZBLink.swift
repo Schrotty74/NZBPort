@@ -16,14 +16,14 @@ public struct NZBLink: Equatable, Sendable, Identifiable {
               uri.host == nil || uri.host == "",
               uri.path.isEmpty, uri.fragment == nil,
               let query = uri.percentEncodedQuery else {
-            throw RelayError.message("Der Link muss eine NZBlnk-Adresse mit Suchkennung sein.")
+            throw RelayError.message("The link must be an NZBlnk address with a search identifier.")
         }
         var parameters = [String: [String]]()
         for field in query.split(separator: "&") {
             let pair = field.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
             func decode(_ part: Substring) throws -> String {
                 guard let text = String(part).replacingOccurrences(of: "+", with: " ").removingPercentEncoding else {
-                    throw RelayError.message("Der NZBlnk-Link enthält eine ungültige Zeichenkodierung.")
+                    throw RelayError.message("The NZBlnk link contains invalid character encoding.")
                 }
                 return text
             }
@@ -34,12 +34,12 @@ public struct NZBLink: Equatable, Sendable, Identifiable {
         func single(_ name: String) throws -> String? {
             let values = parameters[name] ?? []
             guard Set(values).count <= 1 else {
-                throw RelayError.message("Der NZBlnk-Link enthält widersprüchliche Angaben für \(name).")
+                throw RelayError.message("The NZBlnk link contains conflicting values for \(name).")
             }
             return values.first.flatMap { $0.isEmpty ? nil : $0 }
         }
         guard let search = try single("h"), !search.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw RelayError.message("Im NZBlnk-Link fehlt die Suchkennung (h).")
+            throw RelayError.message("The NZBlnk link is missing the search identifier (h).")
         }
         header = search
         // Compatibility with existing links that omit the specification's title.

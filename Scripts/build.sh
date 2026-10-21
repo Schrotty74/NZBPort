@@ -17,6 +17,11 @@ if [[ -n "${NZBPORT_BUNDLE_ID:-}" ]]; then
 fi
 swift "$PROJECT_DIR/Scripts/RenderBrand.swift" "$PROJECT_DIR/Resources"
 cp "$PROJECT_DIR/Resources/BrandMark.png" "$APP_DIR/Contents/Resources/BrandMark.png"
+RESOURCE_BUNDLE="NZBRelay_RelayCore.bundle"
+if [[ -d "$APP_DIR/Contents/Resources/$RESOURCE_BUNDLE" ]]; then
+    rm -r "$APP_DIR/Contents/Resources/$RESOURCE_BUNDLE"
+fi
+cp -R "$BIN_DIR/$RESOURCE_BUNDLE" "$APP_DIR/Contents/Resources/$RESOURCE_BUNDLE"
 xcrun actool "$PROJECT_DIR/Resources/NZBPort.icon" \
     --compile "$ICON_BUILD_DIR" --platform macosx \
     --minimum-deployment-target 26.0 --app-icon NZBPort \

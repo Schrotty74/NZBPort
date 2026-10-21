@@ -25,17 +25,17 @@ actor WebNZBSearch: NZBSearchProvider {
         do { response = try await transport.perform(request) }
         catch is CancellationError { throw CancellationError() }
         catch let error as URLError where error.code == .cancelled { throw CancellationError() }
-        catch { throw RelayError.message("Suchdienst nicht erreichbar.") }
+        catch { throw RelayError.message("The search service is unavailable.") }
         try Task.checkCancellation()
         guard (200..<300).contains(response.status) else {
-            throw RelayError.message("Suchdienst antwortet mit HTTP \(response.status).")
+            throw RelayError.message("The search service returned HTTP \(response.status).")
         }
         guard response.data.count <= 2 * 1024 * 1024 else {
-            throw RelayError.message("Die Suchantwort überschreitet die unterstützte Größe.")
+            throw RelayError.message("The search response exceeds the supported size.")
         }
         let tags = SearchHTML.tags(in: String(decoding: response.data, as: UTF8.self))
         let result = provider == .king ? kingDownload(tags, origin: origin) : binsearchDownload(tags, origin: origin)
-        guard let result else { throw RelayError.message("Kein Downloadlink in der Suchantwort gefunden.") }
+        guard let result else { throw RelayError.message("No download link was found in the search response.") }
         return result
     }
 

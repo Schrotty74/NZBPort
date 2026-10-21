@@ -20,28 +20,28 @@ public actor NZBIndexClient: NZBSearchProvider {
         do { result = try await transport.perform(request) }
         catch is CancellationError { throw CancellationError() }
         catch let error as URLError where error.code == .cancelled { throw CancellationError() }
-        catch { throw RelayError.message("NZBIndex ist nicht erreichbar. Bitte den Suchzugang und die Netzwerkverbindung prüfen.") }
+        catch { throw RelayError.message("NZBIndex is unavailable. Check the search service and network connection.") }
         try Task.checkCancellation()
         guard (200..<300).contains(result.status) else {
-            throw RelayError.message("NZBIndex antwortet mit HTTP \(result.status). Bitte später erneut versuchen.")
+            throw RelayError.message("NZBIndex returned HTTP \(result.status). Please try again later.")
         }
         let envelope: SearchResponse
         do { envelope = try JSONDecoder().decode(SearchResponse.self, from: result.data) }
-        catch { throw RelayError.message("NZBIndex hat keine gültige JSON-Suchantwort geliefert.") }
+        catch { throw RelayError.message("NZBIndex returned an invalid JSON search response.") }
         guard envelope.error != true, let entries = envelope.data?.content else {
-            throw RelayError.message("NZBIndex hat die Suche abgelehnt. Bitte später erneut versuchen.")
+            throw RelayError.message("NZBIndex rejected the search. Please try again later.")
         }
         var ids = Set<String>()
         let candidates = entries.filter { ids.insert($0.id).inserted }
-        guard !candidates.isEmpty else { throw RelayError.message("NZBIndex hat für diesen Link keine NZB gefunden.") }
+        guard !candidates.isEmpty else { throw RelayError.message("NZBIndex found no NZB for this link.") }
         // A unique header identifies one collection. Never merge unrelated hits.
         guard candidates.count == 1, let candidate = candidates.first else {
-            throw RelayError.message("Die Suchkennung liefert mehrere NZBs. Der Link ist nicht eindeutig; es wurde nichts an SABnzbd gesendet.")
+            throw RelayError.message("The search identifier returned multiple NZBs. The link is ambiguous; nothing was sent to SABnzbd.")
         }
         let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_")
         guard !candidate.id.isEmpty, candidate.id.count <= 128,
               candidate.id.unicodeScalars.allSatisfy({ allowed.contains($0) }) else {
-            throw RelayError.message("NZBIndex hat eine ungültige Trefferkennung geliefert.")
+            throw RelayError.message("NZBIndex returned an invalid result identifier.")
         }
         return base.appendingPathComponent("download").appendingPathComponent(candidate.id + ".nzb")
     }

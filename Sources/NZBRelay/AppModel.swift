@@ -4,14 +4,37 @@ import RelayCore
 
 enum Screen { case downloads, settings }
 struct Notice: Equatable {
-    let text: String
+    private let id = UUID()
+    private let message: String.LocalizationValue?
+    private let error: (any Error)?
     let isError: Bool
+
+    init(text: String.LocalizationValue, isError: Bool) {
+        message = text
+        error = nil
+        self.isError = isError
+    }
+
+    init(error: any Error) {
+        message = nil
+        self.error = error
+        isError = true
+    }
+
+    var text: String {
+        if let message { return L(message) }
+        return error?.localizedDescription ?? ""
+    }
+
+    static func == (lhs: Notice, rhs: Notice) -> Bool { lhs.id == rhs.id }
 }
 
 @MainActor @Observable
 final class AppModel {
     var screen: Screen = .downloads
-    let appearanceSettings = AppearanceSettings()
+    let appearanceSettings: AppearanceSettings
+    let languageSettings: LanguageSettings
+    let loginItemSettings = LoginItemSettings()
     var address = "http://localhost:8080/api"
     var key = ""
     private(set) var categories: [String] = []
@@ -20,26 +43,32 @@ final class AppModel {
     private(set) var pending: [NZBLink] = []
     private(set) var busy = false
     private(set) var sending = false
-    private(set) var progress = ""
+    private(set) var progress: String.LocalizationValue = ""
     var notice: Notice?
     var query = ""
     private(set) var configured = false
     private(set) var handlerRegistered = false
     private(set) var registeringHandler = false
-    private let client = SABClient()
+    private let client: SABClient
+    @ObservationIgnored private let defaults: UserDefaults
+    private var categoryLoadRevision = 0
     private let resolver = NZBResolver()
     private var savedAddress = ""
     private var savedKey = ""
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored var closeAfterSuccess: (() -> Void)?
 
-    init() {
-        address = UserDefaults.standard.string(forKey: "serverAddress") ?? address
-        if let data = UserDefaults.standard.data(forKey: "categoryPreferences"),
+    init(defaults: UserDefaults = .standard, client: SABClient = SABClient()) {
+        self.defaults = defaults
+        self.client = client
+        appearanceSettings = AppearanceSettings(defaults: defaults)
+        languageSettings = LanguageSettings(defaults: defaults)
+        address = defaults.string(forKey: "serverAddress") ?? address
+        if let data = defaults.data(forKey: "categoryPreferences"),
            let decoded = try? JSONDecoder().decode(CategoryPreferences.self, from: data) {
             preferences = decoded
         }
-        key = UserDefaults.standard.string(forKey: "sabAPIKey") ?? ""
+        key = defaults.string(forKey: "sabAPIKey") ?? ""
         configured = (try? ServerConnection(address: address, apiKey: key)) != nil
         savedAddress = address
         savedKey = key
@@ -62,7 +91,7 @@ final class AppModel {
             do {
                 let link = try NZBLink(url.absoluteString)
                 pending.append(link)
-            } catch { notice = Notice(text: error.localizedDescription, isError: true) }
+            } catch { notice = Notice(error: error) }
         }
         if current == nil, !sending, !pending.isEmpty { advance() }
     }
@@ -76,7 +105,7 @@ final class AppModel {
             let link = try NZBLink(text)
             pending.append(link)
             if current == nil, !sending { advance() }
-        } catch { notice = Notice(text: error.localizedDescription, isError: true) }
+        } catch { notice = Notice(error: error) }
     }
 
     private func advance() {
@@ -92,8 +121,24 @@ final class AppModel {
         }
     }
 
+    /// Refresh saved connection categories without blocking the app or changing local visibility choices.
+    func refreshCategoriesAtStartup() async {
+        guard configured, !busy, !sending else { return }
+        let revision = categoryLoadRevision
+        do {
+            let connection = try ServerConnection(address: savedAddress, apiKey: savedKey)
+            let result = try await client.categories(connection)
+            guard !Task.isCancelled, revision == categoryLoadRevision, !sending else { return }
+            categories = result
+        } catch {
+            guard !Task.isCancelled, revision == categoryLoadRevision else { return }
+            notice = Notice(error: error)
+        }
+    }
+
     func loadCategories() {
         guard !sending else { return }
+        categoryLoadRevision += 1
         task?.cancel()
         busy = true
         progress = "Kategorien laden …"
@@ -111,7 +156,7 @@ final class AppModel {
             catch let error as URLError where error.code == .cancelled { }
             catch {
                 guard !Task.isCancelled else { return }
-                notice = Notice(text: error.localizedDescription, isError: true)
+                notice = Notice(error: error)
             }
         }
     }
@@ -124,18 +169,18 @@ final class AppModel {
             key = connection.apiKey
             savedAddress = address
             savedKey = key
-            UserDefaults.standard.set(address, forKey: "serverAddress")
-            UserDefaults.standard.set(key, forKey: "sabAPIKey")
+            defaults.set(address, forKey: "serverAddress")
+            defaults.set(key, forKey: "sabAPIKey")
             configured = true
             screen = .downloads
             loadCategories()
-        } catch { notice = Notice(text: error.localizedDescription, isError: true) }
+        } catch { notice = Notice(error: error) }
     }
 
     func setVisible(_ visible: Bool, category: String) {
         preferences.setVisible(visible, category: category)
         if let data = try? JSONEncoder().encode(preferences) {
-            UserDefaults.standard.set(data, forKey: "categoryPreferences")
+            defaults.set(data, forKey: "categoryPreferences")
         }
     }
 
@@ -162,7 +207,7 @@ final class AppModel {
             } catch {
                 busy = false
                 sending = false
-                notice = Notice(text: error.localizedDescription, isError: true)
+                notice = Notice(error: error)
             }
         }
     }
@@ -203,5 +248,5 @@ final class AppModel {
         notice = nil
     }
 
-    func categoryName(_ category: String) -> String { category == "*" || category.isEmpty ? "Standard" : category }
+    func categoryName(_ category: String) -> String { category == "*" || category.isEmpty ? L("Standard") : category }
 }

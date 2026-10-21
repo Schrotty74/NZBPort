@@ -2,7 +2,26 @@
 
 [Deutsch](README.de.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
+> Current test version: **0.1.1**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.1.1).
+
 NZBPort is a small macOS menu bar app that opens `nzblnk:` links and sends downloads to SABnzbd. Choose a category, and the app searches NZBIndex, NZBKing, then BinSearch as needed. The window closes when SABnzbd confirms the submission; NZBPort stays in the menu bar.
+
+## Features
+
+- Open `nzblnk:` links directly from Safari or paste them from the clipboard.
+- Choose a SABnzbd category before submitting a download.
+- Search through NZBIndex, with NZBKing and BinSearch as fallbacks.
+- Pass the link title and optional unpacking password to SABnzbd.
+- Refresh categories at app startup, when opening a link, or manually in settings.
+- Hide and restore categories locally without changing them in SABnzbd; new categories appear automatically.
+- Report connection and submission failures in the app.
+- Process multiple links in sequence and remain in the menu bar after submission.
+- Switch immediately between **English**, **Deutsch** and **System**, following the supported macOS language preferences by default.
+- Choose **Standard**, **Coffee**, **Ivory** or **Mint**, independently of light/dark appearance and window transparency.
+- Use native Liquid Glass controls and an adaptive Icon Composer app icon.
+- Enable or disable **Launch at Login** through macOS login items.
+- Open the GitHub project and portfolio homepage from **About NZBPort**.
+- Build from original Swift application code using Apple system frameworks, with no third-party package dependencies.
 
 ## Screenshots
 
@@ -36,12 +55,16 @@ See [Apple’s instructions for opening apps safely](https://support.apple.com/e
 
 1. Open NZBPort and enter the SABnzbd URL and full API key.
 2. Test the connection, then save it.
-3. Select **Als Link-App verwenden** to register NZBPort for `nzblnk:` links.
+3. Select **Use as Link App** to register NZBPort for `nzblnk:` links.
 4. If a browser userscript already intercepts these links, disable it on this Mac.
 
-The interface is currently in German. You can also paste a copied link using **NZBlnk aus Zwischenablage**. Categories refresh from SABnzbd when a link opens. Hide or restore categories in settings; this changes only their visibility in NZBPort. New categories appear automatically. Links opened together are processed in sequence.
+The interface supports English and German. Choose **Language → System, Deutsch or English** in the app menu, menu bar menu or gear menu. System is the default and follows the first supported language in your macOS language preferences, falling back to English. A manual choice is saved locally and takes effect immediately, including menus and app-generated error messages. You can also paste a copied link using **Paste NZBlnk**. Categories refresh from SABnzbd when the app starts and whenever a link opens. Startup checks run in the background; a failed check is shown as an error in the app. The refresh button beside **Your Categories** in connection settings also reloads them on request. Hide or restore categories in settings; this changes only their visibility in NZBPort. New categories appear automatically. Links opened together are processed in sequence.
 
-The app menu and gear menu offer system, light and dark appearance, with system, transparent or opaque window backgrounds. Controls use native Liquid Glass. The Icon Composer asset supports the system icon appearances.
+The app menu and gear menu offer **Standard, Coffee, Ivory and Mint** color themes, independently of system, light or dark appearance and system, transparent or opaque window backgrounds. Themes adapt to light and dark mode, and the choice is saved locally. Controls use native Liquid Glass. The Icon Composer asset supports the system icon appearances.
+
+Use **Launch at Login** in the app menu, menu bar menu or gear menu to enable or disable startup at macOS login. It is changed only when you toggle it. If macOS requires approval, choose **Allow in macOS…** to open the Login Items settings.
+
+**About NZBPort** links to the project on GitHub and the developer’s [portfolio homepage](https://schrotty74.github.io/Portfolio/). Links open in your default browser only when selected.
 
 ## How a link becomes a download
 
@@ -78,6 +101,8 @@ The app is created at `Build/NZBPort.app` and signed locally ad hoc. The build s
 | `Sources/RelayCore` | Link parsing, search providers, SABnzbd API and category preferences |
 | `Sources/NZBRelay` | App lifecycle, menu bar and state |
 | `Sources/NZBRelay/UI` | Views and settings |
+| `Sources/NZBRelay/Localization` | Saved language selection and native language menu |
+| `Sources/RelayCore/Resources` | English and German interface and error translations |
 | `Sources/NZBRelay/Theme` | Appearance and native glass controls |
 | `Resources/NZBPort.icon` | Editable Icon Composer artwork |
 | `Scripts` | App build and original brand artwork generation |

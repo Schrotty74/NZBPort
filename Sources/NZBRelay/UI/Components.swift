@@ -4,10 +4,11 @@ import RelayCore
 struct CategorySendButton: View {
     let name: String
     let action: () -> Void
+    @Environment(\.colorTheme) private var colorTheme
     var body: some View {
         Button(action: action) {
             HStack(spacing: 13) {
-                Image(systemName: "folder").font(.system(size: 18)).foregroundStyle(RelayTheme.accent)
+                Image(systemName: "folder").font(.system(size: 18)).foregroundStyle(colorTheme.accent)
                 Text(name).font(.system(size: 15, weight: .medium)).lineLimit(2)
                 Spacer()
                 Image(systemName: "arrow.up.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
@@ -17,7 +18,7 @@ struct CategorySendButton: View {
         }
         .buttonBorderShape(.roundedRectangle(radius: RelayTheme.rowRadius))
         .controlSize(.large)
-        .accessibilityLabel("An SABnzbd senden: \(name)")
+        .accessibilityLabel(L("An SABnzbd senden: \(name)"))
     }
 }
 
@@ -30,7 +31,7 @@ struct CategoryPreferenceRow: View {
             Image(systemName: hidden ? "eye.slash" : "folder").foregroundStyle(.secondary).frame(width: 20)
             Text(name).lineLimit(2)
             Spacer()
-            Button(hidden ? "Wieder einblenden" : "Ausblenden", action: action)
+            Button(hidden ? L("Wieder einblenden") : L("Ausblenden"), action: action)
                 .font(.system(size: 12)).controlSize(.small)
         }
         .padding(.vertical, 7)
@@ -43,7 +44,7 @@ struct SearchField: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-            TextField("Kategorie suchen", text: $text).textFieldStyle(.plain)
+            TextField(L("Kategorie suchen"), text: $text).textFieldStyle(.plain)
         }
         .padding(10)
         .glassEffect(.regular, in: .capsule)

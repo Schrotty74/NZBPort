@@ -30,6 +30,6 @@ public actor NZBResolver {
             catch let error as URLError where error.code == .cancelled { throw CancellationError() }
             catch { failures.append(provider.name + ": " + error.localizedDescription) }
         }
-        throw RelayError.message("Die NZB konnte bei keinem Suchdienst gefunden werden.\n" + failures.joined(separator: "\n"))
+        throw RelayError.message("No NZB was found by any search service.\n\(failures.joined(separator: "\n"))")
     }
 }

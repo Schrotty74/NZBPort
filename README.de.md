@@ -2,7 +2,26 @@
 
 [English](README.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
+> Aktuelle Testversion: **0.1.1**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.1.1).
+
 NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links öffnet und Downloads an SABnzbd übergibt. Nach deiner Kategorieauswahl sucht sie bei Bedarf nacheinander über NZBIndex, NZBKing und BinSearch. Sobald SABnzbd die Übergabe bestätigt, schließt sich das Fenster. Die App bleibt in der Menüleiste erreichbar.
+
+## Funktionen
+
+- `nzblnk:`-Links direkt aus Safari öffnen oder aus der Zwischenablage einfügen.
+- Vor der Übergabe eine SABnzbd-Kategorie auswählen.
+- Über NZBIndex suchen, mit NZBKing und BinSearch als Ausweichdiensten.
+- Link-Titel und optionales Entpackpasswort an SABnzbd übergeben.
+- Kategorien beim App-Start, beim Öffnen eines Links oder manuell in den Einstellungen aktualisieren.
+- Kategorien lokal ausblenden und wieder einblenden, ohne sie in SABnzbd zu ändern; neue Kategorien erscheinen automatisch.
+- Verbindungsfehler und fehlgeschlagene Übergaben in der App anzeigen.
+- Mehrere Links nacheinander bearbeiten und nach der Übergabe in der Menüleiste bleiben.
+- Sofort zwischen **English**, **Deutsch** und **System** umschalten; standardmäßig den unterstützten macOS-Spracheinstellungen folgen.
+- **Standard**, **Coffee**, **Elfenbein** oder **Minze** wählen, unabhängig von Hell/Dunkel und Fenstertransparenz.
+- Native Liquid-Glass-Bedienelemente und ein anpassungsfähiges Icon-Composer-App-Icon nutzen.
+- **Beim Anmelden starten** über die macOS-Anmeldeobjekte ein- oder ausschalten.
+- GitHub-Projekt und Portfolio-Homepage über **Über NZBPort** öffnen.
+- Eigenen Swift-Anwendungscode mit Apple-Systemframeworks und ohne externe Paketabhängigkeiten selbst bauen.
 
 ## Bildschirmfotos
 
@@ -39,9 +58,13 @@ Siehe auch [Apples Anleitung zum sicheren Öffnen von Apps](https://support.appl
 3. Wähle „Als Link-App verwenden“, um NZBPort für `nzblnk:`-Links zu registrieren.
 4. Falls ein Browser-Userscript die Links bereits abfängt, deaktiviere es auf diesem Mac.
 
-Die Oberfläche ist deutsch. Kopierte Links kannst du über „NZBlnk aus Zwischenablage“ öffnen. Beim Öffnen eines Links werden die Kategorien von SABnzbd neu geladen. In den Einstellungen kannst du Kategorien ausblenden und wieder einblenden. Das betrifft nur die Anzeige in NZBPort; SABnzbd bleibt unverändert. Neue Kategorien erscheinen automatisch. Mehrere Links werden nacheinander bearbeitet.
+Die Oberfläche unterstützt Deutsch und Englisch. Im App-Menü, im Menüleistensymbol und im Zahnradmenü wählst du unter **Sprache** zwischen **System, Deutsch und English**. Standardmäßig verwendet die App die erste unterstützte Sprache aus deinen macOS-Einstellungen. Ist keine dabei, verwendet sie Englisch. Eine manuelle Auswahl wird lokal gespeichert und gilt sofort, auch für Menüs und app-eigene Fehlermeldungen. Kopierte Links kannst du über „NZBlnk aus Zwischenablage“ öffnen. Beim App-Start und beim Öffnen eines Links werden die Kategorien von SABnzbd neu geladen. Die Startabfrage läuft im Hintergrund; schlägt sie fehl, zeigt die App eine Fehlermeldung. Der Aktualisieren-Button neben **Deine Kategorien** in den Verbindungseinstellungen lädt sie auch manuell neu. In den Einstellungen kannst du Kategorien ausblenden und wieder einblenden. Das betrifft nur die Anzeige in NZBPort; SABnzbd bleibt unverändert. Neue Kategorien erscheinen automatisch. Mehrere Links werden nacheinander bearbeitet.
 
-Im App-Menü und im Zahnradmenü wählst du zwischen System, Hell und Dunkel sowie einem systemgesteuerten, transparenten oder deckenden Fensterhintergrund. Die Bedienelemente nutzen natives Liquid Glass. Das Icon-Composer-Dokument unterstützt die Systemdarstellungen des App-Icons.
+Im App-Menü und im Zahnradmenü wählst du zwischen den Farbthemen **Standard, Coffee, Elfenbein und Minze**. Davon unabhängig lassen sich System, Hell und Dunkel sowie ein systemgesteuerter, transparenter oder deckender Fensterhintergrund wählen. Die Farbthemen passen sich dem hellen und dunklen Modus an; die Auswahl wird lokal gespeichert. Die Bedienelemente nutzen natives Liquid Glass. Das Icon-Composer-Dokument unterstützt die Systemdarstellungen des App-Icons.
+
+Unter **Autostart → Beim Anmelden starten** im App-Menü, im Menüleistensymbol oder im Zahnradmenü schaltest du den Start bei der macOS-Anmeldung ein oder aus. Die Einstellung wird erst durch deine Auswahl geändert. Verlangt macOS eine Freigabe, führt **In macOS erlauben …** zu den Anmeldeobjekten in den Systemeinstellungen.
+
+**Über NZBPort** führt zum GitHub-Projekt und zur [Portfolio-Homepage](https://schrotty74.github.io/Portfolio/). Die Links öffnen sich erst nach deiner Auswahl im Standardbrowser.
 
 ## Vom Link zum Download
 
@@ -78,6 +101,8 @@ Die App entsteht unter `Build/NZBPort.app` und wird lokal ad hoc signiert. Das B
 | `Sources/RelayCore` | Link-Auswertung, Suchdienste, SABnzbd-API und Kategorienfilter |
 | `Sources/NZBRelay` | App-Lebenszyklus, Menüleiste und Zustand |
 | `Sources/NZBRelay/UI` | Ansichten und Einstellungen |
+| `Sources/NZBRelay/Localization` | Gespeicherte Sprachwahl und natives Sprachmenü |
+| `Sources/RelayCore/Resources` | Deutsche und englische Texte für Oberfläche und Fehler |
 | `Sources/NZBRelay/Theme` | Erscheinungsbild und native Glass-Bedienelemente |
 | `Resources/NZBPort.icon` | Bearbeitbares Icon-Composer-Dokument |
 | `Scripts` | App-Build und Erzeugung des eigenen Markenzeichens |

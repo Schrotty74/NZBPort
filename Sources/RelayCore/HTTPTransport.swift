@@ -1,9 +1,9 @@
 import Foundation
 
 public enum RelayError: LocalizedError, Sendable {
-    case message(String)
+    case message(String.LocalizationValue)
     public var errorDescription: String? {
-        switch self { case .message(let message): message }
+        switch self { case .message(let message): Localization.string(message, table: "Errors") }
     }
 }
 
@@ -23,7 +23,7 @@ public struct SessionTransport: HTTPTransport {
         try Task.checkCancellation()
         let (body, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else {
-            throw RelayError.message("Der Dienst hat keine HTTP-Antwort geliefert.")
+            throw RelayError.message("The service did not return an HTTP response.")
         }
         return HTTPResult(data: body, status: http.statusCode)
     }

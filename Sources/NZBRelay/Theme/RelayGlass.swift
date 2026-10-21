@@ -10,6 +10,5 @@ extension View {
     func relayPrimaryAction() -> some View {
         buttonStyle(.glassProminent)
             .buttonBorderShape(.capsule)
-            .tint(RelayTheme.accent)
     }
 }

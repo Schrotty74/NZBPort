@@ -119,8 +119,10 @@ func sendRejectsUnconfirmedOrFailedAPIResponses(_ body: String) async throws {
         try await SABClient(transport: transport).send(link, download: download, category: "*", connection: testConnection())
         Issue.record("A timed-out submission must not be reported as successful.")
     } catch let error as RelayError {
-        #expect(error.localizedDescription.contains("Downloadstatus ist unklar"))
-        #expect(error.localizedDescription.contains("Warteschlange prüfen"))
+        #expect(error.localizedDescription == Localization.string(
+            "The connection to SABnzbd was interrupted. The download status is unknown; check the SABnzbd queue.",
+            table: "Errors"
+        ))
     }
 }
 
