@@ -93,3 +93,5 @@ Statusabfrage von zehn auf zwei Sekunden verkürzt; Hinweise in Deutsch und Engl
 ## Veröffentlichung 0.2 bestätigt
 
 22. Oktober 2026: https://github.com/Schrotty74/NZBPort/releases/tag/v0.2 als öffentliches Vorabrelease veröffentlicht. App-Quellcommit `74c25ba` auf main; DMG, ZIP und SHA256SUMS vollständig hochgeladen. Die drei GitHub-Asset-Digests stimmen mit den lokalen SHA-256-Werten überein. Der Release-Text ist ausschließlich Englisch und wiederholt den Titel nicht. Keine neue Bedienungssitzung, keine erneuten Funktionstests und keine zusätzlichen App-Kopien zur Prüfung. Lokale Dev-Builds bleiben von der Veröffentlichungskonvention ausgenommen.
+
+22. Oktober 2026: Changelogs v0.1.0 und v0.1.1 auf GitHub in die Struktur der 0.2-Release-Notes überführt: konkrete Funktionen und Änderungen, Voraussetzungen/Einschränkungen sowie damalige Validierung. Ausschließlich Englisch, ohne doppelte Versionsüberschrift. Die Projektregeln schreiben dieses Muster auch für künftige und nachträglich überarbeitete Releases vor.

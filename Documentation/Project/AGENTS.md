@@ -51,3 +51,11 @@
 - GitHub-Release-Titel nicht als Überschrift im Beschreibungstext wiederholen. Release-Notes beginnen direkt mit Inhalt oder Unterabschnitten.
 
 - Ein Auftrag wie „neue Version erstellen“ oder „neue Testversion erstellen“ umfasst Vorbereitung, erforderliche Prüfungen, bereinigte Dokumentation, Commit, Push, passenden Tag und GitHub-Release mit DMG, ZIP und Prüfsummen. Testversionen als Vorabrelease veröffentlichen. Lokale Dev-Builds bleiben immer lokal. Ein reiner Dev-Build-Auftrag umfasst keinen Commit, Push, Tag oder Release; diese Veröffentlichungskonvention gilt für neue Test- und Finalversionen.
+
+## Changelogs und Release-Notes
+
+- Ausschließlich Englisch verwenden, auch bei nachträglich überarbeiteten älteren Releases.
+- Der Changelog von 0.2 dient als verbindliches Muster: konkrete Änderungen unter passenden Abschnitten wie `Added`, `Changed`, gegebenenfalls `Fixed`, anschließend `Requirements and limitations` und `Validation`.
+- Nur tatsächlich zutreffende Abschnitte und belegte Änderungen aufnehmen. Prüfergebnisse dem damaligen Release zuordnen; keine späteren Tests rückwirkend behaupten.
+- Ältere Changelogs mit derselben Sorgfalt und Struktur pflegen; nicht auf eine allgemeine Kurzbeschreibung reduzieren.
+- Den Release-Titel nicht im Beschreibungstext wiederholen. Keine zusätzliche H1-Versionsüberschrift.
