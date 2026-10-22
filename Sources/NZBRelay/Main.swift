@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             self?.model.notice = Notice(text: "Autostart konnte nicht geändert werden: \(error.localizedDescription)", isError: true)
             self?.showWindow()
         }
+        model.monitor.installNotificationDelegate()
         Task { await model.refreshCategoriesAtStartup() }
         showWindow()
         model.closeAfterSuccess = { [weak self] in self?.window?.close() }
@@ -76,8 +77,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             window.center()
             self.window = window
         }
+        model.monitor.setVisible(model.screen == .overview)
         window?.makeKeyAndOrderFront(nil)
         NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+
+    func windowWillClose(_ notification: Notification) { model.monitor.setVisible(false) }
+    @objc private func openFiles() { showWindow(); model.chooseFiles() }
+    @objc private func openSAB() { model.openSABnzbd() }
+    @objc private func overview() { model.screen = .overview; showWindow() }
+    @objc private func updates() {
+        model.screen = .updates
+        showWindow()
+        Task { await model.updateSettings.check() }
     }
 
     @objc private func settings() { showWindow(); model.openSettings() }
@@ -107,7 +119,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         for (title, action) in [
             (L("NZBPort öffnen"), #selector(openRelay)),
             (L("NZBlnk aus Zwischenablage"), #selector(pasteLink)),
-            (L("Einstellungen …"), #selector(settings))
+            (L("Einstellungen …"), #selector(settings)),
+            (L("NZB-Dateien öffnen …"), #selector(openFiles)),
+            (L("SABnzbd im Browser öffnen"), #selector(openSAB)),
+            (L("Downloads"), #selector(overview)),
+            (L("Nach Updates suchen …"), #selector(updates))
         ] {
             let entry = NSMenuItem(title: title, action: action, keyEquivalent: "")
             entry.target = self
@@ -137,6 +153,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         appMenu.addItem(languageMenu.makeItem())
         appMenu.addItem(loginItemMenu.makeItem())
         appMenu.addItem(aboutMenu.makeItem())
+        let updateItem = NSMenuItem(title: L("Nach Updates suchen …"), action: #selector(updates), keyEquivalent: "")
+        updateItem.target = self
+        appMenu.addItem(updateItem)
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: L("NZBPort beenden"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
@@ -144,6 +163,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         let file = NSMenuItem()
         menu.addItem(file)
         let fileMenu = NSMenu(title: L("Ablage"))
+        for (title, action) in [(L("NZB-Dateien öffnen …"), #selector(openFiles)), (L("Downloads"), #selector(overview)), (L("SABnzbd im Browser öffnen"), #selector(openSAB))] {
+            let entry = NSMenuItem(title: title, action: action, keyEquivalent: "")
+            entry.target = self
+            fileMenu.addItem(entry)
+        }
         let paste = NSMenuItem(title: L("NZBlnk aus Zwischenablage"), action: #selector(pasteLink), keyEquivalent: "v")
         paste.keyEquivalentModifierMask = [.command, .shift]
         paste.target = self

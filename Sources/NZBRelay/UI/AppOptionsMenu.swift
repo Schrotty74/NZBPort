@@ -13,6 +13,14 @@ struct AppOptionsMenu: View {
                 model.openSettings()
             }
             .disabled(model.sending || model.screen == .settings)
+            Button(L("NZB-Dateien öffnen …"), systemImage: "doc.badge.plus") { model.chooseFiles() }
+            Button(L("SABnzbd im Browser öffnen"), systemImage: "safari") { model.openSABnzbd() }.disabled(!model.configured)
+            Button(L("Downloads"), systemImage: "arrow.down.circle") { model.screen = .overview }
+            Button(L("Nach Updates suchen …"), systemImage: "arrow.triangle.2.circlepath") {
+                model.screen = .updates
+                Task { await model.updateSettings.check() }
+            }
+            Divider()
             Picker(L("Sprache"), selection: $language.selection) {
                 ForEach(AppLanguage.allCases) { choice in
                     Text(choice.title).tag(choice)

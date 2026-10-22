@@ -2,7 +2,7 @@
 
 [English](README.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
-> Aktuelle Testversion: **0.1.1**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.1.1).
+> Aktuelle Testversion: **0.2**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2).
 
 NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links öffnet und Downloads an SABnzbd übergibt. Nach deiner Kategorieauswahl sucht sie bei Bedarf nacheinander über NZBIndex, NZBKing und BinSearch. Sobald SABnzbd die Übergabe bestätigt, schließt sich das Fenster. Die App bleibt in der Menüleiste erreichbar.
 
@@ -22,6 +22,17 @@ NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links öffnet und 
 - **Beim Anmelden starten** über die macOS-Anmeldeobjekte ein- oder ausschalten.
 - GitHub-Projekt und Portfolio-Homepage über **Über NZBPort** öffnen.
 - Eigenen Swift-Anwendungscode mit Apple-Systemframeworks und ohne externe Paketabhängigkeiten selbst bauen.
+
+- `.nzb`-Dateien über Dateiauswahl, „Öffnen mit“ und Drag-and-drop öffnen (16 MiB pro Datei; insgesamt 64 MiB wartende Daten).
+- Downloadpriorität wählen oder Aufträge pausiert übergeben.
+- Favoriten markieren und anordnen; Kategorienbereich in den Verbindungseinstellungen auf- und zuklappen.
+- Fortschritt, Geschwindigkeit, Restgröße, Restzeit und letzte Aufträge in der Downloadübersicht anzeigen.
+- Einzelne Aufträge oder die gesamte SABnzbd-Warteschlange pausieren und fortsetzen.
+- Status mit zwei Sekunden Wartezeit zwischen Abrufen aktualisieren, solange die Übersicht sichtbar oder Benachrichtigungen aktiv sind.
+- Optionale macOS-Abschluss- und Fehlermeldungen einschalten. Bereits vorhandener Verlauf wird beim ersten Abruf übersprungen; Entpacken zählt noch nicht als Abschluss.
+- Wiederholte Übergabeversuche innerhalb von zehn Minuten bestätigen, auch nach unklaren Verbindungsfehlern; dafür liegen nur Hashes und Zeitstempel im Arbeitsspeicher.
+- SABnzbd ohne API-Key in der Browseradresse öffnen.
+- GitHub-Updates manuell prüfen, auf Wunsch einschließlich Testversionen; kein automatischer Download oder Installer.
 
 ## Bildschirmfotos
 
@@ -75,7 +86,7 @@ Unter **Autostart → Beim Anmelden starten** im App-Menü, im Menüleistensymbo
 5. NZBPort übergibt Downloadadresse, Titel, gewählte Kategorie und optionales Archivpasswort an SABnzbd. Den Download übernimmt SABnzbd; NZBPort lädt selbst keine Usenet-Artikel.
 6. Nach einer bestätigten Übergabe schließt sich das Fenster oder der nächste wartende Link erscheint. Bei einem Fehler bleibt die Meldung sichtbar. Läuft eine Übergabe in ein Timeout, prüfe vor einem neuen Versuch die SABnzbd-Warteschlange, um doppelte Aufträge zu vermeiden.
 
-Mehrere unterschiedliche Trefferkennungen lehnt der NZBIndex-Provider ab; anschließend geht die Ausweichsuche weiter. Die HTML-Provider verwenden den ersten unterstützten Treffer ihrer Antwort. Suchtreffer garantieren weder Inhalt noch Verfügbarkeit. Die App legt keine SABnzbd-Kategorien an, löscht keine Kategorien, verwaltet keine Usenet-Zugänge und ändert den globalen Pausenzustand von SABnzbd nicht.
+Mehrere unterschiedliche Trefferkennungen lehnt der NZBIndex-Provider ab; anschließend geht die Ausweichsuche weiter. Die HTML-Provider verwenden den ersten unterstützten Treffer ihrer Antwort. Suchtreffer garantieren weder Inhalt noch Verfügbarkeit. Die App legt keine SABnzbd-Kategorien an, löscht keine Kategorien und verwaltet keine Usenet-Zugänge.
 
 ## Datenschutz und Suchdienste
 

@@ -29,3 +29,14 @@
 /docs/screenshots/*
 !/docs/screenshots/nzbport-main.png
 !/docs/screenshots/nzbport-settings.png
+
+# Public project rules and continuation context; other internal documents stay local.
+!/AGENTS.md
+!/Documentation/
+/Documentation/*
+!/Documentation/Project/
+/Documentation/Project/*
+!/Documentation/Project/AGENTS.md
+!/Documentation/Project/PROJECT_CONTEXT.md
+!/Documentation/Project/NEXT_STEPS.md
+!/Documentation/Project/CHAT_TEMPLATE.md

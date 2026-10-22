@@ -25,3 +25,13 @@
 "SABnzbd returned HTTP status %lld." = "SABnzbd returned HTTP status %lld.";
 "SABnzbd returned an invalid JSON response." = "SABnzbd returned an invalid JSON response.";
 "No NZB was found by any search service.\n%@" = "No NZB was found by any search service.\n%@";
+"Choose an NZB file smaller than 16 MiB." = "Choose an NZB file smaller than 16 MiB.";
+"Choose a valid .nzb file." = "Choose a valid .nzb file.";
+"The NZB file is invalid." = "The NZB file is invalid.";
+"SABnzbd returned an invalid queue response." = "SABnzbd returned an invalid queue response.";
+"SABnzbd returned an invalid history response." = "SABnzbd returned an invalid history response.";
+"SABnzbd did not confirm the requested action." = "SABnzbd did not confirm the requested action.";
+"Could not check for updates." = "Could not check for updates.";
+"Too many pending downloads." = "Too many pending downloads.";
+"Pending NZB files exceed 64 MiB." = "Pending NZB files exceed 64 MiB.";
+"Notifications are not allowed in macOS settings." = "Notifications are not allowed in macOS settings.";

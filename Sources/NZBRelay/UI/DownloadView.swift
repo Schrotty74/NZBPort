@@ -17,6 +17,10 @@ struct DownloadView: View {
                             .font(.system(size: 12)).foregroundStyle(.secondary)
                     }
                 }
+                Picker(L("Priorität"), selection: $model.selectedPriority) {
+                    ForEach(SABPriority.allCases) { priority in Text(priority.title).tag(priority) }
+                }.disabled(model.busy || model.addPaused)
+                Toggle(L("Pausiert hinzufügen"), isOn: $model.addPaused).disabled(model.busy)
                 Divider()
                 HStack {
                     Text(L("Kategorie wählen")).font(.headline)
@@ -52,12 +56,18 @@ struct DownloadView: View {
                         .fixedSize(horizontal: false, vertical: true)
                     Text(L("Öffne einen NZBlnk-Link in Safari. Hier wählst du die Kategorie für SABnzbd."))
                         .font(.system(size: 14)).foregroundStyle(.secondary).lineSpacing(3)
+                    Button { model.chooseFiles() } label: {
+                        Label(L("NZB-Dateien öffnen …"), systemImage: "doc.badge.plus")
+                            .frame(maxWidth: .infinity).padding(.vertical, 5)
+                    }
+                    .relayPrimaryAction().controlSize(.large)
+                    .disabled(model.busy)
                     Button { model.paste() } label: {
                         Label(L("NZBlnk aus Zwischenablage"), systemImage: "doc.on.clipboard")
                             .frame(maxWidth: .infinity).padding(.vertical, 5)
                     }
                     .relayPrimaryAction().controlSize(.large)
-                    .padding(.top, 6)
+                    .disabled(model.busy)
                 }
                 Divider()
                 HStack {
@@ -71,6 +81,8 @@ struct DownloadView: View {
                 }
                 Button(model.handlerRegistered ? L("Als Link-App eingerichtet") : L("Als Link-App verwenden")) { model.registerHandler() }
                     .disabled(model.busy || model.handlerRegistered || model.registeringHandler)
+                Text(L("NZB-Dateien und Links kannst du auch in dieses Fenster ziehen."))
+                    .font(.caption).foregroundStyle(.secondary)
                 Text(L("Falls eine Browser-Erweiterung den Klick abfängt, deaktiviere deren Link-Verarbeitung in Safari."))
                     .font(.system(size: 12)).foregroundStyle(.secondary)
             }

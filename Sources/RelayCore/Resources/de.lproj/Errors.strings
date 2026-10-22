@@ -25,3 +25,13 @@
 "SABnzbd returned HTTP status %lld." = "SABnzbd antwortete mit HTTP-Status %lld.";
 "SABnzbd returned an invalid JSON response." = "SABnzbd hat eine ungültige JSON-Antwort gesendet.";
 "No NZB was found by any search service.\n%@" = "Die NZB konnte bei keinem Suchdienst gefunden werden.\n%@";
+"Choose an NZB file smaller than 16 MiB." = "Bitte eine NZB-Datei auswählen, die kleiner als 16 MiB ist.";
+"Choose a valid .nzb file." = "Bitte eine gültige .nzb-Datei auswählen.";
+"The NZB file is invalid." = "Die NZB-Datei ist ungültig.";
+"SABnzbd returned an invalid queue response." = "SABnzbd hat eine ungültige Antwort auf die Warteschlangenabfrage gesendet.";
+"SABnzbd returned an invalid history response." = "SABnzbd hat eine ungültige Antwort auf die Verlaufsabfrage gesendet.";
+"SABnzbd did not confirm the requested action." = "SABnzbd hat die angeforderte Aktion nicht bestätigt.";
+"Could not check for updates." = "Die Updates konnten nicht gesucht werden.";
+"Too many pending downloads." = "Es sind zu viele ausstehende Downloads vorhanden.";
+"Pending NZB files exceed 64 MiB." = "Die ausstehenden NZB-Dateien überschreiten 64 MiB.";
+"Notifications are not allowed in macOS settings." = "Benachrichtigungen sind in den macOS-Einstellungen nicht erlaubt.";

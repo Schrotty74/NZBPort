@@ -2,7 +2,7 @@
 
 [Deutsch](README.de.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
-> Current test version: **0.1.1**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.1.1).
+> Current test version: **0.2**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2).
 
 NZBPort is a small macOS menu bar app that opens `nzblnk:` links and sends downloads to SABnzbd. Choose a category, and the app searches NZBIndex, NZBKing, then BinSearch as needed. The window closes when SABnzbd confirms the submission; NZBPort stays in the menu bar.
 
@@ -22,6 +22,17 @@ NZBPort is a small macOS menu bar app that opens `nzblnk:` links and sends downl
 - Enable or disable **Launch at Login** through macOS login items.
 - Open the GitHub project and portfolio homepage from **About NZBPort**.
 - Build from original Swift application code using Apple system frameworks, with no third-party package dependencies.
+
+- Open `.nzb` files through the file chooser, Open With or drag-and-drop (16 MiB per file; 64 MiB total pending data).
+- Choose download priority or submit jobs paused.
+- Pin and reorder favorite categories; collapse or expand the categories section in connection settings.
+- View progress, speed, remaining size and time, and recent history in the Downloads view.
+- Pause or resume individual jobs or the whole SABnzbd queue.
+- Refresh status with a two-second wait between requests while Downloads is visible or notifications are enabled.
+- Enable optional macOS completion and failure notifications. Existing history is skipped on the first refresh; unpacking is not reported as completed.
+- Confirm duplicate attempts within ten minutes, including retries after uncertain network failures; only hashes and timestamps are held in memory.
+- Open SABnzbd in the browser without including the API key in the URL.
+- Check GitHub updates manually, optionally including test releases; no automatic download or installation.
 
 ## Screenshots
 
@@ -75,7 +86,7 @@ Use **Launch at Login** in the app menu, menu bar menu or gear menu to enable or
 5. NZBPort submits the resolved download URL, title, chosen category and optional archive password to SABnzbd. SABnzbd performs the download; NZBPort does not download Usenet articles itself.
 6. A confirmed submission closes the window or advances to the next waiting link. An error remains visible in the window. If a submission times out, check the SABnzbd queue before trying again to avoid duplicate jobs.
 
-NZBIndex results with multiple distinct collection IDs are rejected by that provider; the fallback then continues. The HTML providers use the first supported result in their response. Search results are not a guarantee of the content or its availability. The app does not create or delete SABnzbd categories, manage Usenet accounts, or control SABnzbd’s global pause state.
+NZBIndex results with multiple distinct collection IDs are rejected by that provider; the fallback then continues. The HTML providers use the first supported result in their response. Search results are not a guarantee of the content or its availability. The app does not create or delete SABnzbd categories or manage Usenet accounts.
 
 ## Privacy and service limits
 
