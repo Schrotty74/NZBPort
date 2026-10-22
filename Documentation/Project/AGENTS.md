@@ -46,10 +46,6 @@
 - Öffentliche Beschreibung standardmäßig Englisch, zusätzlich Deutsch, gegenseitig verlinkt. Funktionen als Feature-Liste dokumentieren. Gatekeeper-Hinweis erhalten; Ad-hoc-Signierung nicht als Apple-Notarisierung darstellen.
 - Nach App-Änderungen einen Link zur gebauten App liefern. Selbst geöffnete Apps und Computersteuerung nach Abschluss beenden.
 
-- Changelog und GitHub-Release-Notes ausschließlich auf Englisch verfassen; die allgemeine README und App-Oberfläche bleiben zweisprachig.
-
-- GitHub-Release-Titel nicht als Überschrift im Beschreibungstext wiederholen. Release-Notes beginnen direkt mit Inhalt oder Unterabschnitten.
-
 - Ein Auftrag wie „neue Version erstellen“ oder „neue Testversion erstellen“ umfasst Vorbereitung, erforderliche Prüfungen, bereinigte Dokumentation, Commit, Push, passenden Tag und GitHub-Release mit DMG, ZIP und Prüfsummen. Testversionen als Vorabrelease veröffentlichen. Lokale Dev-Builds bleiben immer lokal. Ein reiner Dev-Build-Auftrag umfasst keinen Commit, Push, Tag oder Release; diese Veröffentlichungskonvention gilt für neue Test- und Finalversionen.
 
 ## Changelogs und Release-Notes
