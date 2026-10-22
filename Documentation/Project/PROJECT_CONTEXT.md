@@ -6,10 +6,10 @@ Stand: 22. Oktober 2026.
 
 - Repository: https://github.com/Schrotty74/NZBPort
 - Projektpfade beziehen sich auf den Repository-Root; der lokale Ordner trägt historisch den Namen `NZBRelay`.
-- Aktueller Branch: `main`. Lokaler HEAD und zuletzt geprüfter Remote-Stand: `4b0167e`. Weitere Remote-Branches wurden bei dieser Vorbereitung nicht gefunden.
-- Veröffentlicht: `v0.1.1` als GitHub-Vorabrelease mit DMG und ZIP. Außerdem existiert `v0.1.0`.
-- Lokaler Entwicklungsstand: Version `0.2`, Build `4`. Mehrere Quell-, Test- und README-Änderungen sind noch nicht committet oder veröffentlicht. Die Veröffentlichung von 0.2 ist inzwischen ausdrücklich beauftragt.
-- Die fünf Einstieg-/Kontextdateien wurden lokal angelegt. Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`. Diese Dateien waren im zuletzt geprüften Commit noch nicht vorhanden.
+- Aktueller Branch: `main`. Veröffentlichter App-Quellcommit für 0.2: `74c25ba`; spätere reine Dokumentationscommits ändern die App-Pakete nicht. Weitere Remote-Branches wurden bei dieser Vorbereitung nicht gefunden.
+- Veröffentlicht: `v0.2`, Build 4, als GitHub-Vorabrelease mit DMG, ZIP und SHA256SUMS. Ältere Releases: `v0.1.1` und `v0.1.0`.
+- App-Stand: Version `0.2`, Build `4`. Quellen, Tests, README und bereinigte Projektdateien sind veröffentlicht. Aktuell ist kein weiterer Release-Auftrag offen.
+- Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`; alle fünf sind auf GitHub enthalten.
 
 ## Produkt
 
@@ -74,7 +74,7 @@ Benötigt werden Xcode mit macOS-26-SDK oder neuer und Icon-Composer-Kompilierun
 - Der Nutzer bestätigte den vorherigen Funktionsstand grundsätzlich als funktionierend. Das ist keine gesonderte Bestätigung jedes Benachrichtigungs-, Plattform- oder Fehlerfalls.
 - Ein erfolgreicher Build ist kein Nachweis einer UI-Prüfung oder von Tests auf macOS 26 und 27.
 - HTML-Suchdienste können ihre Seiten ändern oder Zugriffe sperren. Keine CAPTCHA- oder Zugangssperrenumgehung.
-- Die README-Entwicklungsabschnitte enthalten noch die alte Zehn-Sekunden-Angabe; andere Beschreibungen grenzen Warteschlangensteuerung noch nach dem älteren Release ab. Vor Veröffentlichung auf den tatsächlichen Zielstand abgleichen.
+- Englische und deutsche README enthalten die Feature-Liste für 0.2, einschließlich Zwei-Sekunden-Abfrage und Warteschlangensteuerung.
 
 ## Änderungsstand 22. Oktober 2026
 
@@ -89,3 +89,7 @@ Statusabfrage von zehn auf zwei Sekunden verkürzt; Hinweise in Deutsch und Engl
 ## Veröffentlichungsauftrag für 0.2
 
 22. Oktober 2026: Nutzer stellt klar, dass neue Test- und Finalversionen auch Commit, Upload und GitHub-Release umfassen; lokale Dev-Builds bleiben lokal. Veröffentlichung von 0.2, Build 4, ist ausdrücklich beauftragt. Englische und deutsche Feature-Listen auf 0.2 abgeglichen; englische Release-Notes ohne wiederholten Release-Titel vorbereitet. Der nachfolgende Veröffentlichungsnachtrag dokumentiert das tatsächliche Ergebnis.
+
+## Veröffentlichung 0.2 bestätigt
+
+22. Oktober 2026: https://github.com/Schrotty74/NZBPort/releases/tag/v0.2 als öffentliches Vorabrelease veröffentlicht. App-Quellcommit `74c25ba` auf main; DMG, ZIP und SHA256SUMS vollständig hochgeladen. Die drei GitHub-Asset-Digests stimmen mit den lokalen SHA-256-Werten überein. Der Release-Text ist ausschließlich Englisch und wiederholt den Titel nicht. Keine neue Bedienungssitzung, keine erneuten Funktionstests und keine zusätzlichen App-Kopien zur Prüfung. Lokale Dev-Builds bleiben von der Veröffentlichungskonvention ausgenommen.

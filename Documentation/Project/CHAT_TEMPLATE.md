@@ -8,7 +8,7 @@ Verwende den aktuellen Repository-Root; keinen festen lokalen Benutzerpfad vorau
 2. `Documentation/Project/PROJECT_CONTEXT.md`
 3. `Documentation/Project/NEXT_STEPS.md`
 
-Prüfe den tatsächlichen Branch und Quellstand. Öffne danach nur die auftragsrelevanten Dateien. Der zuletzt dokumentierte Stand ist `main` auf `4b0167e`, mit lokalen, noch nicht committeten Änderungen für 0.2, Build 4. Veröffentlicht ist 0.1.1 als Vorabrelease. Keine getrennten Dev-/Beta-/Final-Branches voraussetzen und keinen Branch ohne Auftrag wechseln.
+Prüfe den tatsächlichen Branch und Quellstand. Öffne danach nur die auftragsrelevanten Dateien. Testversion 0.2, Build 4, ist als Vorabrelease v0.2 veröffentlicht; App-Quellcommit `74c25ba` auf `main`. Spätere Dokumentationscommits können darüber liegen. Keine getrennten Dev-/Beta-/Final-Branches voraussetzen und keinen Branch ohne Auftrag wechseln.
 
 NZBPort ist eine native SwiftUI-/AppKit-Menüleisten-App für Apple Silicon ab macOS 26. Sie übergibt NZBlnk-Links und NZB-Dateien an SABnzbd. Die Suchanbieter sind NZBIndex, NZBKing und BinSearch. Kategorien stammen von SABnzbd; Ausblendungen und Favoriten bleiben lokal. Statusabfragen warten zwei Sekunden zwischen Abrufen. Ein vollständiger eigener Usenet-Downloader wurde nur besprochen, nicht beauftragt.
 
@@ -16,7 +16,7 @@ Keinen Schlüsselbund einführen, keine privaten Daten dokumentieren und keine f
 
 Prüfungen bündeln und nur bei konkretem Anlass wiederholen. Nach Builds die vier Projektdateien prüfen und relevante Änderungen nachführen. Keine zusätzlichen Prüf-Apps oder Projektkopien ohne ausdrücklichen Auftrag.
 
-Ohne ausdrücklichen Auftrag keine Commits, Pushes, Tags oder Releases. Nach App-Änderungen den Link zur gebauten App liefern. Selbst geöffnete Apps und Computersteuerung nach Abschluss beenden.
+Ohne ausdrücklichen Auftrag keine Commits, Pushes, Tags oder Releases. Neue Test- und Finalversion erstellen umfasst auch die Veröffentlichung; lokale Dev-Builds bleiben lokal. Nach App-Änderungen den Link zur gebauten App liefern. Selbst geöffnete Apps und Computersteuerung nach Abschluss beenden.
 
 Aktueller Auftrag:
 
