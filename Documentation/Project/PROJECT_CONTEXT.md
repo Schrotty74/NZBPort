@@ -1,14 +1,13 @@
 # Projektkontext – NZBPort
 
-Stand: 22. Oktober 2026.
+Stand: 3. November 2026.
 
 ## Projekt und Git-Stand
 
 - Repository: https://github.com/Schrotty74/NZBPort
 - Projektpfade beziehen sich auf den Repository-Root; der lokale Ordner trägt historisch den Namen `NZBRelay`.
-- Aktueller Branch: `main`. Veröffentlichter App-Quellcommit für 0.2: `74c25ba`; spätere reine Dokumentationscommits ändern die App-Pakete nicht. Weitere Remote-Branches wurden bei dieser Vorbereitung nicht gefunden.
-- Veröffentlicht: `v0.2`, Build 4, als GitHub-Vorabrelease mit DMG, ZIP und SHA256SUMS. Ältere Releases: `v0.1.1` und `v0.1.0`.
-- App-Stand: Version `0.2`, Build `4`. Quellen, Tests, README und bereinigte Projektdateien sind veröffentlicht. Aktuell ist kein weiterer Release-Auftrag offen.
+- Entwicklungsbranch: `main`. Der App-Quellcommit für 0.2 war `74c25ba`; danach folgten Dokumentationscommits.
+- Testversion 0.2.1, Build 5, enthält die Autostart-Korrektur. GitHub-Tag: `v0.2.1`. Frühere Releases: `v0.2`, `v0.1.1` und `v0.1.0`.
 - Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`; alle fünf sind auf GitHub enthalten.
 
 ## Produkt
@@ -27,7 +26,7 @@ Die App ist in Swift 6 mit SwiftUI und AppKit geschrieben. Mindestversion ist ma
 - Native Liquid-Glass-Bedienelemente und eigenes Icon-Composer-Icon mit Systemdarstellungen.
 - Autostart über macOS-Anmeldeobjekte und About-Links zu GitHub und Portfolio.
 
-Zusätzlich im lokalen Stand 0.2:
+Zusätzlich in der veröffentlichten Testversion 0.2:
 
 - NZB-Dateien über Dateiauswahl, Öffnen mit und Drag-and-drop; maximal 16 MiB pro Datei und 64 MiB für gleichzeitig gehaltene Auftragsdaten.
 - Priorität oder pausierte Übergabe vor dem Senden wählen.
@@ -95,3 +94,17 @@ Statusabfrage von zehn auf zwei Sekunden verkürzt; Hinweise in Deutsch und Engl
 22. Oktober 2026: https://github.com/Schrotty74/NZBPort/releases/tag/v0.2 als öffentliches Vorabrelease veröffentlicht. App-Quellcommit `74c25ba` auf main; DMG, ZIP und SHA256SUMS vollständig hochgeladen. Die drei GitHub-Asset-Digests stimmen mit den lokalen SHA-256-Werten überein. Der Release-Text ist ausschließlich Englisch und wiederholt den Titel nicht. Keine neue Bedienungssitzung, keine erneuten Funktionstests und keine zusätzlichen App-Kopien zur Prüfung. Lokale Dev-Builds bleiben von der Veröffentlichungskonvention ausgenommen.
 
 22. Oktober 2026: Changelogs v0.1.0 und v0.1.1 auf GitHub nach dem Muster von 0.2 überarbeitet und geprüft.
+
+## Stand für die Chat-Fortsetzung
+
+22. Oktober 2026: Repository vor dieser Vorbereitung sauber, main und origin/main auf `0f92fcb`. Die doppelten Changelog-Regeln sind im veröffentlichten Dokumentationsstand entfernt; der verbindliche Abschnitt steht einmal in `Documentation/Project/AGENTS.md`. Für die Chat-Vorbereitung nur `PROJECT_CONTEXT.md` und `CHAT_TEMPLATE.md` lokal aktualisiert. Kein Build, Testlauf, Commit, Push oder Release ausgeführt. Offene Bedienungsbestätigungen stehen unverändert in `NEXT_STEPS.md`.
+
+## Lokale Autostart-Korrektur
+
+29. Oktober 2026: `Main.swift` erkennt den Start als macOS-Anmeldeobjekt anhand des Apple Events (`kAEOpenApplication` mit `keyAEPropData` gleich `keyAELaunchedAsLogInItem`). Bei diesem Start wird das Hauptfenster nicht geöffnet; die App bleibt in der Menüleiste. Manuelles Öffnen sowie NZB-Dateien und NZBlnk-Links öffnen weiterhin das Fenster.
+
+Lokaler Dev-Build erfolgreich, vorhandene lokale Bundle-ID erhalten. Ad-hoc-Signatur und Info.plist im Build geprüft. Version 0.2 und Build 4 unverändert. Keine automatisierten Tests und kein echter Anmeldestart durchgeführt; die Bedienungsbestätigung steht noch aus. Keine Veröffentlichung.
+
+## Testversion 0.2.1, Build 5
+
+3. November 2026: Die Autostart-Korrektur für das Vorabrelease gebaut. Die automatisierten Tests bestanden. Ein echter Anmeldestart wurde nicht geprüft. Die Pakete verwenden die öffentliche Bundle-ID.

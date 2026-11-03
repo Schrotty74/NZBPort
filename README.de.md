@@ -2,7 +2,7 @@
 
 [English](README.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
-> Aktuelle Testversion: **0.2**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2).
+> Aktuelle Testversion: **0.2.1**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.1).
 
 NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links öffnet und Downloads an SABnzbd übergibt. Nach deiner Kategorieauswahl sucht sie bei Bedarf nacheinander über NZBIndex, NZBKing und BinSearch. Sobald SABnzbd die Übergabe bestätigt, schließt sich das Fenster. Die App bleibt in der Menüleiste erreichbar.
 

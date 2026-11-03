@@ -8,7 +8,7 @@ Verwende den aktuellen Repository-Root; keinen festen lokalen Benutzerpfad vorau
 2. `Documentation/Project/PROJECT_CONTEXT.md`
 3. `Documentation/Project/NEXT_STEPS.md`
 
-Prüfe den tatsächlichen Branch und Quellstand. Öffne danach nur die auftragsrelevanten Dateien. Testversion 0.2, Build 4, ist als Vorabrelease v0.2 veröffentlicht; App-Quellcommit `74c25ba` auf `main`. Spätere Dokumentationscommits können darüber liegen. Keine getrennten Dev-/Beta-/Final-Branches voraussetzen und keinen Branch ohne Auftrag wechseln.
+Prüfe den tatsächlichen Branch und Quellstand. Öffne danach nur die auftragsrelevanten Dateien. Der Stand von 0.2.1, Build 5, enthält die Autostart-Korrektur: Beim Start als Anmeldeobjekt bleibt das Fenster geschlossen. Ein echter Anmeldestart ist noch nicht bestätigt. Keine getrennten Dev-/Beta-/Final-Branches voraussetzen und keinen Branch ohne Auftrag wechseln.
 
 NZBPort ist eine native SwiftUI-/AppKit-Menüleisten-App für Apple Silicon ab macOS 26. Sie übergibt NZBlnk-Links und NZB-Dateien an SABnzbd. Die Suchanbieter sind NZBIndex, NZBKing und BinSearch. Kategorien stammen von SABnzbd; Ausblendungen und Favoriten bleiben lokal. Statusabfragen warten zwei Sekunden zwischen Abrufen. Ein vollständiger eigener Usenet-Downloader wurde nur besprochen, nicht beauftragt.
 

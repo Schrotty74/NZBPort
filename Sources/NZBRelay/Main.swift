@@ -13,6 +13,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     private lazy var appearanceMenu = AppearanceMenu(settings: model.appearanceSettings)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let launchEvent = NSAppleEventManager.shared().currentAppleEvent
+        let launchedAtLogin = launchEvent?.eventID == kAEOpenApplication &&
+            launchEvent?.paramDescriptor(forKeyword: keyAEPropData)?.enumCodeValue == keyAELaunchedAsLogInItem
         buildMenu()
         buildStatusMenu()
         model.appearanceSettings.onModeChange = { [weak self] in
@@ -30,7 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         }
         model.monitor.installNotificationDelegate()
         Task { await model.refreshCategoriesAtStartup() }
-        showWindow()
+        if !launchedAtLogin { showWindow() }
         model.closeAfterSuccess = { [weak self] in self?.window?.close() }
     }
 
