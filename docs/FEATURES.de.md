@@ -2,43 +2,47 @@
 
 [Zurück zur README](../README.de.md) · [English](FEATURES.md)
 
-## Links, Dateien und wartende Eingänge
+## Links und Dateien öffnen
 
-Öffne einen NZBlnk-Link aus Safari, füge ihn über **NZBlnk aus Zwischenablage** ein oder ziehe ihn ins Fenster. NZBPort prüft beim Start und beim Aktivieren die macOS-Zuordnung. Ist die App bereits als Standard eingetragen, zeigt der Button **Als Link-App eingerichtet**.
+- **NZBlnk-Links:** Öffne einen Link aus Safari, füge ihn über **NZBlnk aus Zwischenablage** ein oder ziehe ihn ins Fenster.
+- **macOS-Link-Zuordnung:** NZBPort prüft beim Start und beim Aktivieren, welche App NZBlnk-Links öffnet. Ist NZBPort bereits als Standard eingetragen, zeigt der Button **Als Link-App eingerichtet**.
+- **NZB-Dateien:** Öffne Dateien über die Dateiauswahl, über **Öffnen mit** im Finder oder per Drag-and-drop. Pro Datei sind bis zu 16 MiB erlaubt. Für die aktuelle und alle wartenden NZB-Dateien gilt zusammen ein Limit von 64 MiB.
+- **Wartende Links und Dateien:** NZBPort bearbeitet die Eingänge nacheinander. Die Liste zeigt, was als Nächstes dran ist. Du kannst einzelne Einträge vor der Übergabe entfernen; der aktuelle Auftrag bleibt erhalten.
 
-NZB-Dateien kannst du über die Dateiauswahl, über **Öffnen mit** im Finder oder per Drag-and-drop öffnen. Pro Datei sind bis zu 16 MiB erlaubt. Für wartende NZB-Dateien und die aktuelle Datei gilt zusammen ein Limit von 64 MiB. NZBPort bearbeitet die Eingänge nacheinander. Unter **Wartende Links und Dateien** siehst du, was als Nächstes dran ist, und kannst einzelne Einträge vor der Übergabe entfernen.
+## Kategorie wählen und Auftrag übergeben
 
-## Kategorien und Übergabe
-
-NZBPort lädt die SABnzbd-Kategorien beim Start, beim Öffnen eines Auftrags und auf Wunsch auch manuell. Der Abruf beim Start läuft im Hintergrund. Fehler bei der Verbindung oder der Übergabe zeigt die App an.
-
-In den **Verbindungseinstellungen** kannst du **Deine Kategorien** auf- und zuklappen, Kategorien ausblenden oder wieder einblenden und Favoriten anheften und sortieren. Diese Änderungen gelten nur in NZBPort. Neue Kategorien von SABnzbd erscheinen automatisch. Wähle vor der Übergabe eine Kategorie und bei Bedarf eine andere Priorität oder **Pausiert hinzufügen**.
-
-Bei erkannten Wiederholungen innerhalb von zehn Minuten bittet NZBPort um Bestätigung. Das gilt auch nach einer unklaren Übertragung. Für diese Prüfung bleiben nur Hashes und Zeitstempel im Arbeitsspeicher. Wenn unklar ist, ob SABnzbd einen Auftrag angenommen hat, prüfe vor einem neuen Versuch die Warteschlange.
+- **Kategorien abrufen:** NZBPort lädt die aktuellen SABnzbd-Kategorien beim Start, beim Öffnen eines Auftrags und auf Wunsch auch manuell. Der Abruf beim Start läuft im Hintergrund.
+- **Kategorie finden:** Filtere die Kategoriebuttons vor der Übergabe nach Namen.
+- **Kategorien ordnen:** In den Verbindungseinstellungen kannst du **Deine Kategorien** auf- und zuklappen, Kategorien ausblenden oder wieder einblenden und Favoriten anheften und sortieren. Diese Änderungen gelten nur in NZBPort. Neue Kategorien von SABnzbd erscheinen automatisch.
+- **Priorität:** Wähle vor der Übergabe Niedrig, Normal, Hoch oder Sofort. Mit **Pausiert hinzufügen** legst du einen Auftrag an, ohne ihn zu starten.
+- **Titel und Archivpasswort:** NZBPort übergibt den Titel und ein im NZBlnk-Link enthaltenes Archivpasswort zusammen mit der gewählten Kategorie an SABnzbd.
+- **Rückmeldung zur Übergabe:** Sobald SABnzbd den Auftrag bestätigt, zeigt NZBPort den nächsten Eingang oder schließt das Fenster und bleibt in der Menüleiste. Fehler bei der Verbindung oder Übergabe zeigt die App an.
+- **Duplikatwarnung:** Bei erkannten Wiederholungen innerhalb von zehn Minuten bittet NZBPort um Bestätigung, auch nach einer unklaren Übertragung. Für die Prüfung bleiben nur Hashes und Zeitstempel im Arbeitsspeicher. Wenn unklar ist, ob SABnzbd den Auftrag angenommen hat, prüfe vor einem neuen Versuch die Warteschlange.
 
 ## Downloads, Menüleiste und Mitteilungen
 
-Unter **Downloads** siehst du Fortschritt, Status und Kategorie der wartenden und laufenden Aufträge. Dazu kommen die Gesamtgeschwindigkeit, Restgröße und Restzeit sowie die letzten Aufträge. Du kannst die Ansicht aktualisieren und einzelne Aufträge oder die ganze Warteschlange pausieren und fortsetzen.
-
-Das Menü von NZBPort zeigt die Anzahl der Aufträge und, falls verfügbar, die Downloadgeschwindigkeit. Es meldet auch eine leere oder pausierte Warteschlange und zeigt an, wenn der Status nicht verfügbar ist. Beim Öffnen fragt NZBPort den Status ab. Über **SABnzbd im Browser öffnen** erreichst du den Server, ohne dass der API-Key in der Browseradresse steht.
-
-Optionale macOS-Mitteilungen melden abgeschlossene und fehlgeschlagene Downloads. Beim ersten Abruf bleibt der bereits vorhandene Verlauf außen vor. Ein Auftrag, der noch entpackt wird, gilt nicht als abgeschlossen. Solange die Downloadübersicht offen ist oder Mitteilungen aktiv sind, wartet NZBPort nach jedem Statusabruf zwei Sekunden bis zur nächsten Abfrage.
-
-## Updates
-
-Über **Nach Updates suchen** prüfst du, ob es auf GitHub eine neuere Version gibt. Auf Wunsch bezieht NZBPort Testversionen ein. Die App öffnet die Release-Seite; sie lädt und installiert Updates nicht automatisch.
+- **Details zur Warteschlange:** Unter **Downloads** siehst du Titel, Fortschritt, Status und Kategorie pro Auftrag. Die Übersicht zeigt auch Gesamtgeschwindigkeit, Restgröße und geschätzte Restzeit.
+- **Downloads steuern:** Pausiere einzelne Aufträge oder die ganze SABnzbd-Warteschlange und setze sie wieder fort.
+- **Verlauf:** Die App zeigt die letzten zehn Einträge mit ihrem Status.
+- **Status aktualisieren:** Aktualisiere die Downloadübersicht auf Wunsch manuell. Solange die Übersicht offen ist oder Mitteilungen aktiv sind, wartet NZBPort nach jedem Abruf zwei Sekunden bis zur nächsten Abfrage.
+- **Kurzstatus in der Menüleiste:** Beim Öffnen des NZBPort-Menüs fragt die App die Anzahl der Aufträge und die Geschwindigkeit ab. Das Menü zeigt auch, wenn die Warteschlange leer oder pausiert, die Verbindung nicht eingerichtet oder der Status nicht verfügbar ist.
+- **macOS-Mitteilungen:** Auf Wunsch meldet die App abgeschlossene und fehlgeschlagene Downloads. Bereits vorhandene Verlaufseinträge bleiben beim ersten Abruf außen vor. Ein Auftrag, der noch entpackt wird, gilt nicht als abgeschlossen.
+- **SABnzbd im Browser öffnen:** Öffne den eingerichteten Server, ohne dass der API-Key in der Browseradresse steht.
 
 ## Sprache, Darstellung und Autostart
 
-Die Oberfläche unterstützt Deutsch und Englisch. Im App-Menü, im Menüleistensymbol und im Zahnradmenü wählst du unter **Sprache** zwischen **System, Deutsch und English**. Standardmäßig verwendet die App die erste unterstützte Sprache aus deinen macOS-Einstellungen. Ist keine dabei, verwendet sie Englisch. Eine manuelle Auswahl wird lokal gespeichert und gilt sofort, auch für Menüs und app-eigene Fehlermeldungen.
+- **Sprache:** Wähle im App-Menü, Menüleistensymbol oder Zahnradmenü zwischen System, Deutsch und English. System folgt der ersten unterstützten macOS-Sprache und verwendet sonst Englisch. Eine manuelle Auswahl wird gespeichert und gilt sofort, auch für Menüs und app-eigene Fehlermeldungen.
+- **Farbthemen:** Wähle Standard, Coffee, Elfenbein oder Minze. Die Themen passen sich an den hellen oder dunklen Modus an.
+- **Darstellung und Hintergrund:** Wähle unabhängig vom Farbthema zwischen System, Hell und Dunkel. Der Fensterhintergrund kann systemgesteuert, transparent oder deckend sein.
+- **Native macOS-Darstellung:** NZBPort verwendet Liquid-Glass-Bedienelemente. Das mit Icon Composer erstellte App-Symbol unterstützt die Systemdarstellungen.
+- **Fensterhöhe:** Das Fenster wächst bei Bedarf bis zum sichtbaren Bildschirmrand. Reicht der Platz nicht aus, kannst du scrollen. Eine von Hand eingestellte Größe bleibt bis zum nächsten Öffnen erhalten.
+- **Autostart:** Aktiviere oder deaktiviere den Start bei der Anmeldung im App-Menü, im Menüleistensymbol oder im Zahnradmenü. Wenn macOS eine Freigabe verlangt, wähle **In macOS erlauben …**. Beim Anmeldestart bleibt NZBPort in der Menüleiste. Beim manuellen Start öffnet sich das Fenster.
 
-Im App-Menü und im Zahnradmenü wählst du zwischen den Farbthemen **Standard, Coffee, Elfenbein und Minze**. Davon unabhängig lassen sich System, Hell und Dunkel sowie ein systemgesteuerter, transparenter oder deckender Fensterhintergrund wählen. Die Farbthemen passen sich dem hellen und dunklen Modus an; die Auswahl wird lokal gespeichert. Die Bedienelemente nutzen natives Liquid Glass. Das Icon-Composer-Dokument unterstützt die Systemdarstellungen des App-Icons.
+## Updates, Projektlinks und Quellcode
 
-Das Hauptfenster wächst bei Bedarf bis zum sichtbaren Bildschirmrand. Reicht der Platz nicht aus, kannst du scrollen. Eine von Hand eingestellte Größe bleibt bis zum nächsten Öffnen erhalten.
-
-Unter **Autostart → Beim Anmelden starten** im App-Menü, im Menüleistensymbol oder im Zahnradmenü schaltest du den Start bei der macOS-Anmeldung ein oder aus. Die Einstellung wird erst durch deine Auswahl geändert. Verlangt macOS eine Freigabe, führt **In macOS erlauben …** zu den Anmeldeobjekten in den Systemeinstellungen. Beim Anmeldestart bleibt NZBPort in der Menüleiste. Beim manuellen Start öffnet sich das Fenster.
-
-**Über NZBPort** führt zum GitHub-Projekt und zur [Portfolio-Homepage](https://schrotty74.github.io/Portfolio/). Die Links öffnen sich erst nach deiner Auswahl im Standardbrowser.
+- **Nach Updates suchen:** Prüfe auf GitHub, ob es eine neuere Version gibt, auf Wunsch auch Testversionen. NZBPort öffnet die Release-Seite und lädt oder installiert Updates nicht automatisch.
+- **Über NZBPort:** Öffne das GitHub-Projekt oder die [Portfolio-Seite](https://schrotty74.github.io/Portfolio/) im Standardbrowser.
+- **Aus dem Quellcode bauen:** NZBPort ist in Swift geschrieben und nutzt Apple-Systemframeworks. Externe Pakete sind nicht nötig. Siehe [Build-Anleitung](../README.de.md#bauen) und [Datenschutz und Suchdienste](../README.de.md#datenschutz-und-suchdienste).
 
 ## Vom Link zum Download
 
