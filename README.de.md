@@ -8,32 +8,18 @@ NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links öffnet und 
 
 ## Funktionen
 
-- `nzblnk:`-Links direkt aus Safari öffnen oder aus der Zwischenablage einfügen.
-- Vor der Übergabe eine SABnzbd-Kategorie auswählen.
-- Über NZBIndex suchen, mit NZBKing und BinSearch als Ausweichdiensten.
-- Link-Titel und optionales Entpackpasswort an SABnzbd übergeben.
-- Kategorien beim App-Start, beim Öffnen eines Links oder manuell in den Einstellungen aktualisieren.
-- Kategorien lokal ausblenden und wieder einblenden, ohne sie in SABnzbd zu ändern; neue Kategorien erscheinen automatisch.
-- Verbindungsfehler und fehlgeschlagene Übergaben in der App anzeigen.
-- Mehrere Links nacheinander bearbeiten und nach der Übergabe in der Menüleiste bleiben.
-- Sofort zwischen **English**, **Deutsch** und **System** umschalten; standardmäßig den unterstützten macOS-Spracheinstellungen folgen.
-- **Standard**, **Coffee**, **Elfenbein** oder **Minze** wählen, unabhängig von Hell/Dunkel und Fenstertransparenz.
-- Native Liquid-Glass-Bedienelemente und ein anpassungsfähiges Icon-Composer-App-Icon nutzen.
-- **Beim Anmelden starten** über die macOS-Anmeldeobjekte ein- oder ausschalten.
-- GitHub-Projekt und Portfolio-Homepage über **Über NZBPort** öffnen.
-- Eigenen Swift-Anwendungscode mit Apple-Systemframeworks und ohne externe Paketabhängigkeiten selbst bauen.
+- **NZBlnk-Links öffnen**: direkt aus Safari, aus der Zwischenablage oder per Drag-and-drop.
+- **NZB-Dateien öffnen**: per Dateiauswahl, über „Öffnen mit“ im Finder oder per Drag-and-drop.
+- **NZBs suchen**: zuerst bei NZBIndex, danach bei Bedarf bei NZBKing und BinSearch.
+- **SABnzbd-Kategorie wählen**: vor der Übergabe eine Kategorie auswählen, Favoriten anheften und ungenutzte Kategorien ausblenden.
+- **Priorität festlegen** oder einen Auftrag pausiert übergeben.
+- **Wartende Links und Dateien verwalten**: vor der Übergabe ansehen und einzeln entfernen.
+- **Downloads im Blick behalten**: Fortschritt, Kategorien und Verlauf sehen, einzelne Aufträge oder die ganze Warteschlange pausieren und fortsetzen.
+- **SABnzbd-Status im Menü abrufen**: Anzahl der Aufträge und, falls verfügbar, Downloadgeschwindigkeit sehen.
+- **macOS-Mitteilungen erhalten**, wenn Downloads abgeschlossen sind oder fehlschlagen.
+- **Bei der Anmeldung starten** und NZBPort direkt in der Menüleiste bereithalten.
 
-- `.nzb`-Dateien über Dateiauswahl, „Öffnen mit“ und Drag-and-drop öffnen (16 MiB pro Datei; insgesamt 64 MiB wartende Daten).
-- Downloadpriorität wählen oder Aufträge pausiert übergeben.
-- Favoriten markieren und anordnen; Kategorienbereich in den Verbindungseinstellungen auf- und zuklappen.
-- Fortschritt, Geschwindigkeit, Restgröße, Restzeit und letzte Aufträge in der Downloadübersicht anzeigen.
-- Einzelne Aufträge oder die gesamte SABnzbd-Warteschlange pausieren und fortsetzen.
-- Status mit zwei Sekunden Wartezeit zwischen Abrufen aktualisieren, solange die Übersicht sichtbar oder Benachrichtigungen aktiv sind.
-- Optionale macOS-Abschluss- und Fehlermeldungen einschalten. Bereits vorhandener Verlauf wird beim ersten Abruf übersprungen; Entpacken zählt noch nicht als Abschluss.
-- Wiederholte Übergabeversuche innerhalb von zehn Minuten bestätigen, auch nach unklaren Verbindungsfehlern; dafür liegen nur Hashes und Zeitstempel im Arbeitsspeicher.
-- SABnzbd ohne API-Key in der Browseradresse öffnen.
-- GitHub-Updates manuell prüfen, auf Wunsch einschließlich Testversionen; kein automatischer Download oder Installer.
-- Wartende Links und Dateien ansehen und vor der Übergabe einzeln entfernen. Die Downloadübersicht zeigt die Kategorie pro Auftrag. Im Menüleistensymbol stehen die Anzahl der Aufträge und, falls verfügbar, die Downloadgeschwindigkeit.
+[Alle Funktionen im Detail](docs/FEATURES.de.md).
 
 ## Bildschirmfotos
 
@@ -69,25 +55,6 @@ Siehe auch [Apples Anleitung zum sicheren Öffnen von Apps](https://support.appl
 2. Prüfe die Verbindung und speichere die Einstellungen.
 3. Wähle „Als Link-App verwenden“, um NZBPort für `nzblnk:`-Links zu registrieren.
 4. Falls ein Browser-Userscript die Links bereits abfängt, deaktiviere es auf diesem Mac.
-
-Die Oberfläche unterstützt Deutsch und Englisch. Im App-Menü, im Menüleistensymbol und im Zahnradmenü wählst du unter **Sprache** zwischen **System, Deutsch und English**. Standardmäßig verwendet die App die erste unterstützte Sprache aus deinen macOS-Einstellungen. Ist keine dabei, verwendet sie Englisch. Eine manuelle Auswahl wird lokal gespeichert und gilt sofort, auch für Menüs und app-eigene Fehlermeldungen. Kopierte Links kannst du über „NZBlnk aus Zwischenablage“ öffnen. Beim App-Start und beim Öffnen eines Links werden die Kategorien von SABnzbd neu geladen. Die Startabfrage läuft im Hintergrund; schlägt sie fehl, zeigt die App eine Fehlermeldung. Der Aktualisieren-Button neben **Deine Kategorien** in den Verbindungseinstellungen lädt sie auch manuell neu. In den Einstellungen kannst du Kategorien ausblenden und wieder einblenden. Das betrifft nur die Anzeige in NZBPort; SABnzbd bleibt unverändert. Neue Kategorien erscheinen automatisch. Mehrere Links werden nacheinander bearbeitet.
-
-Im App-Menü und im Zahnradmenü wählst du zwischen den Farbthemen **Standard, Coffee, Elfenbein und Minze**. Davon unabhängig lassen sich System, Hell und Dunkel sowie ein systemgesteuerter, transparenter oder deckender Fensterhintergrund wählen. Die Farbthemen passen sich dem hellen und dunklen Modus an; die Auswahl wird lokal gespeichert. Die Bedienelemente nutzen natives Liquid Glass. Das Icon-Composer-Dokument unterstützt die Systemdarstellungen des App-Icons.
-
-Unter **Autostart → Beim Anmelden starten** im App-Menü, im Menüleistensymbol oder im Zahnradmenü schaltest du den Start bei der macOS-Anmeldung ein oder aus. Die Einstellung wird erst durch deine Auswahl geändert. Verlangt macOS eine Freigabe, führt **In macOS erlauben …** zu den Anmeldeobjekten in den Systemeinstellungen.
-
-**Über NZBPort** führt zum GitHub-Projekt und zur [Portfolio-Homepage](https://schrotty74.github.io/Portfolio/). Die Links öffnen sich erst nach deiner Auswahl im Standardbrowser.
-
-## Vom Link zum Download
-
-1. Der Browser übergibt einen `nzblnk:`-Link an die registrierte macOS-App. Zuvor kann der Browser eine Bestätigung verlangen.
-2. NZBPort liest Suchkennung (`h`), Titel (`t`), optionales Passwort (`p`) und wiederholte Gruppenfelder (`g`). Prozentkodierter Text wird unterstützt; abgekürzte `a.b.`-Gruppen werden für NZBIndex ausgeschrieben.
-3. Die App ruft die aktuellen SABnzbd-Kategorien ab und berücksichtigt deine lokal ausgeblendeten Kategorien. Über das Suchfeld kannst du die Kategoriebuttons nach Namen filtern.
-4. Mit der Kategorieauswahl beginnt die Suche. Zuerst wird die öffentliche JSON-API von NZBIndex ohne zusätzlichen Such-API-Key verwendet. Schlägt die Suche fehl, folgen NZBKing und BinSearch mit ihren öffentlichen Suchantworten.
-5. NZBPort übergibt Downloadadresse, Titel, gewählte Kategorie und optionales Archivpasswort an SABnzbd. Den Download übernimmt SABnzbd; NZBPort lädt selbst keine Usenet-Artikel.
-6. Nach einer bestätigten Übergabe schließt sich das Fenster oder der nächste wartende Link erscheint. Bei einem Fehler bleibt die Meldung sichtbar. Läuft eine Übergabe in ein Timeout, prüfe vor einem neuen Versuch die SABnzbd-Warteschlange, um doppelte Aufträge zu vermeiden.
-
-Mehrere unterschiedliche Trefferkennungen lehnt der NZBIndex-Provider ab; anschließend geht die Ausweichsuche weiter. Die HTML-Provider verwenden den ersten unterstützten Treffer ihrer Antwort. Suchtreffer garantieren weder Inhalt noch Verfügbarkeit. Die App legt keine SABnzbd-Kategorien an, löscht keine Kategorien und verwaltet keine Usenet-Zugänge.
 
 ## Datenschutz und Suchdienste
 
