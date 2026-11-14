@@ -33,6 +33,7 @@
 "Bereit für SABnzbd" = "Ready for SABnzbd";
 "Entpackpasswort enthalten" = "Unpacking password included";
 "Kategorie wählen" = "Choose a Category";
+"Kategorie: %@" = "Category: %@";
 "Alle Kategorien sind ausgeblendet. Du kannst sie in den Einstellungen wieder einblenden." = "All categories are hidden. Show them again in Settings.";
 "Keine passende Kategorie." = "No matching category.";
 "Link verwerfen" = "Discard Link";
@@ -47,6 +48,10 @@
 "Zurück" = "Back";
 "Verbindung einrichten" = "Set Up Connection";
 "%lld weitere Links" = "%lld more links";
+"Wartend: %lld" = "Waiting: %lld";
+"Wartende Links und Dateien" = "Waiting Links and Files";
+"Entfernen" = "Remove";
+"%@ entfernen" = "Remove %@";
 "Für deinen Mac" = "For Your Mac";
 "In der Zwischenablage liegt kein Link." = "There is no link on the clipboard.";
 "Bitte zuerst die Verbindung zu SABnzbd einrichten." = "Set up the connection to SABnzbd first.";
@@ -115,6 +120,11 @@
 "Wird geladen" = "Downloading";
 "Wartet" = "Queued";
 "Pausiert" = "Paused";
+"SABnzbd nicht eingerichtet" = "SABnzbd not configured";
+"SABnzbd-Status nicht verfügbar" = "SABnzbd status unavailable";
+"SABnzbd-Status wird geladen …" = "Checking SABnzbd status…";
+"SABnzbd-Warteschlange pausiert" = "SABnzbd queue paused";
+"In der Warteschlange: %lld" = "In queue: %lld";
 "Abgeschlossen" = "Completed";
 "Fehlgeschlagen" = "Failed";
 "Wird entpackt" = "Extracting";

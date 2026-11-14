@@ -1,12 +1,17 @@
 import RelayCore
 import AppKit
+import Observation
 import SwiftUI
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuItemValidation {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuItemValidation, NSMenuDelegate {
     let model = AppModel()
     private var window: NSWindow?
+    private var contentOverflow: CGFloat = 0
+    private var resizedByUser = false
     private var statusItem: NSStatusItem?
+    private var statusSummary: NSMenuItem?
+    private var statusMenuSession: UUID?
     private let aboutMenu = AboutMenu()
     private lazy var loginItemMenu = LoginItemMenu(settings: model.loginItemSettings)
     private lazy var languageMenu = LanguageMenu(settings: model.languageSettings)
@@ -32,9 +37,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             self?.showWindow()
         }
         model.monitor.installNotificationDelegate()
+        model.refreshHandlerRegistration()
         Task { await model.refreshCategoriesAtStartup() }
         if !launchedAtLogin { showWindow() }
         model.closeAfterSuccess = { [weak self] in self?.window?.close() }
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        model.refreshHandlerRegistration()
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {
@@ -65,8 +75,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
 
     private func showWindow() {
         if window == nil {
-            let window = NSWindow(contentRect: NSRect(origin: .zero, size: RelayTheme.windowSize),
-                                  styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+            let style: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable]
+            var contentSize = RelayTheme.windowSize
+            if let visibleFrame = NSScreen.main?.visibleFrame {
+                let availableHeight = NSWindow.contentRect(forFrameRect: visibleFrame, styleMask: style).height
+                contentSize.height = min(contentSize.height, availableHeight)
+            }
+            let window = NSWindow(contentRect: NSRect(origin: .zero, size: contentSize),
+                                  styleMask: style, backing: .buffered, defer: false)
             window.title = "NZBPort"
             window.titleVisibility = .hidden
             window.titlebarAppearsTransparent = false
@@ -75,17 +91,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             window.appearance = model.appearanceSettings.mode.native
             window.isReleasedWhenClosed = false
             window.minSize = RelayTheme.minimumWindowSize
-            window.contentView = NSHostingView(rootView: RelayRootView(model: model))
+            window.contentView = NSHostingView(rootView: RelayRootView(model: model) { [weak self] overflow in
+                self?.contentOverflow = overflow
+                self?.fitWindowToContent()
+            })
             window.delegate = self
             window.center()
             self.window = window
         }
         model.monitor.setVisible(model.screen == .overview)
         window?.makeKeyAndOrderFront(nil)
+        fitWindowToContent()
         NSApplication.shared.activate(ignoringOtherApps: true)
     }
 
-    func windowWillClose(_ notification: Notification) { model.monitor.setVisible(false) }
+    private func fitWindowToContent() {
+        guard !resizedByUser, contentOverflow > 0,
+              let window, window.isVisible, !window.isMiniaturized, !window.styleMask.contains(.fullScreen),
+              let visibleFrame = window.screen?.visibleFrame else { return }
+        var frame = window.frame
+        let growth = min(contentOverflow, visibleFrame.height - frame.height)
+        guard growth >= 1 else { return }
+        frame.size.height += growth
+        frame.origin.y = min(max(frame.origin.y - growth, visibleFrame.minY), visibleFrame.maxY - frame.height)
+        // Wait for the next measurement before applying another resize.
+        contentOverflow = 0
+        window.setFrame(frame, display: true)
+    }
+
+    func windowWillStartLiveResize(_ notification: Notification) { resizedByUser = true }
+
+    func windowWillClose(_ notification: Notification) {
+        resizedByUser = false
+        model.monitor.setVisible(false)
+    }
     @objc private func openFiles() { showWindow(); model.chooseFiles() }
     @objc private func openSAB() { model.openSABnzbd() }
     @objc private func overview() { model.screen = .overview; showWindow() }
@@ -119,6 +158,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         }
 
         let menu = NSMenu()
+        menu.delegate = self
+        let summary = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        summary.isEnabled = false
+        menu.addItem(summary)
+        menu.addItem(.separator())
+        statusSummary = summary
         for (title, action) in [
             (L("NZBPort öffnen"), #selector(openRelay)),
             (L("NZBlnk aus Zwischenablage"), #selector(pasteLink)),
@@ -142,6 +187,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         menu.addItem(quit)
         item.menu = menu
         statusItem = item
+    }
+
+    func menuWillOpen(_ menu: NSMenu) {
+        let session = UUID()
+        statusMenuSession = session
+        observeStatusSummary(session: session)
+        Task { await model.monitor.refresh() }
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        statusMenuSession = nil
+    }
+
+    private func observeStatusSummary(session: UUID) {
+        guard statusMenuSession == session else { return }
+        let title = withObservationTracking {
+            downloadStatusTitle
+        } onChange: { [weak self] in
+            Task { @MainActor in self?.observeStatusSummary(session: session) }
+        }
+        statusSummary?.title = title
+    }
+
+    private var downloadStatusTitle: String {
+        let monitor = model.monitor
+        guard model.configured else { return L("SABnzbd nicht eingerichtet") }
+        if monitor.statusUnavailable { return L("SABnzbd-Status nicht verfügbar") }
+        guard let queue = monitor.queue else { return L("SABnzbd-Status wird geladen …") }
+        if queue.paused { return L("SABnzbd-Warteschlange pausiert") }
+        if queue.jobs.isEmpty { return L("Keine aktiven Downloads.") }
+        let summary = L("In der Warteschlange: \(queue.jobs.count)")
+        return queue.speed.isEmpty ? summary : "\(summary) · \(queue.speed)B/s"
     }
 
     private func buildMenu() {

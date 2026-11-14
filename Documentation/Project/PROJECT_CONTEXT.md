@@ -1,13 +1,13 @@
 # Projektkontext – NZBPort
 
-Stand: 3. November 2026.
+Stand: 14. November 2026.
 
 ## Projekt und Git-Stand
 
 - Repository: https://github.com/Schrotty74/NZBPort
 - Projektpfade beziehen sich auf den Repository-Root; der lokale Ordner trägt historisch den Namen `NZBRelay`.
 - Entwicklungsbranch: `main`. Der App-Quellcommit für 0.2 war `74c25ba`; danach folgten Dokumentationscommits.
-- Testversion 0.2.1, Build 5, enthält die Autostart-Korrektur. GitHub-Tag: `v0.2.1`. Frühere Releases: `v0.2`, `v0.1.1` und `v0.1.0`.
+- Testversion 0.2.2, Build 6, enthält die unten dokumentierten Änderungen vom 14. November 2026. GitHub-Tag: `v0.2.2`. Frühere Releases: `v0.2.1`, `v0.2`, `v0.1.1` und `v0.1.0`.
 - Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`; alle fünf sind auf GitHub enthalten.
 
 ## Produkt
@@ -108,3 +108,19 @@ Lokaler Dev-Build erfolgreich, vorhandene lokale Bundle-ID erhalten. Ad-hoc-Sign
 ## Testversion 0.2.1, Build 5
 
 3. November 2026: Die Autostart-Korrektur für das Vorabrelease gebaut. Die automatisierten Tests bestanden. Ein echter Anmeldestart wurde nicht geprüft. Die Pakete verwenden die öffentliche Bundle-ID.
+
+## Änderungen in Testversion 0.2.2, Build 6
+
+14. November 2026: Die Startgröße des Hauptfensters beträgt jetzt 500 × 660 Punkte. Passt das Fenster nicht in den sichtbaren Bildschirmbereich, begrenzt die App die Höhe. Der Inhalt bleibt scrollbar. Der lokale Dev-Build und seine Signaturprüfung waren erfolgreich. Die neue Fenstergröße wurde noch nicht in der App geprüft.
+
+Die automatische Höhenanpassung gilt für alle Ansichten im Hauptfenster, auch für die Verbindungseinstellungen mit aufgeklappten Kategorien. Passt der Inhalt nicht ins Fenster, wächst es bis zum sichtbaren Bildschirmrand. Wer die Größe von Hand ändert, behält sie bis zum nächsten Öffnen. Der lokale Build und die Signaturprüfung waren erfolgreich. Die Darstellung in den Verbindungseinstellungen wurde noch nicht in der laufenden App geprüft.
+
+Beim Start und beim Aktivieren liest NZBPort die macOS-Zuordnung für NZBlnk-Links. Ist dieser Build als Standard-App eingetragen, zeigt der Button „Als Link-App eingerichtet“. Der lokale Build und die Signaturprüfung waren erfolgreich. Die macOS-Abfrage bestätigte die Zuordnung zum lokalen Build; der Nutzer bestätigte anschließend die Anzeige nach dem Neustart.
+
+Die Downloadübersicht zeigt unter dem Status jedes Auftrags in der SABnzbd-Warteschlange auch dessen Kategorie. Für die Anzeige werden die vorhandenen Warteschlangendaten verwendet. Die deutschen und englischen Sprachdateien, der lokale Build und seine Signatur wurden geprüft. Die Anzeige mit einem laufenden Download wurde noch nicht geprüft.
+
+NZBPort listet wartende NZBlnk-Links und NZB-Dateien in der Übergabeansicht und in den Verbindungseinstellungen. Einzelne Einträge lassen sich vor der Übergabe entfernen. Der aktuelle Auftrag bleibt dabei erhalten. Die Sprachdateien, der lokale Build und die Signatur wurden geprüft. Die Liste wurde noch nicht in der laufenden App getestet.
+
+Oben im Menüleistensymbol zeigt NZBPort die Zahl der Aufträge in der SABnzbd-Warteschlange und, wenn verfügbar, die Geschwindigkeit. Das Menü zeigt auch an, wenn die Warteschlange leer oder pausiert ist, die Verbindung noch nicht eingerichtet ist oder der Statusabruf fehlschlägt. Beim Öffnen aktualisiert der vorhandene Downloadmonitor die Anzeige, sofern noch kein Abruf läuft. Sprachdateien, lokaler Build und Signatur wurden geprüft. Die Anzeige im geöffneten Menü wurde noch nicht in der laufenden App geprüft.
+
+Für 0.2.2 bestanden alle 53 automatisierten Tests. Die App im DMG wurde auf ihre Signatur geprüft. DMG, ZIP und SHA-256-Prüfsummen wurden vor dem Upload geprüft. Die neuen Ansichten wurden im Release-Build nicht praktisch getestet.

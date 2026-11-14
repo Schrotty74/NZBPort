@@ -89,3 +89,30 @@ struct DownloadView: View {
         }
     }
 }
+
+struct PendingSubmissionsView: View {
+    let submissions: [DownloadSubmission]
+    let remove: (UUID) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L("Wartende Links und Dateien")).font(.headline)
+            ForEach(submissions) { submission in
+                HStack {
+                    Label {
+                        Text(submission.title).lineLimit(2)
+                    } icon: {
+                        switch submission {
+                        case .link: Image(systemName: "link").accessibilityHidden(true)
+                        case .file: Image(systemName: "doc").accessibilityHidden(true)
+                        }
+                    }
+                    Spacer()
+                    Button(L("Entfernen")) { remove(submission.id) }
+                        .controlSize(.small)
+                        .accessibilityLabel(L("\(submission.title) entfernen"))
+                }
+            }
+        }
+    }
+}

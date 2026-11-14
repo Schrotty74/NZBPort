@@ -2,7 +2,7 @@
 
 [Deutsch](README.de.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
-> Current test version: **0.2.1**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.1).
+> Current test version: **0.2.2**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.2).
 
 NZBPort is a small macOS menu bar app that opens `nzblnk:` links and sends downloads to SABnzbd. Choose a category, and the app searches NZBIndex, NZBKing, then BinSearch as needed. The window closes when SABnzbd confirms the submission; NZBPort stays in the menu bar.
 
@@ -33,6 +33,7 @@ NZBPort is a small macOS menu bar app that opens `nzblnk:` links and sends downl
 - Confirm duplicate attempts within ten minutes, including retries after uncertain network failures; only hashes and timestamps are held in memory.
 - Open SABnzbd in the browser without including the API key in the URL.
 - Check GitHub updates manually, optionally including test releases; no automatic download or installation.
+- See and remove waiting links and files before sending them to SABnzbd. The Downloads view shows each queued job's category, and the menu bar menu shows the queue count and download speed when available.
 
 ## Screenshots
 

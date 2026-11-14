@@ -33,6 +33,7 @@
 "Bereit für SABnzbd" = "Bereit für SABnzbd";
 "Entpackpasswort enthalten" = "Entpackpasswort enthalten";
 "Kategorie wählen" = "Kategorie wählen";
+"Kategorie: %@" = "Kategorie: %@";
 "Alle Kategorien sind ausgeblendet. Du kannst sie in den Einstellungen wieder einblenden." = "Alle Kategorien sind ausgeblendet. Du kannst sie in den Einstellungen wieder einblenden.";
 "Keine passende Kategorie." = "Keine passende Kategorie.";
 "Link verwerfen" = "Link verwerfen";
@@ -47,6 +48,10 @@
 "Zurück" = "Zurück";
 "Verbindung einrichten" = "Verbindung einrichten";
 "%lld weitere Links" = "%lld weitere Links";
+"Wartend: %lld" = "Wartend: %lld";
+"Wartende Links und Dateien" = "Wartende Links und Dateien";
+"Entfernen" = "Entfernen";
+"%@ entfernen" = "%@ entfernen";
 "Für deinen Mac" = "Für deinen Mac";
 "In der Zwischenablage liegt kein Link." = "In der Zwischenablage liegt kein Link.";
 "Bitte zuerst die Verbindung zu SABnzbd einrichten." = "Bitte zuerst die Verbindung zu SABnzbd einrichten.";
@@ -115,6 +120,11 @@
 "Wird geladen" = "Wird geladen";
 "Wartet" = "Wartet";
 "Pausiert" = "Pausiert";
+"SABnzbd nicht eingerichtet" = "SABnzbd nicht eingerichtet";
+"SABnzbd-Status nicht verfügbar" = "SABnzbd-Status nicht verfügbar";
+"SABnzbd-Status wird geladen …" = "SABnzbd-Status wird geladen …";
+"SABnzbd-Warteschlange pausiert" = "SABnzbd-Warteschlange pausiert";
+"In der Warteschlange: %lld" = "In der Warteschlange: %lld";
 "Abgeschlossen" = "Abgeschlossen";
 "Fehlgeschlagen" = "Fehlgeschlagen";
 "Wird entpackt" = "Wird entpackt";

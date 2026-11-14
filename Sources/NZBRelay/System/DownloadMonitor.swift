@@ -15,6 +15,7 @@ final class DownloadMonitor: NSObject, UNUserNotificationCenterDelegate {
     private(set) var queue: SABQueueSnapshot?
     private(set) var history: [SABHistoryJob] = []
     private(set) var error: (any Error)?
+    private(set) var statusUnavailable = false
     private(set) var refreshing = false
     private(set) var changing = false
     private(set) var notificationsEnabled: Bool
@@ -35,6 +36,7 @@ final class DownloadMonitor: NSObject, UNUserNotificationCenterDelegate {
         pollTask?.cancel(); pollTask = nil
         self.connection = connection
         queue = nil; history = []; error = nil; refreshing = false
+        statusUnavailable = false
         completions = CompletionTracker()
         updatePolling()
     }
@@ -79,12 +81,18 @@ final class DownloadMonitor: NSObject, UNUserNotificationCenterDelegate {
             queue = nextQueue
             history = nextHistory
             error = nil
+            statusUnavailable = false
             let completed = completions.observe(nextHistory)
             if notificationsEnabled {
                 for job in completed { await notify(job) }
             }
         } catch is CancellationError { }
-        catch { if revision == generation, !Task.isCancelled { self.error = error } }
+        catch {
+            if revision == generation, !Task.isCancelled {
+                self.error = error
+                statusUnavailable = true
+            }
+        }
     }
 
     func control(_ action: SABQueueAction, jobID: String? = nil) async {

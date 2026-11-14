@@ -10,7 +10,7 @@ extension EnvironmentValues {
 enum RelayTheme {
     static let solidBackground = Color(nsColor: .windowBackgroundColor)
 
-    static let windowSize = NSSize(width: 500, height: 560)
+    static let windowSize = NSSize(width: 500, height: 660)
     static let minimumWindowSize = NSSize(width: 480, height: 440)
     static let pagePadding: CGFloat = 20
     static let sectionSpacing: CGFloat = 16

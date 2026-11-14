@@ -289,6 +289,10 @@ final class AppModel {
         }
     }
 
+    func removePending(id: UUID) {
+        pending.removeAll { $0.id == id }
+    }
+
     func discardCurrent() {
         guard !sending else { return }
         task?.cancel()
@@ -300,6 +304,12 @@ final class AppModel {
 
     private func showSearchProvider(_ provider: String) {
         progress = "NZB suchen: \(provider) …"
+    }
+
+    func refreshHandlerRegistration() {
+        let handler = URL(string: "nzblnk://registration-check")
+            .flatMap { NSWorkspace.shared.urlForApplication(toOpen: $0) }
+        handlerRegistered = handler?.resolvingSymlinksInPath().path == Bundle.main.bundleURL.resolvingSymlinksInPath().path
     }
 
     func registerHandler() {

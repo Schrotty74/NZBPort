@@ -36,7 +36,13 @@ struct DownloadOverview: View {
                         Text(job.title).font(.headline).lineLimit(2)
                         ProgressView(value: job.progress)
                         HStack {
-                            Text(localizedJobStatus(job.status)).font(.caption).foregroundStyle(.secondary)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(localizedJobStatus(job.status))
+                                Text(L("Kategorie: \(model.categoryName(job.category))"))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                             Spacer()
                             let paused = job.status.lowercased().contains("paused")
                             Button(paused ? L("Fortsetzen") : L("Pausieren")) {

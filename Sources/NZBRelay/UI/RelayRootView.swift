@@ -4,6 +4,7 @@ import RelayCore
 
 struct RelayRootView: View {
     @Bindable var model: AppModel
+    var fitContent: (CGFloat) -> Void
     @State private var dropTargeted = false
     var body: some View {
         VStack(spacing: 0) {
@@ -33,9 +34,18 @@ struct RelayRootView: View {
                         else if model.screen == .overview { DownloadOverview(model: model) }
                         else if model.screen == .updates { UpdateView(settings: model.updateSettings) }
                         else { DownloadView(model: model) }
+                        if (model.screen == .downloads || model.screen == .settings), !model.pending.isEmpty {
+                            Divider()
+                            PendingSubmissionsView(submissions: model.pending, remove: model.removePending)
+                        }
                     }
                     .padding(RelayTheme.pagePadding)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                    ceil(max(0, geometry.contentSize.height - geometry.containerSize.height))
+                } action: { _, overflow in
+                    fitContent(overflow)
                 }
                 .onChange(of: model.notice) { _, notice in
                     if notice != nil { reader.scrollTo("relayNotice", anchor: .top) }
@@ -47,7 +57,7 @@ struct RelayRootView: View {
                 Text(model.configured ? model.serverHost : L("Verbindung einrichten"))
                     .lineLimit(1).truncationMode(.middle)
                 Spacer()
-                if !model.pending.isEmpty { Text(L("\(model.pending.count) weitere Links")) }
+                if !model.pending.isEmpty { Text(L("Wartend: \(model.pending.count)")) }
                 else { Text(L("Für deinen Mac")) }
             }
             .font(.system(size: 11)).foregroundStyle(.secondary)
