@@ -36,7 +36,7 @@
 - **Darstellung und Hintergrund:** Wähle unabhängig vom Farbthema zwischen System, Hell und Dunkel. Der Fensterhintergrund kann systemgesteuert, transparent oder deckend sein.
 - **Native macOS-Darstellung:** NZBPort verwendet Liquid-Glass-Bedienelemente. Das mit Icon Composer erstellte App-Symbol unterstützt die Systemdarstellungen.
 - **Fensterhöhe:** Das Fenster wächst bei Bedarf bis zum sichtbaren Bildschirmrand. Reicht der Platz nicht aus, kannst du scrollen. Eine von Hand eingestellte Größe bleibt bis zum nächsten Öffnen erhalten.
-- **Autostart:** Aktiviere oder deaktiviere den Start bei der Anmeldung im App-Menü, im Menüleistensymbol oder im Zahnradmenü. Wenn macOS eine Freigabe verlangt, wähle **In macOS erlauben …**. Beim Anmeldestart bleibt NZBPort in der Menüleiste. Beim manuellen Start öffnet sich das Fenster.
+- **Autostart:** Aktiviere oder deaktiviere den Start bei der Anmeldung im App-Menü, im Menüleistensymbol oder im Zahnradmenü. Wenn macOS eine Freigabe verlangt, wähle **In macOS erlauben …**. Beim Anmeldestart bleibt NZBPort in der Menüleiste. Beim manuellen Start öffnet sich das Fenster. Wenn SABnzbd noch startet, wiederholt NZBPort den Kategorienabruf bis zu dreimal mit 2, 5 und 10 Sekunden Wartezeit. Dauerhafte Fehler und abgelehnte Zugangsdaten werden weiterhin angezeigt. Der manuelle Start bleibt unverändert.
 
 ## Updates, Projektlinks und Quellcode
 

@@ -158,17 +158,32 @@ final class AppModel {
     }
 
     /// Refresh saved connection categories without blocking the app or changing local visibility choices.
-    func refreshCategoriesAtStartup() async {
+    func refreshCategoriesAtStartup(launchedAtLogin: Bool = false,
+                                    retryDelays: [Duration] = [.seconds(2), .seconds(5), .seconds(10)]) async {
         guard configured, !busy, !sending else { return }
         let revision = categoryLoadRevision
-        do {
-            let connection = try ServerConnection(address: savedAddress, apiKey: savedKey)
-            let result = try await client.categories(connection)
-            guard !Task.isCancelled, revision == categoryLoadRevision, !sending else { return }
-            categories = result
-        } catch {
-            guard !Task.isCancelled, revision == categoryLoadRevision else { return }
-            notice = Notice(error: error)
+        let initialNotice = notice
+        var delays = retryDelays.makeIterator()
+        while !Task.isCancelled, revision == categoryLoadRevision, !busy, !sending {
+            do {
+                let connection = try ServerConnection(address: savedAddress, apiKey: savedKey)
+                let result = try await client.categories(connection, loginProbe: launchedAtLogin)
+                guard !Task.isCancelled, revision == categoryLoadRevision, !sending else { return }
+                categories = result
+                return
+            } catch {
+                guard !Task.isCancelled, revision == categoryLoadRevision else { return }
+                if launchedAtLogin {
+                    guard !busy, !sending, notice == initialNotice, !(error is CancellationError) else { return }
+                    if let failure = error as? RelayError, case .retryableCategoryRead = failure,
+                       let delay = delays.next() {
+                        do { try await Task.sleep(for: delay) } catch { return }
+                        continue
+                    }
+                }
+                notice = Notice(error: error)
+                return
+            }
         }
     }
 

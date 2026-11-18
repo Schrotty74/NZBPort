@@ -36,7 +36,7 @@
 - **Appearance and background:** Choose system, light, or dark appearance independently of the theme. The window background can follow the system or be transparent or opaque.
 - **Native macOS design:** NZBPort uses Liquid Glass controls. Its Icon Composer app icon supports the system icon appearances.
 - **Window height:** The window grows to fit its content up to the visible screen height. Scroll when more space is needed. A size you set by hand stays in effect until you reopen the window.
-- **Launch at login:** Enable or disable startup from the app menu, menu bar menu, or gear menu. Choose **Allow in macOS…** if macOS asks for approval. NZBPort stays in the menu bar at login; launching it manually opens the window.
+- **Launch at login:** Enable or disable startup from the app menu, menu bar menu, or gear menu. Choose **Allow in macOS…** if macOS asks for approval. NZBPort stays in the menu bar at login; launching it manually opens the window. If SABnzbd is still starting, NZBPort retries the category request up to three times, waiting 2, 5, then 10 seconds. It still reports persistent failures and rejected credentials. Manual launches keep their existing behavior.
 
 ## Updates, project links and source code
 

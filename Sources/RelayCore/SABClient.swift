@@ -5,8 +5,9 @@ public actor SABClient {
     private let transport: any HTTPTransport
     public init(transport: any HTTPTransport = SessionTransport()) { self.transport = transport }
 
-    public func categories(_ connection: ServerConnection) async throws -> [String] {
-        let data = try await request(connection, fields: [("mode", "get_cats")], failureMessage: "SABnzbd could not retrieve the categories.")
+    public func categories(_ connection: ServerConnection, loginProbe: Bool = false) async throws -> [String] {
+        let data = try await request(connection, fields: [("mode", "get_cats")],
+                                     failureMessage: "SABnzbd could not retrieve the categories.", loginProbe: loginProbe)
         let payload = try decode(data, as: CategoriesResponse.self)
         if let error = payload.error { throw RelayError.message("SABnzbd: \(error)") }
         guard let categories = payload.categories else { throw RelayError.message("SABnzbd returned an invalid response to the category request.") }
@@ -79,20 +80,27 @@ public actor SABClient {
         if let error = p.error { throw RelayError.message("SABnzbd: \(error)") }
         guard p.status == true else { throw RelayError.message("SABnzbd did not confirm the requested action.") }
     }
-    private func request(_ connection: ServerConnection, fields: [(String, String)], failureMessage: String.LocalizationValue) async throws -> Data {
-        var req = URLRequest(url: connection.endpoint); req.timeoutInterval = 25; req.httpMethod = "POST"
+    private func request(_ connection: ServerConnection, fields: [(String, String)], failureMessage: String.LocalizationValue, loginProbe: Bool = false) async throws -> Data {
+        var req = URLRequest(url: connection.endpoint); req.timeoutInterval = loginProbe ? 5 : 25; req.httpMethod = "POST"
         req.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         req.setValue("application/json", forHTTPHeaderField: "Accept")
         req.httpBody = FormEncoding.encode(fields + [("output", "json"), ("apikey", connection.apiKey)])
-        return try await perform(req, failureMessage: failureMessage)
+        return try await perform(req, failureMessage: failureMessage, loginProbe: loginProbe)
     }
-    private func perform(_ req: URLRequest, failureMessage: String.LocalizationValue) async throws -> Data {
+    private func perform(_ req: URLRequest, failureMessage: String.LocalizationValue, loginProbe: Bool = false) async throws -> Data {
         do {
             let result = try await transport.perform(req)
+            if loginProbe, [502, 503, 504].contains(result.status) {
+                throw RelayError.retryableCategoryRead("SABnzbd returned HTTP status \(result.status).")
+            }
             guard (200..<300).contains(result.status) else { throw RelayError.message("SABnzbd returned HTTP status \(result.status).") }
             return result.data
         } catch is CancellationError { throw CancellationError() }
         catch let e as URLError where e.code == .cancelled { throw CancellationError() }
+        catch let e as URLError where loginProbe && [
+            .timedOut, .cannotConnectToHost, .networkConnectionLost, .notConnectedToInternet,
+            .cannotFindHost, .dnsLookupFailed
+        ].contains(e.code) { throw RelayError.retryableCategoryRead(failureMessage) }
         catch let e as URLError where e.code == .timedOut { throw RelayError.message(failureMessage) }
         catch let e as RelayError { throw e }
         catch { throw RelayError.message(failureMessage) }

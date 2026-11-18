@@ -5,12 +5,20 @@ import RelayCore
 
 private actor StartupTransport: HTTPTransport {
     private let response: Result<HTTPResult, Error>
+    private var firstResponse: Result<HTTPResult, Error>?
     private(set) var count = 0
 
-    init(response: Result<HTTPResult, Error>) { self.response = response }
+    init(response: Result<HTTPResult, Error>, firstResponse: Result<HTTPResult, Error>? = nil) {
+        self.response = response
+        self.firstResponse = firstResponse
+    }
 
     func perform(_ request: URLRequest) async throws -> HTTPResult {
         count += 1
+        if let firstResponse {
+            self.firstResponse = nil
+            return try firstResponse.get()
+        }
         return try response.get()
     }
 }
@@ -53,11 +61,49 @@ private func isolatedDefaults() -> (UserDefaults, String) {
 
     await model.refreshCategoriesAtStartup()
 
+    #expect(await transport.count == 1)
     #expect(model.notice?.isError == true)
     #expect(model.notice?.text.contains("SABnzbd") == true)
     #expect(model.configured && model.screen == .downloads)
     #expect(!model.busy)
     #expect(defaults.string(forKey: "sabAPIKey") == "synthetic-test-key")
+}
+
+@MainActor @Test(arguments: [false, true])
+func loginRefreshRecoversWhenSABnzbdBecomesReady(throughProxy: Bool) async {
+    let (defaults, domain) = isolatedDefaults()
+    defer { defaults.removePersistentDomain(forName: domain) }
+    defaults.set("https://sab.example.invalid/api", forKey: "serverAddress")
+    defaults.set("synthetic-test-key", forKey: "sabAPIKey")
+    let first: Result<HTTPResult, Error> = throughProxy
+        ? .success(HTTPResult(data: Data(), status: 503))
+        : .failure(URLError(.cannotConnectToHost))
+    let transport = StartupTransport(
+        response: .success(HTTPResult(data: Data(#"{"categories":["Movies"]}"#.utf8), status: 200)),
+        firstResponse: first
+    )
+    let model = AppModel(defaults: defaults, client: SABClient(transport: transport))
+
+    await model.refreshCategoriesAtStartup(launchedAtLogin: true, retryDelays: [.zero, .zero, .zero])
+
+    #expect(await transport.count == 2)
+    #expect(model.categories == ["Movies"])
+    #expect(model.notice == nil)
+}
+
+@MainActor @Test(arguments: [401, 503])
+func loginRefreshReportsPermanentOrExhaustedFailure(status: Int) async {
+    let (defaults, domain) = isolatedDefaults()
+    defer { defaults.removePersistentDomain(forName: domain) }
+    defaults.set("https://sab.example.invalid/api", forKey: "serverAddress")
+    defaults.set("synthetic-test-key", forKey: "sabAPIKey")
+    let transport = StartupTransport(response: .success(HTTPResult(data: Data(), status: status)))
+    let model = AppModel(defaults: defaults, client: SABClient(transport: transport))
+
+    await model.refreshCategoriesAtStartup(launchedAtLogin: true, retryDelays: [.zero, .zero, .zero])
+
+    #expect(await transport.count == (status == 503 ? 4 : 1))
+    #expect(model.notice?.isError == true)
 }
 
 @MainActor @Test func unconfiguredStartupDoesNotContactAnyServer() async {

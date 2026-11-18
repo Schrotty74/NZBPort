@@ -38,7 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         }
         model.monitor.installNotificationDelegate()
         model.refreshHandlerRegistration()
-        Task { await model.refreshCategoriesAtStartup() }
+        Task { await model.refreshCategoriesAtStartup(launchedAtLogin: launchedAtLogin) }
         if !launchedAtLogin { showWindow() }
         model.closeAfterSuccess = { [weak self] in self?.window?.close() }
     }

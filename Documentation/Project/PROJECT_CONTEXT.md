@@ -1,13 +1,13 @@
 # Projektkontext – NZBPort
 
-Stand: 14. November 2026.
+Stand: 18. November 2026.
 
 ## Projekt und Git-Stand
 
 - Repository: https://github.com/Schrotty74/NZBPort
 - Projektpfade beziehen sich auf den Repository-Root; der lokale Ordner trägt historisch den Namen `NZBRelay`.
 - Entwicklungsbranch: `main`. Der App-Quellcommit für 0.2 war `74c25ba`; danach folgten Dokumentationscommits.
-- Testversion 0.2.2, Build 6, enthält die unten dokumentierten Änderungen vom 14. November 2026. GitHub-Tag: `v0.2.2`. Frühere Releases: `v0.2.1`, `v0.2`, `v0.1.1` und `v0.1.0`.
+- Testversion 0.2.3, Build 7, enthält zusätzlich das Warten auf SABnzbd beim Anmeldestart. GitHub-Tag: `v0.2.3`. Frühere Releases: `v0.2.1`, `v0.2`, `v0.1.1` und `v0.1.0`.
 - Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`; alle fünf sind auf GitHub enthalten.
 
 ## Produkt
@@ -124,3 +124,11 @@ NZBPort listet wartende NZBlnk-Links und NZB-Dateien in der Übergabeansicht und
 Oben im Menüleistensymbol zeigt NZBPort die Zahl der Aufträge in der SABnzbd-Warteschlange und, wenn verfügbar, die Geschwindigkeit. Das Menü zeigt auch an, wenn die Warteschlange leer oder pausiert ist, die Verbindung noch nicht eingerichtet ist oder der Statusabruf fehlschlägt. Beim Öffnen aktualisiert der vorhandene Downloadmonitor die Anzeige, sofern noch kein Abruf läuft. Sprachdateien, lokaler Build und Signatur wurden geprüft. Die Anzeige im geöffneten Menü wurde noch nicht in der laufenden App geprüft.
 
 Für 0.2.2 bestanden alle 53 automatisierten Tests. Die App im DMG wurde auf ihre Signatur geprüft. DMG, ZIP und SHA-256-Prüfsummen wurden vor dem Upload geprüft. Die neuen Ansichten wurden im Release-Build nicht praktisch getestet.
+
+## Testversion 0.2.3, Build 7: Kategorien beim Anmeldestart
+
+Beim macOS-Anmeldestart bleibt NZBPort in der Menüleiste. Ist SABnzbd vorübergehend nicht erreichbar, wiederholt NZBPort den Kategorienabruf im Hintergrund bis zu dreimal. Bei Erfolg zeigt die App keine Warnung. Nach dem letzten erfolglosen Versuch oder bei einem Fehler wie einer abgelehnten Anmeldung zeigt sie die Meldung weiterhin an. Der manuelle App-Start und die Downloadübergabe sind unverändert. Die automatisierten Tests, der lokale Build und die Signaturprüfung waren erfolgreich. Der Nutzer bestätigte am 16. November 2026, dass beim morgendlichen Anmeldestart keine Kategorienwarnung erschien.
+
+Die Planung für einen eigenen Downloader steht in NEXT_STEPS.md: Downloads ausschließlich auf dem Mac, Bedienung am Handy über eine Weboberfläche im Heimnetz. Kein separater NAS-/Serverdienst. Die Umsetzung ist nicht beauftragt. Die Rust-Glasprobe wurde auf Nutzerauftrag vollständig entfernt.
+
+18. November 2026: Version 0.2.3, Build 7, für das GitHub-Vorabrelease vorbereitet. Core- und App-Tests bestanden, einschließlich Wiederherstellung nach vorübergehenden Startfehlern und Meldung dauerhafter Fehler. Öffentliche Bundle-ID, Apple-Silicon-Architektur, Ad-hoc-Signatur, DMG mit Applications-Verknüpfung, ZIP und SHA-256-Prüfsummen geprüft. README und Detailseiten in beiden Sprachen sowie Chatvorlage und nächste Schritte nachgeführt.

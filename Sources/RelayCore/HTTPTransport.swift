@@ -2,8 +2,12 @@ import Foundation
 
 public enum RelayError: LocalizedError, Sendable {
     case message(String.LocalizationValue)
+    case retryableCategoryRead(String.LocalizationValue)
     public var errorDescription: String? {
-        switch self { case .message(let message): Localization.string(message, table: "Errors") }
+        switch self {
+        case .message(let message), .retryableCategoryRead(let message):
+            Localization.string(message, table: "Errors")
+        }
     }
 }
 
