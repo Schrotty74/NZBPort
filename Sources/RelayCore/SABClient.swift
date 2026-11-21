@@ -21,12 +21,15 @@ public actor SABClient {
         return try confirmedIDs(data)
     }
 
-    @discardableResult public func send(_ file: NZBFile, category: String, connection: ServerConnection, options: SendOptions = SendOptions()) async throws -> [String] {
+    @discardableResult public func send(_ file: NZBFile, category: String, connection: ServerConnection,
+                                        options: SendOptions = SendOptions(), title: String? = nil,
+                                        password: String? = nil) async throws -> [String] {
         let boundary = "NZBRelay-\(UUID().uuidString)"
         var body = Data()
         func field(_ name: String, _ value: String) { body.append(Data("--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"\r\n\r\n\(value)\r\n".utf8)) }
         field("mode", "addfile"); field("output", "json"); field("apikey", connection.apiKey)
-        field("cat", category); field("nzbname", file.title); field("priority", String(options.addPaused ? -2 : options.priority.rawValue))
+        field("cat", category); field("nzbname", title ?? file.title); field("priority", String(options.addPaused ? -2 : options.priority.rawValue))
+        if let password { field("password", password) }
         body.append(Data("--\(boundary)\r\nContent-Disposition: form-data; name=\"name\"; filename=\"\(file.title).nzb\"\r\nContent-Type: application/x-nzb\r\n\r\n".utf8))
         body.append(file.data); body.append(Data("\r\n--\(boundary)--\r\n".utf8))
         var req = URLRequest(url: connection.endpoint); req.timeoutInterval = 25; req.httpMethod = "POST"

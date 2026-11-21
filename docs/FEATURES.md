@@ -49,8 +49,8 @@
 1. A browser hands a `nzblnk:` URL to the registered macOS app. A browser confirmation may appear first.
 2. NZBPort parses the search identifier (`h`), title (`t`), optional password (`p`) and repeated group fields (`g`). It accepts percent-encoded text and expands abbreviated `a.b.` groups for NZBIndex.
 3. The app fetches the current SABnzbd categories and applies your local hidden-category choices. You can filter the category buttons by name.
-4. Selecting a category starts the lookup. NZBIndex is tried first through its public JSON API, without a separate search API key. If it fails, the app tries NZBKing and then BinSearch using their public search responses.
-5. NZBPort submits the resolved download URL, title, chosen category and optional archive password to SABnzbd. SABnzbd performs the download; NZBPort does not download Usenet articles itself.
+4. Selecting a category starts the lookup in NZBIndex, NZBKing and BinSearch. If none finds the NZB, the app searches Treasure Maps and then NewzBay by release title. Enter a provider’s API key in Connection Settings to enable it.
+5. NZBPort sends SABnzbd the public download URL or the NZB file it retrieved from Treasure Maps or NewzBay, along with the title, category and optional archive password. SABnzbd downloads the Usenet articles.
 6. A confirmed submission closes the window or advances to the next waiting link. An error remains visible in the window. If a submission times out, check the SABnzbd queue before trying again to avoid duplicate jobs.
 
 NZBIndex results with multiple distinct collection IDs are rejected by that provider; the fallback then continues. The HTML providers use the first supported result in their response. Search results are not a guarantee of the content or its availability. The app does not create or delete SABnzbd categories or manage Usenet accounts.

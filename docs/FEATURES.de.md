@@ -49,8 +49,8 @@
 1. Der Browser übergibt einen `nzblnk:`-Link an die registrierte macOS-App. Zuvor kann der Browser eine Bestätigung verlangen.
 2. NZBPort liest Suchkennung (`h`), Titel (`t`), optionales Passwort (`p`) und wiederholte Gruppenfelder (`g`). Prozentkodierter Text wird unterstützt; abgekürzte `a.b.`-Gruppen werden für NZBIndex ausgeschrieben.
 3. Die App ruft die aktuellen SABnzbd-Kategorien ab und berücksichtigt deine lokal ausgeblendeten Kategorien. Über das Suchfeld kannst du die Kategoriebuttons nach Namen filtern.
-4. Mit der Kategorieauswahl beginnt die Suche. Zuerst wird die öffentliche JSON-API von NZBIndex ohne zusätzlichen Such-API-Key verwendet. Schlägt die Suche fehl, folgen NZBKing und BinSearch mit ihren öffentlichen Suchantworten.
-5. NZBPort übergibt Downloadadresse, Titel, gewählte Kategorie und optionales Archivpasswort an SABnzbd. Den Download übernimmt SABnzbd; NZBPort lädt selbst keine Usenet-Artikel.
+4. Mit der Kategorieauswahl beginnt die Suche bei NZBIndex, NZBKing und BinSearch. Bleibt sie erfolglos, sucht die App bei Treasure Maps und danach bei NewzBay nach dem Releasetitel. Aktiviere den jeweiligen Dienst mit seinem API-Key in den Verbindungseinstellungen.
+5. NZBPort übergibt die öffentliche Downloadadresse oder die von Treasure Maps oder NewzBay geladene NZB-Datei zusammen mit Titel, Kategorie und optionalem Archivpasswort an SABnzbd. SABnzbd lädt die Usenet-Artikel.
 6. Nach einer bestätigten Übergabe schließt sich das Fenster oder der nächste wartende Link erscheint. Bei einem Fehler bleibt die Meldung sichtbar. Läuft eine Übergabe in ein Timeout, prüfe vor einem neuen Versuch die SABnzbd-Warteschlange, um doppelte Aufträge zu vermeiden.
 
 Mehrere unterschiedliche Trefferkennungen lehnt der NZBIndex-Provider ab; anschließend geht die Ausweichsuche weiter. Die HTML-Provider verwenden den ersten unterstützten Treffer ihrer Antwort. Suchtreffer garantieren weder Inhalt noch Verfügbarkeit. Die App legt keine SABnzbd-Kategorien an, löscht keine Kategorien und verwaltet keine Usenet-Zugänge.

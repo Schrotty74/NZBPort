@@ -5,6 +5,7 @@ public struct NZBLink: Equatable, Sendable, Identifiable {
     public let id = UUID()
     public let header: String
     public let title: String
+    let hasTitle: Bool
     public let password: String?
     public let groups: [String]
 
@@ -43,7 +44,9 @@ public struct NZBLink: Equatable, Sendable, Identifiable {
         }
         header = search
         // Compatibility with existing links that omit the specification's title.
-        title = try single("t") ?? search
+        let suppliedTitle = try single("t")
+        title = suppliedTitle ?? search
+        hasTitle = suppliedTitle != nil
         password = try single("p")
         groups = (parameters["g"] ?? []).filter { !$0.isEmpty }
     }

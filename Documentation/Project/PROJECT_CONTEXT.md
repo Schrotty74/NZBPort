@@ -1,13 +1,13 @@
 # Projektkontext – NZBPort
 
-Stand: 18. November 2026.
+Stand: 21. November 2026.
 
 ## Projekt und Git-Stand
 
 - Repository: https://github.com/Schrotty74/NZBPort
 - Projektpfade beziehen sich auf den Repository-Root; der lokale Ordner trägt historisch den Namen `NZBRelay`.
 - Entwicklungsbranch: `main`. Der App-Quellcommit für 0.2 war `74c25ba`; danach folgten Dokumentationscommits.
-- Testversion 0.2.3, Build 7, enthält zusätzlich das Warten auf SABnzbd beim Anmeldestart. GitHub-Tag: `v0.2.3`. Frühere Releases: `v0.2.1`, `v0.2`, `v0.1.1` und `v0.1.0`.
+- Testversion 0.2.4, Build 8, ergänzt Treasure Maps und NewzBay. GitHub-Tag: `v0.2.4`. In 0.2.3, Build 7, kam das Warten auf SABnzbd beim Anmeldestart hinzu.
 - Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`; alle fünf sind auf GitHub enthalten.
 
 ## Produkt
@@ -20,6 +20,7 @@ Die App ist in Swift 6 mit SwiftUI und AppKit geschrieben. Mindestversion ist ma
 
 - NZBlnk-Registrierung, Zwischenablage und mehrere wartende Aufträge.
 - Eigenständige Link-Auswertung und serielle Suche über NZBIndex, NZBKing und BinSearch. NZBIndex nutzt seine öffentliche API ohne zusätzlichen Such-Key.
+- Seit 0.2.4 kann NZBPort nach den öffentlichen Suchdiensten bei Treasure Maps und danach bei NewzBay nach dem Releasetitel suchen. Beide Anbieter haben ein eigenes optionales API-Key-Feld. NZBPort übernimmt einen eindeutigen Treffer mit passendem Titel.
 - Übernahme von Titel und optionalem Archivpasswort an SABnzbd.
 - Kategorien beim Start, beim Öffnen eines Auftrags und manuell laden; Fehler anzeigen. Lokal ausblenden und wiederherstellen.
 - Deutsch, Englisch und System-Sprachwahl; Standard, Coffee, Elfenbein und Minze; separate Hell-/Dunkel- und Transparenzeinstellungen.
@@ -132,3 +133,19 @@ Beim macOS-Anmeldestart bleibt NZBPort in der Menüleiste. Ist SABnzbd vorüberg
 Die Planung für einen eigenen Downloader steht in NEXT_STEPS.md: Downloads ausschließlich auf dem Mac, Bedienung am Handy über eine Weboberfläche im Heimnetz. Kein separater NAS-/Serverdienst. Die Umsetzung ist nicht beauftragt. Die Rust-Glasprobe wurde auf Nutzerauftrag vollständig entfernt.
 
 18. November 2026: Version 0.2.3, Build 7, für das GitHub-Vorabrelease vorbereitet. Core- und App-Tests bestanden, einschließlich Wiederherstellung nach vorübergehenden Startfehlern und Meldung dauerhafter Fehler. Öffentliche Bundle-ID, Apple-Silicon-Architektur, Ad-hoc-Signatur, DMG mit Applications-Verknüpfung, ZIP und SHA-256-Prüfsummen geprüft. README und Detailseiten in beiden Sprachen sowie Chatvorlage und nächste Schritte nachgeführt.
+
+## Lokale Treasure-Maps-Suche
+
+21. November 2026: Das optionale API-Key-Feld steht in den Verbindungseinstellungen. Beim Speichern wird der Key lokal und unverschlüsselt abgelegt. Die App verwendet für Treasure Maps den Releasetitel aus dem NZBlnk und prüft den Titel des Treffers. Da die Downloadadresse den Key enthalten kann, lädt NZBPort die NZB-Datei selbst und übergibt sie mit der gewählten Kategorie und dem optionalen Archivpasswort an SABnzbd.
+
+Alle 63 automatisierten Tests bestanden. Lokaler Build und Signaturprüfung waren erfolgreich. Der Nutzer bestätigte danach, dass er alle drei zunächst fehlenden Releases mit der integrierten Treasure-Maps-Suche gefunden hat.
+
+## Lokale NewzBay-Suche
+
+21. November 2026: NewzBay ist mit eigenem API-Key als Ausweichsuche nach Treasure Maps eingerichtet. Beide Anbieter nutzen denselben Newznab-Client. NZBPort lädt die Datei bei NewzBay anhand der Treffer-ID und übergibt sie ohne die NewzBay-Downloadadresse an SABnzbd.
+
+Die öffentliche NewzBay-API bestätigte die Titelsuche. Die zwei angemeldeten Suchanfragen für die gemeldete Folge lieferten HTTP 429 mit dem Hinweis auf das Anfragelimit. Es gab keine Trefferliste. Alle 67 automatisierten Tests bestanden. Der lokale Build und seine Signatur wurden geprüft. Die Darstellung im laufenden Build und die erste erfolgreiche Übergabe eines NewzBay-Treffers stehen noch aus.
+
+## Testversion 0.2.4, Build 8
+
+21. November 2026: Treasure Maps und NewzBay in das GitHub-Vorabrelease aufgenommen. Für 0.2.4 bestanden alle 67 automatisierten Tests. Geprüft wurden außerdem die öffentliche Bundle-ID, Apple-Silicon-Architektur, Ad-hoc-Signatur, die App in DMG und ZIP, der Applications-Link und die SHA-256-Prüfsummen. Die App wurde für diese Prüfung nicht gestartet.

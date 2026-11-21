@@ -2,7 +2,7 @@
 
 [English](README.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
-> Aktuelle Testversion: **0.2.3**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.3).
+> Aktuelle Testversion: **0.2.4**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.4).
 
 NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links öffnet und Downloads an SABnzbd übergibt. Nach deiner Kategorieauswahl sucht sie bei Bedarf nacheinander über NZBIndex, NZBKing und BinSearch. Sobald SABnzbd die Übergabe bestätigt, schließt sich das Fenster. Die App bleibt in der Menüleiste erreichbar.
 
@@ -10,7 +10,7 @@ NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links öffnet und 
 
 - **NZBlnk-Links öffnen**: direkt aus Safari, aus der Zwischenablage oder per Drag-and-drop.
 - **NZB-Dateien öffnen**: per Dateiauswahl, über „Öffnen mit“ im Finder oder per Drag-and-drop.
-- **NZBs suchen**: zuerst bei NZBIndex, danach bei Bedarf bei NZBKing und BinSearch.
+- **NZBs suchen** bei NZBIndex, NZBKing und BinSearch. Mit den passenden API-Keys in den Verbindungseinstellungen sucht NZBPort bei Treasure Maps und NewzBay weiter, wenn die anderen Dienste nichts finden.
 - **SABnzbd-Kategorie wählen**: vor der Übergabe eine Kategorie auswählen, Favoriten anheften und ungenutzte Kategorien ausblenden.
 - **Priorität festlegen** oder einen Auftrag pausiert übergeben.
 - **Wartende Links und Dateien verwalten**: vor der Übergabe ansehen und einzeln entfernen.
@@ -60,7 +60,9 @@ Siehe auch [Apples Anleitung zum sicheren Öffnen von Apps](https://support.appl
 
 SABnzbd-Adresse und API-Key werden lokal und unverschlüsselt in den App-Einstellungen gespeichert. Die App verwendet keinen Schlüsselbund. Der API-Key wird im POST-Inhalt an den eingestellten SABnzbd-Endpunkt gesendet. HTTP wird unterstützt; nutze für fremde Netze HTTPS oder ein vertrauenswürdiges VPN.
 
-Die Suchdienste erhalten die Suchkennung des Links; NZBIndex erhält zusätzlich dessen Gruppen. Titel, Archivpasswort und SABnzbd-Key gehören nicht zu den Suchanfragen. Titel und optionales Passwort werden zusammen mit der gewählten Kategorie an SABnzbd übergeben. Verfügbarkeit und Nutzung hängen von den externen Diensten und deren Bedingungen ab. Die HTML-Ausweichsuche kann bei Seitenänderungen oder einer Sperre automatisierter Zugriffe ausfallen. Zugangssperren und CAPTCHAs werden nicht umgangen.
+NZBIndex, NZBKing und BinSearch erhalten die Suchkennung des Links. NZBIndex erhält zusätzlich die Newsgroups. Wenn diese Dienste nichts finden, sucht NZBPort bei Treasure Maps und danach bei NewzBay, sofern du sie eingerichtet hast. Jeder Anbieter erhält den Releasetitel und seinen eigenen API-Key. NZBPort speichert die Keys lokal und unverschlüsselt. Um einen Dienst abzuschalten, leere sein Feld und speichere die Einstellungen.
+
+NZBPort lädt Treffer von Treasure Maps und NewzBay selbst und übergibt die NZB-Datei an SABnzbd. SABnzbd erhält außerdem den Titel, die gewählte Kategorie und das optionale Archivpasswort. Den SABnzbd-Key erhält nur der von dir eingestellte SABnzbd-Server. Die Suche hängt von der Verfügbarkeit und den Bedingungen der Anbieter ab. Die HTML-Ausweichsuche kann ausfallen, wenn ein Anbieter seine Seiten ändert oder automatisierte Zugriffe sperrt. Zugangssperren und CAPTCHAs werden nicht umgangen.
 
 Der Anwendungscode wurde für dieses Projekt in Swift neu geschrieben: Link-Auswertung, Suchdienste, HTML-Parser, SABnzbd-Client und lokaler Kategorienfilter. Die App enthält keinen fremden Anwendungscode und keine externen Paketabhängigkeiten. Sie verwendet Apples Swift-Standardbibliothek und Systemframeworks wie Foundation, AppKit und SwiftUI. Auch das Markenzeichen wurde für dieses Projekt erstellt.
 

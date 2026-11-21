@@ -1,9 +1,10 @@
 # Nächste Schritte – NZBPort
 
-Stand: 18. November 2026. Testversion 0.2.3, Build 7, ergänzt das Warten auf SABnzbd beim Anmeldestart. Am 16. November bestätigte der Nutzer einen Start ohne Kategorienwarnung. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
+Stand: 21. November 2026. Testversion 0.2.4, Build 8, ergänzt Treasure Maps und NewzBay. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
 
 ## Noch nicht gesondert bestätigte Bedienungsfälle
 
+- NewzBay mit eigenem API-Key in den Verbindungseinstellungen prüfen. Der direkte Suchtest lieferte HTTP 429 und keine Trefferliste. Der Nutzer hat die drei ursprünglich fehlenden Releases bereits mit der integrierten Treasure-Maps-Suche gefunden.
 - Automatische Fensterhöhe in den Verbindungseinstellungen, Liste wartender Eingänge, Kategorieanzeige und Kurzstatus im geöffneten Menü im normalen Betrieb prüfen.
 - Den neuen Klappbereich und die Zwei-Sekunden-Aktualisierung im normalen Betrieb bestätigen.
 - Echte Abschluss-/Fehlermeldungen mit erteilter macOS-Benachrichtigungsfreigabe beobachten, einschließlich geschlossenem Fenster bei weiterlaufender Menüleisten-App. Keine zusätzlichen Downloads oder künstlichen Fehler allein dafür auslösen.

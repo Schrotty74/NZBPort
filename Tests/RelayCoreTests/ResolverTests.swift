@@ -19,7 +19,10 @@ private actor SearchTransport: HTTPTransport {
 
 @Test func indexSuccessDoesNotContactOtherProviders() async throws {
     let transport = SearchTransport([#"{"data":{"content":[{"id":"test-id"}]},"error":false}"#])
-    let result = try await NZBResolver(transport: transport).resolve(NZBLink("nzblnk:?h=fixture"))
+    let treasureMaps = NewznabClient(apiKey: "test-treasure-key", service: .treasureMaps, transport: transport)
+    let newzBay = NewznabClient(apiKey: "test-newzbay-key", service: .newzBay, transport: transport)
+    let result = try await NZBResolver(transport: transport, newznabClients: [treasureMaps, newzBay])
+        .resolve(NZBLink("nzblnk:?h=fixture&t=Fixture+Episode"))
     #expect(result.host == "nzbindex.com")
     #expect(await transport.requests().count == 1)
 }
@@ -68,23 +71,100 @@ private actor SearchTransport: HTTPTransport {
     #expect(await transport.requests().count == 1)
 }
 
-@Test func resolvedFallbackDownloadIsPassedToSABWithCategoryAndTitle() async throws {
+@Test func treasureMapsIsLastAndSABReceivesTheNZBFileWithoutTheSearchKey() async throws {
+    let id = "0123456789abcdef0123456789abcdef"
+    let apiKey = "test-treasure-key"
+    let downloadURL = "https://file.treasure-maps.com/getnzb/\(id)?r=\(apiKey)"
+    let nzb = "<nzb><file/></nzb>"
     let transport = SearchTransport([
         #"{"data":{"content":[]},"error":false}"#,
-        #"<a href='/nzb:fixture/'>download</a>"#,
+        "<html>No results</html>",
+        "<html>No results</html>",
+        """
+        <rss xmlns:newznab="http://www.newznab.com/DTD/2010/feeds/attributes/" version="2.0">
+          <channel><newznab:response offset="0" total="1"/><item>
+            <title>Test.Package.S01E07.GERMAN-Team</title>
+            <guid isPermaLink="true">https://treasure-maps.com/details/\(id)</guid>
+            <enclosure url="\(downloadURL)" length="100" type="application/x-nzb"/>
+            <newznab:attr name="guid" value="\(id)"/>
+          </item></channel>
+        </rss>
+        """,
+        nzb,
         #"{"status":true,"nzo_ids":["test-job"]}"#
     ])
-    let link = try NZBLink("nzblnk:?h=fixture&t=Test+Package&p=test-password")
-    let download = try await NZBResolver(transport: transport).resolve(link)
-    try await SABClient(transport: transport).send(link, download: download, category: "test-category",
-        connection: ServerConnection(address: "https://sab.example/api", apiKey: "test-only-key"))
+    let link = try NZBLink("nzblnk:?h=fixture&t=Test+Package+S01E07+GERMAN-Team&p=test-password")
+    let treasureMaps = NewznabClient(apiKey: apiKey, service: .treasureMaps, transport: transport)
+    let newzBay = NewznabClient(apiKey: "test-newzbay-key", service: .newzBay, transport: transport)
+    let resolver = NZBResolver(transport: transport, newznabClients: [treasureMaps, newzBay])
+    let download = try await resolver.resolve(link)
+    let file = try #require(await resolver.fetchFile(download))
+    try await SABClient(transport: transport).send(file, category: "test-category",
+        connection: ServerConnection(address: "https://sab.example/api", apiKey: "test-only-key"),
+        options: SendOptions(addPaused: true), title: link.title, password: link.password)
     let requests = await transport.requests()
+    #expect(requests.map { $0.url?.host } == [
+        "nzbindex.com", "www.nzbking.com", "www.binsearch.info", "treasure-maps.com", "file.treasure-maps.com", "sab.example"
+    ])
+    let searchURL = try #require(requests.dropFirst(3).first?.url)
+    var search = try #require(URLComponents(url: searchURL, resolvingAgainstBaseURL: false))
+    search.percentEncodedQuery = search.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%20")
+    let searchItems = try #require(search.queryItems)
+    #expect(searchItems.first { $0.name == "q" }?.value == link.title)
+    #expect(searchItems.first { $0.name == "apikey" }?.value == apiKey)
+    #expect(!searchURL.absoluteString.contains("test-password"))
+    #expect(requests.dropFirst(4).first?.url?.absoluteString == downloadURL)
     let last = try #require(requests.last)
-    let body = String(decoding: try #require(last.httpBody), as: UTF8.self).replacingOccurrences(of: "+", with: "%20")
-    let items = try #require(URLComponents(string: "https://example.invalid/?" + body)?.queryItems)
-    #expect(items.first { $0.name == "name" }?.value == "https://www.nzbking.com/nzb:fixture/")
-    #expect(items.first { $0.name == "cat" }?.value == "test-category")
-    #expect(items.first { $0.name == "nzbname" }?.value == "Test Package")
-    #expect(items.first { $0.name == "password" }?.value == "test-password")
+    let body = String(decoding: try #require(last.httpBody), as: UTF8.self)
+    #expect(body.contains("name=\"mode\"\r\n\r\naddfile\r\n"))
+    #expect(body.contains("name=\"cat\"\r\n\r\ntest-category\r\n"))
+    #expect(body.contains("name=\"nzbname\"\r\n\r\n\(link.title)\r\n"))
+    #expect(body.contains("name=\"password\"\r\n\r\ntest-password\r\n"))
+    #expect(body.contains("name=\"priority\"\r\n\r\n-2\r\n"))
+    #expect(body.contains(nzb))
+    #expect(!body.contains(apiKey))
     #expect(last.url?.query == nil)
+}
+
+@Test func newzBayRunsAfterTreasureMapsAndUsesItsOwnKeyForTheNZB() async throws {
+    let id = "0123456789abcdef0123456789abcdef"
+    let nzb = "<nzb><file/></nzb>"
+    let transport = SearchTransport([
+        #"{"data":{"content":[]},"error":false}"#, "<html></html>", "<html></html>",
+        "<rss><channel></channel></rss>",
+        """
+        <rss xmlns:newznab="http://www.newznab.com/DTD/2010/feeds/attributes/" version="2.0">
+          <channel><item><title>Test.Package.S01E07.GERMAN-Team</title>
+            <newznab:attr name="guid" value="\(id)"/>
+          </item></channel>
+        </rss>
+        """,
+        nzb,
+        #"{"status":true,"nzo_ids":["test-job"]}"#
+    ])
+    let link = try NZBLink("nzblnk:?h=fixture&t=Test+Package+S01E07+GERMAN-Team&p=test-password")
+    let treasureMaps = NewznabClient(apiKey: "test-treasure-key", service: .treasureMaps, transport: transport)
+    let newzBay = NewznabClient(apiKey: "test-newzbay-key", service: .newzBay, transport: transport)
+    let resolver = NZBResolver(transport: transport, newznabClients: [treasureMaps, newzBay])
+    let download = try await resolver.resolve(link)
+    let file = try #require(await resolver.fetchFile(download))
+    try await SABClient(transport: transport).send(file, category: "test-category",
+        connection: ServerConnection(address: "https://sab.example/api", apiKey: "test-only-key"),
+        title: link.title, password: link.password)
+
+    let requests = await transport.requests()
+    #expect(requests.map { $0.url?.host } == [
+        "nzbindex.com", "www.nzbking.com", "www.binsearch.info", "treasure-maps.com", "newzbay.cc", "newzbay.cc", "sab.example"
+    ])
+    for (request, expected) in zip(requests.dropFirst(3), ["test-treasure-key", "test-newzbay-key", "test-newzbay-key"]) {
+        let components = try #require(request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) })
+        #expect(components.queryItems?.first { $0.name == "apikey" }?.value == expected)
+    }
+    let components = try #require(URLComponents(url: download, resolvingAgainstBaseURL: false))
+    #expect(components.queryItems?.first { $0.name == "t" }?.value == "get")
+    #expect(components.queryItems?.first { $0.name == "id" }?.value == id)
+    let upload = String(decoding: try #require(requests.last?.httpBody), as: UTF8.self)
+    #expect(upload.contains(nzb))
+    #expect(!upload.contains("test-newzbay-key"))
+    #expect(!upload.contains("test-treasure-key"))
 }

@@ -35,3 +35,16 @@
 "Too many pending downloads." = "Es sind zu viele ausstehende Downloads vorhanden.";
 "Pending NZB files exceed 64 MiB." = "Die ausstehenden NZB-Dateien überschreiten 64 MiB.";
 "Notifications are not allowed in macOS settings." = "Benachrichtigungen sind in den macOS-Einstellungen nicht erlaubt.";
+"The search service requires an API key." = "Bitte einen API-Key für den Suchdienst eintragen.";
+"The search service needs a release title to search." = "Der Link enthält keinen Releasetitel für die Suche.";
+"The search service could not build the search request." = "Die Suchanfrage konnte nicht erstellt werden.";
+"The search service is unavailable. Check the search service and network connection." = "Der Suchdienst ist gerade nicht erreichbar. Prüfe die Netzwerkverbindung.";
+"The search service returned an HTTP error. Please try again later." = "Der Suchdienst meldet einen HTTP-Fehler. Bitte versuche es später erneut.";
+"The search service response exceeds the supported size." = "Die Suchantwort ist zu groß.";
+"The search service rejected the API key or search request." = "Der Suchdienst hat die Anfrage abgelehnt. Prüfe den API-Key.";
+"The search service returned an invalid XML search response." = "Der Suchdienst hat eine ungültige Suchantwort geliefert.";
+"The search service found no exact title match." = "Der Suchdienst hat kein Release mit diesem Titel gefunden.";
+"The search service found multiple exact title matches. The result is ambiguous." = "Der Suchdienst hat mehrere Releases mit demselben Titel gefunden.";
+"The search service returned an invalid NZB download link." = "Der Suchdienst hat einen ungültigen NZB-Downloadlink geliefert.";
+"The search service could not download the NZB file." = "Die NZB-Datei konnte nicht vom Suchdienst geladen werden.";
+"The search service rate limit was reached. Wait a while, then try again." = "Das API-Anfragelimit ist erreicht. Warte eine Weile und versuche es erneut.";

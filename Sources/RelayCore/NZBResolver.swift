@@ -8,14 +8,28 @@ public protocol NZBSearchProvider: Sendable {
 /// Serial fallback; a failure at one provider does not prevent the next search.
 public actor NZBResolver {
     private let providers: [any NZBSearchProvider]
+    private let newznabClients: [NewznabClient]
 
-    public init(transport: any HTTPTransport = SessionTransport()) {
-        providers = [NZBIndexClient(transport: transport),
-                     WebNZBSearch(provider: .king, transport: transport),
-                     WebNZBSearch(provider: .binsearch, transport: transport)]
+    public init(transport: any HTTPTransport = SessionTransport(), newznabClients: [NewznabClient] = []) {
+        self.providers = [
+            NZBIndexClient(transport: transport),
+            WebNZBSearch(provider: .king, transport: transport),
+            WebNZBSearch(provider: .binsearch, transport: transport)
+        ] + newznabClients
+        self.newznabClients = newznabClients
     }
 
-    public init(providers: [any NZBSearchProvider]) { self.providers = providers }
+    public init(providers: [any NZBSearchProvider]) {
+        self.providers = providers
+        self.newznabClients = providers.compactMap { $0 as? NewznabClient }
+    }
+
+    public func fetchFile(_ download: URL) async throws -> NZBFile? {
+        for client in newznabClients {
+            if let file = try await client.fetchIfApplicable(download) { return file }
+        }
+        return nil
+    }
 
     public func resolve(_ link: NZBLink, onAttempt: (@Sendable (String) async -> Void)? = nil) async throws -> URL {
         var failures: [String] = []

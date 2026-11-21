@@ -32,6 +32,9 @@ struct Notice: Equatable {
 
 @MainActor @Observable
 final class AppModel {
+    private static let treasureMapsPreference = "treasureMapsAPIKey"
+    private static let newzBayPreference = "newzBayAPIKey"
+
     var screen: Screen = .downloads
     let appearanceSettings: AppearanceSettings
     let languageSettings: LanguageSettings
@@ -44,6 +47,8 @@ final class AppModel {
     private var submissionLedger = SubmissionLedger()
     var address = "http://localhost:8080/api"
     var key = ""
+    var treasureMapsKey = ""
+    var newzBayKey = ""
     private(set) var categories: [String] = []
     private(set) var preferences = CategoryPreferences()
     private(set) var current: DownloadSubmission?
@@ -59,9 +64,10 @@ final class AppModel {
     private let client: SABClient
     @ObservationIgnored private let defaults: UserDefaults
     private var categoryLoadRevision = 0
-    private let resolver = NZBResolver()
     private var savedAddress = ""
     private var savedKey = ""
+    private var savedTreasureMapsKey = ""
+    private var savedNewzBayKey = ""
     @ObservationIgnored private(set) var task: Task<Void, Never>?
     @ObservationIgnored var closeAfterSuccess: (() -> Void)?
 
@@ -78,9 +84,13 @@ final class AppModel {
             preferences = decoded
         }
         key = defaults.string(forKey: "sabAPIKey") ?? ""
+        treasureMapsKey = defaults.string(forKey: Self.treasureMapsPreference) ?? ""
+        newzBayKey = defaults.string(forKey: Self.newzBayPreference) ?? ""
         configured = (try? ServerConnection(address: address, apiKey: key)) != nil
         savedAddress = address
         savedKey = key
+        savedTreasureMapsKey = treasureMapsKey
+        savedNewzBayKey = newzBayKey
         if !configured { screen = .settings }
         monitor.configure(try? ServerConnection(address: savedAddress, apiKey: savedKey))
     }
@@ -220,9 +230,15 @@ final class AppModel {
             key = connection.apiKey
             savedAddress = address
             savedKey = key
+            treasureMapsKey = treasureMapsKey.trimmingCharacters(in: .whitespacesAndNewlines)
+            savedTreasureMapsKey = treasureMapsKey
+            newzBayKey = newzBayKey.trimmingCharacters(in: .whitespacesAndNewlines)
+            savedNewzBayKey = newzBayKey
             monitor.configure(connection)
             defaults.set(address, forKey: "serverAddress")
             defaults.set(key, forKey: "sabAPIKey")
+            defaults.set(treasureMapsKey.isEmpty ? nil : treasureMapsKey, forKey: Self.treasureMapsPreference)
+            defaults.set(newzBayKey.isEmpty ? nil : newzBayKey, forKey: Self.newzBayPreference)
             configured = true
             screen = .downloads
             loadCategories()
@@ -278,13 +294,24 @@ final class AppModel {
                 let ids: [String]
                 switch submission {
                 case .link(let link):
+                    let keys: [(NewznabClient.Service, String)] = [(.treasureMaps, savedTreasureMapsKey), (.newzBay, savedNewzBayKey)]
+                    let clients = keys.compactMap { service, key in
+                        key.isEmpty ? nil : NewznabClient(apiKey: key, service: service)
+                    }
+                    let resolver = NZBResolver(newznabClients: clients)
                     let download = try await resolver.resolve(link) { [self] provider in
                         await self.showSearchProvider(provider)
                     }
+                    let file = try await resolver.fetchFile(download)
                     try Task.checkCancellation()
                     progress = "An SABnzbd senden …"
                     submissionLedger.record(fingerprint)
-                    ids = try await client.send(link, download: download, category: category, connection: connection, options: options)
+                    if let file {
+                        ids = try await client.send(file, category: category, connection: connection, options: options,
+                                                    title: link.title, password: link.password)
+                    } else {
+                        ids = try await client.send(link, download: download, category: category, connection: connection, options: options)
+                    }
                 case .file(let file):
                     progress = "An SABnzbd senden …"
                     submissionLedger.record(fingerprint)
@@ -346,6 +373,8 @@ final class AppModel {
         guard !sending else { return }
         address = savedAddress
         key = savedKey
+        treasureMapsKey = savedTreasureMapsKey
+        newzBayKey = savedNewzBayKey
         screen = .settings
         notice = nil
     }

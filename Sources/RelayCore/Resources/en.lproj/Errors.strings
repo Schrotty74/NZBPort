@@ -35,3 +35,16 @@
 "Too many pending downloads." = "Too many pending downloads.";
 "Pending NZB files exceed 64 MiB." = "Pending NZB files exceed 64 MiB.";
 "Notifications are not allowed in macOS settings." = "Notifications are not allowed in macOS settings.";
+"The search service requires an API key." = "The search service requires an API key.";
+"The search service needs a release title to search." = "The search service needs a release title to search.";
+"The search service could not build the search request." = "The search service could not build the search request.";
+"The search service is unavailable. Check the search service and network connection." = "The search service is unavailable. Check the search service and network connection.";
+"The search service returned an HTTP error. Please try again later." = "The search service returned an HTTP error. Please try again later.";
+"The search service response exceeds the supported size." = "The search service response exceeds the supported size.";
+"The search service rejected the API key or search request." = "The search service rejected the API key or search request.";
+"The search service returned an invalid XML search response." = "The search service returned an invalid XML search response.";
+"The search service found no exact title match." = "The search service found no exact title match.";
+"The search service found multiple exact title matches. The result is ambiguous." = "The search service found multiple exact title matches. The result is ambiguous.";
+"The search service returned an invalid NZB download link." = "The search service returned an invalid NZB download link.";
+"The search service could not download the NZB file." = "The search service could not download the NZB file.";
+"The search service rate limit was reached. Wait a while, then try again." = "The search service rate limit was reached. Wait a while, then try again.";

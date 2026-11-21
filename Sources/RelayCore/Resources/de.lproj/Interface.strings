@@ -23,6 +23,9 @@
 "Vollständiger SABnzbd-API-Key" = "Vollständiger SABnzbd-API-Key";
 "Wird lokal und unverschlüsselt in den App-Einstellungen gespeichert." = "Wird lokal und unverschlüsselt in den App-Einstellungen gespeichert.";
 "Verbindung prüfen" = "Verbindung prüfen";
+"Treasure-Maps-API-Key (optional)" = "Treasure-Maps-API-Key (optional)";
+"NewzBay-API-Key (optional)" = "NewzBay-API-Key (optional)";
+"Bei Bedarf sucht NZBPort zuerst bei Treasure Maps und dann bei NewzBay nach dem Releasetitel. Die Keys werden lokal und unverschlüsselt gespeichert." = "Bei Bedarf sucht NZBPort zuerst bei Treasure Maps und dann bei NewzBay nach dem Releasetitel. Die Keys werden lokal und unverschlüsselt gespeichert.";
 "Speichern" = "Speichern";
 "%lld Kategorien von SABnzbd geladen" = "%lld Kategorien von SABnzbd geladen";
 "Deine Kategorien" = "Deine Kategorien";

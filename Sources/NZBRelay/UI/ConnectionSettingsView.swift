@@ -32,6 +32,18 @@ struct ConnectionSettingsView: View {
                 Text(L("Wird lokal und unverschlüsselt in den App-Einstellungen gespeichert."))
                     .font(.system(size: 11)).foregroundStyle(.secondary)
             }
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L("Treasure-Maps-API-Key (optional)")).font(.system(size: 12, weight: .medium))
+                SecureField(L("Treasure-Maps-API-Key (optional)"), text: $model.treasureMapsKey)
+                    .textFieldStyle(.roundedBorder).controlSize(.large)
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L("NewzBay-API-Key (optional)")).font(.system(size: 12, weight: .medium))
+                SecureField(L("NewzBay-API-Key (optional)"), text: $model.newzBayKey)
+                    .textFieldStyle(.roundedBorder).controlSize(.large)
+                Text(L("Bei Bedarf sucht NZBPort zuerst bei Treasure Maps und dann bei NewzBay nach dem Releasetitel. Die Keys werden lokal und unverschlüsselt gespeichert."))
+                    .font(.system(size: 11)).foregroundStyle(.secondary)
+            }
             GlassEffectContainer(spacing: 16) {
                 HStack {
                     Button(L("Verbindung prüfen")) { model.loadCategories() }

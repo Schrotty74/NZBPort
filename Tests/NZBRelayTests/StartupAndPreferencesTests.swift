@@ -142,3 +142,36 @@ func loginRefreshReportsPermanentOrExhaustedFailure(status: Int) async {
     #expect(LanguageSettings(defaults: defaults).selection == .system)
     #expect(defaults.string(forKey: "sabAPIKey") == "synthetic-test-key")
 }
+
+@MainActor @Test func newznabKeysCanBeSavedAndClearedIndependently() async throws {
+    let (defaults, domain) = isolatedDefaults()
+    defer { defaults.removePersistentDomain(forName: domain) }
+    defaults.set("https://sab.example.invalid/api", forKey: "serverAddress")
+    defaults.set("synthetic-sab-key", forKey: "sabAPIKey")
+    let transport = StartupTransport(response: .success(HTTPResult(
+        data: Data(#"{"categories":[]}"#.utf8), status: 200
+    )))
+    let client = SABClient(transport: transport)
+    let model = AppModel(defaults: defaults, client: client)
+
+    model.treasureMapsKey = "unsaved"
+    model.newzBayKey = "unsaved"
+    model.openSettings()
+    #expect(model.treasureMapsKey.isEmpty)
+    #expect(model.newzBayKey.isEmpty)
+
+    model.treasureMapsKey = " synthetic-treasure-key "
+    model.newzBayKey = " synthetic-newzbay-key "
+    model.save()
+    await model.task?.value
+    let restored = AppModel(defaults: defaults, client: client)
+    #expect(restored.treasureMapsKey == "synthetic-treasure-key")
+    #expect(restored.newzBayKey == "synthetic-newzbay-key")
+
+    restored.treasureMapsKey = " "
+    restored.save()
+    await restored.task?.value
+    #expect(defaults.string(forKey: "treasureMapsAPIKey") == nil)
+    #expect(defaults.string(forKey: "newzBayAPIKey") == "synthetic-newzbay-key")
+    #expect(defaults.string(forKey: "sabAPIKey") == "synthetic-sab-key")
+}
