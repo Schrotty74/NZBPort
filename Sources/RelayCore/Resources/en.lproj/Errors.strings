@@ -48,3 +48,15 @@
 "The search service returned an invalid NZB download link." = "The search service returned an invalid NZB download link.";
 "The search service could not download the NZB file." = "The search service could not download the NZB file.";
 "The search service rate limit was reached. Wait a while, then try again." = "The search service rate limit was reached. Wait a while, then try again.";
+"The NZB password contains characters that XML cannot represent." = "The NZB password contains characters that XML cannot represent.";
+"Enter a category name of 1 to 64 characters without an asterisk or control characters." = "Enter a category name of 1 to 64 characters without an asterisk or control characters.";
+"SABnzbd could not check the current categories before creating one." = "SABnzbd could not check the current categories before creating one.";
+"SABnzbd returned an invalid category configuration." = "SABnzbd returned an invalid category configuration.";
+"A category with this name already exists in SABnzbd." = "A category with this name already exists in SABnzbd.";
+"The connection to SABnzbd was interrupted while creating the category. Its status is unknown; refresh the category list before trying again." = "The connection to SABnzbd was interrupted while creating the category. Its status is unknown; refresh the category list before trying again.";
+"The default SABnzbd category cannot be deleted." = "The default SABnzbd category cannot be deleted.";
+"SABnzbd could not check the current categories before deleting one." = "SABnzbd could not check the current categories before deleting one.";
+"This category no longer exists in SABnzbd." = "This category no longer exists in SABnzbd.";
+"The connection to SABnzbd was interrupted while deleting the category. Its status is unknown; refresh the category list before trying again." = "The connection to SABnzbd was interrupted while deleting the category. Its status is unknown; refresh the category list before trying again.";
+"SABnzbd did not remove the category. Refresh the category list and try again." = "SABnzbd did not remove the category. Refresh the category list and try again.";
+"NZBFinder requires a premium membership for API access." = "NZBFinder requires a premium membership for API access.";

@@ -2,16 +2,16 @@
 
 [Deutsch](README.de.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
-> Current test version: **0.2.4**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.4).
+> Current test version: **0.2.5**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.5).
 
-NZBPort is a small macOS menu bar app that opens `nzblnk:` links and sends downloads to SABnzbd. Choose a category, and the app searches NZBIndex, NZBKing, then BinSearch as needed. The window closes when SABnzbd confirms the submission; NZBPort stays in the menu bar.
+NZBPort is a small macOS menu bar app that opens `nzblnk:` links and NZB files, then sends downloads to SABnzbd. Choose a category, and the app searches NZBIndex, NZBKing, then BinSearch as needed, followed by any configured indexers. You can also save an NZB file locally. The window closes when SABnzbd confirms the submission; NZBPort stays in the menu bar.
 
 ## Features
 
-- **Open NZBlnk links** from Safari, the clipboard or by dragging them into the window.
-- **Open NZB files** with the file chooser, Finder’s Open With menu or drag and drop.
-- **Find NZBs** through NZBIndex, NZBKing and BinSearch. Add API keys in Connection Settings to search Treasure Maps and NewzBay when the other services find nothing.
-- **Choose a SABnzbd category** before sending. Pin favorites and hide categories you don’t use.
+- **Open NZBlnk links and NZB files** from Safari, the clipboard, Finder’s Open With menu, the file chooser or drag and drop.
+- **Save NZB files** locally, preserving the exact link password as NZB metadata when one is present.
+- **Find NZBs** through NZBIndex, NZBKing and BinSearch, followed by configured Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug and NZBFinder accounts.
+- **Choose and manage SABnzbd categories** before sending. Add or delete categories in SABnzbd, and pin favorites or hide categories locally in NZBPort.
 - **Set a priority** or add a job paused.
 - **Manage waiting links and files** before sending them. Remove individual entries if needed.
 - **Check downloads** with progress, categories and recent history. Pause or resume one job or the whole queue.
@@ -27,12 +27,12 @@ NZBPort is a small macOS menu bar app that opens `nzblnk:` links and sends downl
 | --- | --- |
 | ![NZBPort main window](docs/screenshots/nzbport-main.png) | ![NZBPort connection settings](docs/screenshots/nzbport-settings.png) |
 
-The private server address in the first screenshot has been redacted.
+These screenshots show an earlier version of NZBPort. The private server address in the first screenshot has been redacted.
 
 ## Requirements and installation
 
 - Apple Silicon Mac with macOS 26 or later.
-- A running SABnzbd server and its full API key.
+- A running SABnzbd server and its full API key. Search indexer API keys are optional.
 
 Download the DMG or ZIP from [Releases](https://github.com/Schrotty74/NZBPort/releases). Open the DMG and drag NZBPort into Applications, or extract the ZIP and move the app there. The app is ad hoc signed and is not notarized by Apple. If macOS blocks the first launch, follow the Gatekeeper steps below.
 
@@ -60,9 +60,9 @@ See [Apple’s instructions for opening apps safely](https://support.apple.com/e
 
 The SABnzbd URL and API key are stored locally, unencrypted, in app preferences. The app does not use Keychain. The API key is sent in a POST body to the configured SABnzbd endpoint. HTTP is supported; use HTTPS or a trusted VPN for untrusted networks.
 
-NZBIndex, NZBKing and BinSearch receive the link's search identifier. NZBIndex also receives its groups. When these services find nothing, NZBPort searches the configured providers in order, first Treasure Maps and then NewzBay. Each receives the release title and its own API key. NZBPort stores these keys locally without encryption. To disable a provider, clear its key and save.
+NZBIndex, NZBKing and BinSearch receive the link's search identifier. NZBIndex also receives its groups. When these services find nothing, NZBPort searches configured providers in this order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug and NZBFinder. Each provider receives the release title and only its own API key. Provider keys are optional and are stored locally without encryption only after you save them. To disable a provider, clear its key and save. A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. An authenticated NewzBay test returned HTTP 429, so a live download from it remains unverified. DrunkenSlug's public capabilities confirmed title search, but an authenticated live search was not confirmed. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102.
 
-NZBPort downloads Treasure Maps and NewzBay results locally and sends the NZB file to SABnzbd. SABnzbd also receives the title, selected category and optional archive password. The SABnzbd key is sent only to your configured SABnzbd server. Search availability depends on the providers and their terms. HTML fallbacks can stop working when a provider changes its pages or blocks automated access. No access-control or CAPTCHA bypass is included.
+NZBPort downloads configured indexer results locally and sends the NZB file to SABnzbd. SABnzbd also receives the title, selected category and optional archive password. When saving an NZB file, NZBPort adds the exact link password as NZB metadata. The SABnzbd key is sent only to your configured SABnzbd server. Search availability depends on the providers and their terms. HTML fallbacks can stop working when a provider changes its pages or blocks automated access. No access-control or CAPTCHA bypass is included.
 
 NZBPort’s application code was written specifically for this project in Swift, including the NZBlnk parser, search providers, HTML parser, SABnzbd client and local category filter. It includes no third-party application code or package dependencies. It uses Apple’s Swift standard library and system frameworks such as Foundation, AppKit and SwiftUI. The brand artwork is also original to this project.
 

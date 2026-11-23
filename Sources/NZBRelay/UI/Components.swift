@@ -26,6 +26,7 @@ struct CategoryPreferenceRow: View {
     let name: String
     let hidden: Bool
     let action: () -> Void
+    let deleteAction: (() -> Void)?
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: hidden ? "eye.slash" : "folder").foregroundStyle(.secondary).frame(width: 20)
@@ -33,6 +34,11 @@ struct CategoryPreferenceRow: View {
             Spacer()
             Button(hidden ? L("Wieder einblenden") : L("Ausblenden"), action: action)
                 .font(.system(size: 12)).controlSize(.small)
+            if let deleteAction {
+                Button(L("Löschen"), role: .destructive, action: deleteAction)
+                    .font(.system(size: 12)).controlSize(.small)
+                    .accessibilityLabel(L("Kategorie löschen: \(name)"))
+            }
         }
         .padding(.vertical, 7)
         .overlay(alignment: .bottom) { Divider().opacity(0.5) }

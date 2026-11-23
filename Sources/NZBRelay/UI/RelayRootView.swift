@@ -6,31 +6,47 @@ struct RelayRootView: View {
     @Bindable var model: AppModel
     var fitContent: (CGFloat) -> Void
     @State private var dropTargeted = false
+    @State private var measuredHeaderHeight: CGFloat?
+    @State private var measuredBodyHeight: CGFloat?
+    @State private var measuredFooterHeight: CGFloat?
+
+    private func reportMeasuredHeight() {
+        guard let measuredHeaderHeight, let measuredBodyHeight, let measuredFooterHeight else { return }
+        fitContent(measuredHeaderHeight + measuredBodyHeight + measuredFooterHeight)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                Image(nsImage: NSImage(named: "BrandMark") ?? NSImage(size: .zero))
-                    .resizable().renderingMode(.template).scaledToFit()
-                    .frame(width: 29, height: 29)
-                    .foregroundStyle(model.appearanceSettings.theme.accent)
-                    .accessibilityHidden(true)
-                Text("NZBPort").font(RelayTheme.brandFont)
-                Spacer()
-                if model.screen != .downloads && (model.configured || model.screen != .settings) {
-                    Button { model.screen = model.configured ? .downloads : .settings; model.notice = nil } label: {
-                        Label(L("Zurück"), systemImage: "arrow.left")
+            VStack(spacing: 0) {
+                HStack(spacing: 12) {
+                    Image(nsImage: NSImage(named: "BrandMark") ?? NSImage(size: .zero))
+                        .resizable().renderingMode(.template).scaledToFit()
+                        .frame(width: 29, height: 29)
+                        .foregroundStyle(model.appearanceSettings.theme.accent)
+                        .accessibilityHidden(true)
+                    Text("NZBPort").font(RelayTheme.brandFont)
+                    Spacer()
+                    if model.screen != .downloads && (model.configured || model.screen != .settings) {
+                        Button { model.screen = model.configured ? .downloads : .settings; model.notice = nil } label: {
+                            Label(L("Zurück"), systemImage: "arrow.left")
+                        }
+                        .disabled(model.busy)
                     }
-                    .disabled(model.busy)
+                    AppOptionsMenu(model: model)
                 }
-                AppOptionsMenu(model: model)
+                .padding(.horizontal, RelayTheme.pagePadding).padding(.vertical, 12)
+                Divider()
             }
-            .padding(.horizontal, RelayTheme.pagePadding).padding(.vertical, 12)
-            Divider()
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
+                measuredHeaderHeight = height
+                reportMeasuredHeight()
+            }
             ScrollViewReader { reader in
                 ScrollView {
                     VStack(alignment: .leading, spacing: RelayTheme.sectionSpacing) {
                         if let notice = model.notice { NoticeView(notice: notice).id("relayNotice") }
                         if model.screen == .settings { ConnectionSettingsView(model: model) }
+                        else if model.screen == .categories { CategoriesView(model: model) }
                         else if model.screen == .overview { DownloadOverview(model: model) }
                         else if model.screen == .updates { UpdateView(settings: model.updateSettings) }
                         else { DownloadView(model: model) }
@@ -41,27 +57,32 @@ struct RelayRootView: View {
                     }
                     .padding(RelayTheme.pagePadding)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                    ceil(max(0, geometry.contentSize.height - geometry.containerSize.height))
-                } action: { _, overflow in
-                    fitContent(overflow)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
+                        measuredBodyHeight = height
+                        reportMeasuredHeight()
+                    }
                 }
                 .onChange(of: model.notice) { _, notice in
                     if notice != nil { reader.scrollTo("relayNotice", anchor: .top) }
                 }
             }
-            Divider()
-            HStack(spacing: 7) {
-                Circle().fill(model.configured ? Color.green : Color.secondary).frame(width: 6, height: 6)
-                Text(model.configured ? model.serverHost : L("Verbindung einrichten"))
-                    .lineLimit(1).truncationMode(.middle)
-                Spacer()
-                if !model.pending.isEmpty { Text(L("Wartend: \(model.pending.count)")) }
-                else { Text(L("Für deinen Mac")) }
+            VStack(spacing: 0) {
+                Divider()
+                HStack(spacing: 7) {
+                    Circle().fill(model.configured ? Color.green : Color.secondary).frame(width: 6, height: 6)
+                    Text(model.configured ? model.serverHost : L("Verbindung einrichten"))
+                        .lineLimit(1).truncationMode(.middle)
+                    Spacer()
+                    if !model.pending.isEmpty { Text(L("Wartend: \(model.pending.count)")) }
+                    else { Text(L("Für deinen Mac")) }
+                }
+                .font(.system(size: 11)).foregroundStyle(.secondary)
+                .padding(.horizontal, RelayTheme.pagePadding).padding(.vertical, 9)
             }
-            .font(.system(size: 11)).foregroundStyle(.secondary)
-            .padding(.horizontal, RelayTheme.pagePadding).padding(.vertical, 9)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
+                measuredFooterHeight = height
+                reportMeasuredHeight()
+            }
         }
         .overlay { if dropTargeted { RoundedRectangle(cornerRadius: 12).stroke(model.appearanceSettings.theme.accent, lineWidth: 3).allowsHitTesting(false) } }
         .onDrop(of: [.fileURL, .url], isTargeted: $dropTargeted) { providers in
@@ -77,6 +98,22 @@ struct RelayRootView: View {
                 }
             }
             return !providers.isEmpty
+        }
+        .fileExporter(
+            isPresented: $model.exportPresented,
+            item: model.exportFile.map { NZBExportItem(data: $0.data) },
+            contentTypes: [NZBExportItem.contentType],
+            defaultFilename: model.exportFile.map { $0.title + ".nzb" },
+            onCompletion: model.completeExport,
+            onCancellation: model.cancelExport
+        )
+        .confirmationDialog(L("Kategorie auch in SABnzbd löschen?"), isPresented: Binding(
+            get: { model.categoryToDelete != nil }, set: { if !$0 { model.categoryToDelete = nil } }
+        ), titleVisibility: .visible, presenting: model.categoryToDelete) { name in
+            Button(L("In SABnzbd löschen"), role: .destructive) { model.confirmCategoryDeletion(name) }
+            Button(L("Abbrechen"), role: .cancel) { model.categoryToDelete = nil }
+        } message: { name in
+            Text(L("Die Kategorie „\(name)“ wird auch in SABnzbd gelöscht."))
         }
         .confirmationDialog(L("Diesen Auftrag erneut senden?"), isPresented: Binding(
             get: { model.duplicateCategory != nil }, set: { if !$0 { model.duplicateCategory = nil } }

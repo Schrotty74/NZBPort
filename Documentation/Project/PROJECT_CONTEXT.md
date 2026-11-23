@@ -1,13 +1,14 @@
 # Projektkontext – NZBPort
 
-Stand: 21. November 2026.
+Stand: 23. November 2026.
 
 ## Projekt und Git-Stand
 
 - Repository: https://github.com/Schrotty74/NZBPort
 - Projektpfade beziehen sich auf den Repository-Root; der lokale Ordner trägt historisch den Namen `NZBRelay`.
 - Entwicklungsbranch: `main`. Der App-Quellcommit für 0.2 war `74c25ba`; danach folgten Dokumentationscommits.
-- Testversion 0.2.4, Build 8, ergänzt Treasure Maps und NewzBay. GitHub-Tag: `v0.2.4`. In 0.2.3, Build 7, kam das Warten auf SABnzbd beim Anmeldestart hinzu.
+- Aktueller Release-Stand: Testversion 0.2.5, Build 9, mit NinjaCentral, DrunkenSlug und NZBFinder, NZB-Speicherung, eigenem Kategorienbereich sowie überarbeiteten Verbindungsansichten und Fensterhöhen. GitHub-Tag: `v0.2.5`.
+- Testversion 0.2.4, Build 8, ergänzte Treasure Maps und NewzBay. In 0.2.3, Build 7, kam das Warten auf SABnzbd beim Anmeldestart hinzu.
 - Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`; alle fünf sind auf GitHub enthalten.
 
 ## Produkt
@@ -149,3 +150,77 @@ Die öffentliche NewzBay-API bestätigte die Titelsuche. Die zwei angemeldeten S
 ## Testversion 0.2.4, Build 8
 
 21. November 2026: Treasure Maps und NewzBay in das GitHub-Vorabrelease aufgenommen. Für 0.2.4 bestanden alle 67 automatisierten Tests. Geprüft wurden außerdem die öffentliche Bundle-ID, Apple-Silicon-Architektur, Ad-hoc-Signatur, die App in DMG und ZIP, der Applications-Link und die SHA-256-Prüfsummen. Die App wurde für diese Prüfung nicht gestartet.
+
+## Lokale NinjaCentral-Suche
+
+22. November 2026: NinjaCentral folgt nach Treasure Maps und NewzBay als weiterer optionaler Suchdienst. In den Verbindungseinstellungen gibt es dafür ein eigenes API-Key-Feld. Der Key wird erst beim Speichern lokal und unverschlüsselt abgelegt. Die App übernimmt nur einen eindeutigen Treffer mit passendem Releasetitel, lädt die NZB-Datei selbst und übergibt deren Inhalt an SABnzbd. Für den NZB-Abruf sind HTTPS-Weiterleitungen innerhalb von ninjacentral.co.za erlaubt; die bisherigen Weiterleitungsregeln der anderen Anbieter bleiben erhalten.
+
+Das separate iOS-Userscript wurde auf v2.3.2 erweitert. Es enthält denselben zusätzlichen Suchdienst und ein eigenes optionales Key-Feld. Die Kopien im bestehenden iCloud-Userscripts-Ordner und unter Downloads sind identisch. Das Script wird weiterhin nicht in die Mac-App eingebettet. Bei NinjaCentral prüft es die gemeldete endgültige Antwortadresse; die tatsächliche Weiterleitung führt Userscripts aus.
+
+Der direkte NinjaCentral-Test lieferte einen passenden Suchtreffer und eine gültige NZB-Datei. Es wurde kein Download an SABnzbd gesendet. Alle 71 automatisierten Swift-Tests bestanden, darunter Tests für Treffer-ID, Dateiabruf, Weiterleitungsregeln und gespeicherte Einstellungen. Der lokale App-Build und die Signaturprüfung waren erfolgreich; die bestehende lokale Bundle-ID blieb erhalten. Sprachdateien, Script-Syntax und simulierte Script-Anfragen wurden geprüft. Die Bedienung der ergänzten Mac-Oberfläche und des Scripts auf dem iPhone wurde noch nicht geprüft. Keine Veröffentlichung.
+
+## iOS-Userscript v2.3.4
+
+22. November 2026: Der wirkungslose Schalter für Erfolgs-Benachrichtigungen wurde entfernt. Auf weiteren Nutzerauftrag wurde NZBGet vollständig entfernt. Neben den SABnzbd-Kategorien steht jetzt „NZB-Datei speichern“. Die Option bleibt auch ohne SABnzbd-Konfiguration, bei fehlgeschlagenem Kategorienabruf und nach einem Sendefehler verfügbar. Die vorhandene Ausgabe „Download“ speichert direkt; die direkte SABnzbd-Ausgabe berücksichtigt wieder die eingestellte Standardkategorie.
+
+Beim Speichern werden HTTP-Fehler und ungültige NZB-Antworten abgewiesen. Ein vorhandenes Archivpasswort bleibt in der bisherigen Dateinamenskonvention erhalten. Alte Einstellungen werden auf unterstützte Felder begrenzt; entfernte Ausgabearten wechseln zum SABnzbd-Menü. Die Kopien im iCloud-Userscripts-Ordner und unter Downloads sind identisch. Syntaxprüfung und simulierte Prüfungen für Einstellungen, öffentliche und API-Suchdienste, Dateispeicherung, fehlende SABnzbd-Verbindung sowie erfolgreiche und fehlgeschlagene Übergaben bestanden. Der Nutzer bestätigte anschließend, dass das Speichern der NZB-Datei auf seinem iPhone funktioniert. Die Mac-App wurde für diese Script-Änderungen nicht geändert oder neu gebaut.
+
+## Lokales Speichern von NZB-Dateien in der Mac-App
+
+22. November 2026: „NZB-Datei speichern …“ steht in der Auftragsansicht und bei einem wartenden Auftrag in den Verbindungseinstellungen. Für NZBlnk-Links nutzt die App dieselben Suchdienste und gespeicherten API-Keys wie beim Senden. Sie lädt und prüft die NZB-Datei, bevor der native macOS-Speicherdialog erscheint. Das Speichern benötigt keine SABnzbd-Verbindung und sendet keinen Auftrag. Importierte NZB-Dateien können ebenfalls gespeichert werden. Der aktuelle Auftrag bleibt nach Speichern, Abbrechen und Fehlern erhalten.
+
+Ein im Link enthaltenes Archivpasswort wird unverändert als NZB-Passwortmetadatum übernommen; der Dateiname enthält den bereinigten Releasetitel. Die ursprünglichen Dateidaten werden vor der Metadatenbearbeitung auf Größe, XML und Entity-Deklarationen geprüft. Ohne zusätzliches Passwort bleiben die NZB-Daten unverändert.
+
+Alle 85 automatisierten Tests bestanden. Der lokale Build, die Sprachdateien und die Ad-hoc-Signatur wurden geprüft; die bestehende lokale Bundle-ID blieb erhalten. Die neue Oberfläche und der Speicherdialog wurden nicht in einer Bedienungssitzung geprüft. Die App wurde nicht geöffnet oder neu gestartet. Die Änderungen liegen in der normalen lokalen App unter Build/NZBPort.app; die veröffentlichte Testversion 0.2.4 bleibt unverändert. Kein Commit, Push oder Release.
+
+## Zusätzliche App-Kopien
+
+22. November 2026: Auf Nutzerauftrag liegt eine identische, signaturgeprüfte Kopie des aktuellen lokalen Builds auf dem Datenträger MacSoftware unter Download/NZBPort.app. Künftige App-Änderungen sollen nach erfolgreichem Build auch dorthin übernommen werden. Der Nutzer hat die zunächst gewünschte iCloud-App-Kopie zurückgenommen; sie wird nicht angelegt oder gepflegt. GitHub wird erst bei einem ausdrücklichen Release-Auftrag aktualisiert. Der Nutzer wartet damit vorerst, da möglicherweise weitere Suchdienste hinzukommen. Das separate iOS-Userscript bleibt davon unabhängig.
+
+## Korrigierte automatische Fensterhöhe
+
+23. November 2026: Die bisherige Anpassung addierte gemessenen Scroll-Überlauf zur Fensterhöhe und konnte das Fenster nur vergrößern. Kürzerer Inhalt ließ daher ein zu hohes Fenster mit leerem Platz zurück. Die App misst jetzt den eigentlichen Inhalt innerhalb der Scrollansicht sowie Kopf- und Fußbereich. Aus dieser Gesamthöhe wird die benötigte Fensterhöhe berechnet. Sie kann wachsen und schrumpfen, bleibt auf Mindestgröße und verfügbaren Bildschirmbereich begrenzt und berücksichtigt weiterhin manuelle Größenänderungen bis zum erneuten Öffnen. Schriftgrößen und Fensterbreite sind unverändert.
+
+Alle 85 automatisierten Tests bestanden. Lokaler Build und Signaturprüfung waren erfolgreich; die bestehende lokale Bundle-ID blieb erhalten. Die identische Kopie unter MacSoftware/Download/NZBPort.app wurde aktualisiert und geprüft. Die neue Fensterhöhe wurde noch nicht in der laufenden Oberfläche geprüft; die App wurde für diese Korrektur nicht gestartet. Kein Commit, Push oder Release.
+
+## Getrennte Verbindungseinstellungen
+
+23. November 2026: Der Nutzer bestätigte die korrigierte Fensterhöhe. Die Verbindungseinstellungen sind nun in zwei native GroupBox-Bereiche gegliedert: SABnzbd mit Adresse, Key, Verbindungstest und Kategorienstatus sowie optionale Suchdienste mit getrennten Feldern für Treasure Maps, NewzBay und NinjaCentral. Trennlinien und Anbieternamen ordnen die Keys zu. Der gemeinsame Speichern-Button bleibt außerhalb der Bereiche. Die Speicher- und Suchlogik ist unverändert.
+
+Lokaler Build, Sprachdateien und Signaturprüfung waren erfolgreich. Die identische App-Kopie auf MacSoftware unter Download wurde aktualisiert und geprüft. Für diese reine Umordnung wurden keine weiteren Funktionstests ausgeführt und keine App-Bedienung gestartet. Die neue Gruppierung wurde noch nicht in der laufenden Oberfläche geprüft. Kein Commit, Push oder Release.
+
+## Eigener Kategorienbereich und neue SABnzbd-Kategorien
+
+23. November 2026: Die Kategorienverwaltung wurde aus den Verbindungseinstellungen in eine eigene Ansicht verschoben. „Kategorien …“ ist im Zahnradmenü, im Menü der Menüleisten-App und im App-Menü erreichbar. Dort bleiben Ausblenden, Wiederherstellen, Favoriten und Reihenfolge lokale Anzeigeentscheidungen. Ein Namensfeld mit „In SABnzbd hinzufügen“ legt auf ausdrückliche Nutzeraktion eine neue Kategorie im gespeicherten SABnzbd-Server an. Die bisherige Projektregel, generell keine Kategorien anzulegen, wurde für diesen Nutzerauftrag entsprechend angepasst; Kategorien werden weiterhin nicht gelöscht.
+
+Der Client liest zuerst die aktuelle Kategorienkonfiguration und lehnt bereits vorhandene Namen ab. Zum Anlegen nutzt er einmalig set_config mit section=categories und dem Namen; Ordner, Skript und Priorität werden nicht überschrieben. Neue Kategorien erhalten die Standardwerte von SABnzbd. Danach wird die Kategorienliste neu geladen. Bei unklarem Schreibstatus erfolgt kein automatischer weiterer Versuch. Ein fehlgeschlagener Listenabruf nach bestätigtem Anlegen wird getrennt gemeldet. Die Umsetzung folgt der offiziellen [SABnzbd-API-Dokumentation](https://sabnzbd.org/wiki/configuration/5.1/api) und den Kategorie-Handlern im offiziellen Quellcode.
+
+Alle 97 automatisierten Tests bestanden. Neue Tests prüfen das Anlegen, Duplikate, ungültige Namen, fehlende Konfiguration, Schreib- und Aktualisierungsfehler sowie einen währenddessen eingehenden Link. Lokaler Build, deutsche und englische Sprachdateien, Signatur und identische App-Kopie auf MacSoftware unter Download wurden geprüft. Kein Live-Schreibtest gegen den Nutzer-Server und keine Bedienungssitzung für die neue Ansicht. Keine Veröffentlichung.
+
+## Kategorien auch in SABnzbd löschen
+
+23. November 2026: Der Nutzer bestätigte die Kategorienfunktion als funktionierend und beauftragte zusätzlich das Löschen. Neben Ausblenden beziehungsweise Wieder einblenden steht bei vorhandenen normalen Kategorien nun „Löschen“. Ein Bestätigungsdialog nennt die Kategorie und verlangt „In SABnzbd löschen“. Die Standardkategorie ist geschützt. Ausblenden bleibt eine lokale Anzeigeentscheidung.
+
+Der Client liest die Kategorienkonfiguration, sendet einmalig del_config mit section=categories und keyword mit dem exakten vorhandenen Namen und prüft anschließend über get_config, dass die Kategorie entfernt ist. Die generische Statusantwort allein gilt nicht als Nachweis. Unklare Ergebnisse werden gemeldet und nicht automatisch erneut geschrieben. Erst nach bestätigter Löschung entfernt NZBPort die lokalen Favoriten- und Ausblendungsdaten der Kategorie und aktualisiert die Liste. Laut offiziellem SABnzbd-Kategorie-Handler betrifft die Aktion die Kategorienkonfiguration; Warteschlangenaufträge und heruntergeladene Dateien werden nicht gelöscht.
+
+Alle 109 automatisierten Tests bestanden. Die neuen Prüfungen decken Bestätigung und Abbrechen im Modell, Schutz der Standardkategorie, Entfernung lokaler Anzeigeentscheidungen nach Erfolg, unklare Löschantworten und Fehler bei der anschließenden Aktualisierung ab. Lokaler Build, Sprachdateien, Signatur und identische MacSoftware-Kopie wurden geprüft. Keine Live-Kategorie für einen Test gelöscht und keine Bedienungssitzung für die neue Löschoberfläche durchgeführt. Keine Veröffentlichung.
+
+## Lokale DrunkenSlug-Suche
+
+23. November 2026: Der Nutzer bestätigte auch das Löschen von Kategorien als funktionierend. Auf weiteren Auftrag wurde DrunkenSlug in die Mac-App und das separate iOS-Userscript v2.3.5 aufgenommen. Beide verwenden die Titelsuche unter https://drunkenslug.com/api und den NZB-Abruf anhand der Treffer-ID. DrunkenSlug folgt nach NinjaCentral und wird nur mit gespeichertem eigenem API-Key verwendet. Das gespeicherte Löschen des Keys deaktiviert den Anbieter wieder. Die Mac-App lädt die NZB selbst und übergibt deren Inhalt an SABnzbd; der Suchdienst-Key wird dabei nicht an SABnzbd weitergereicht. Die NZB-Speicherung bleibt ebenfalls verfügbar.
+
+Der anonyme Aufruf von /api?t=caps lieferte HTTP 200 und bestätigte die Titelsuche mit q. Alle 113 automatisierten Swift-Tests bestanden, einschließlich zusätzlicher Tests für DrunkenSlug und der erweiterten Prüfung gespeicherter Keys. Lokaler Build und Signaturprüfung waren erfolgreich; die lokale Bundle-ID blieb erhalten. MacSoftware/Download/NZBPort.app wurde identisch aktualisiert und geprüft. Script-Syntax und simulierte Such-, ID- und Abrufwege bestanden; die Kopien im iCloud-Userscripts-Ordner und unter Downloads sind identisch. Für DrunkenSlug wurde kein echter Key verwendet und keine angemeldete Live-Suche durchgeführt. Keine neue Bedienungssitzung und keine Veröffentlichung.
+
+## Lokale NZBFinder-Suche
+
+23. November 2026: NZBFinder ist in der Mac-App und im separaten iOS-Userscript v2.3.6 als optionaler Anbieter nach DrunkenSlug ergänzt. Beide verwenden die Newznab-XML-Schnittstelle unter https://nzbfinder.ws/api und senden bei Suche und Dateiabruf eine passende App-Kennung. NZBFinder unterstützt die dokumentierten UUID-Treffer-IDs; die bisherigen Anbieter behalten ihre bisherigen ID-Regeln. Ein eigenes API-Key-Feld folgt den bestehenden Speicherregeln. Die NZB-Datei wird weiterhin selbst geladen und geprüft, bevor sie gespeichert oder an SABnzbd übergeben wird.
+
+Der öffentliche Capabilities-Abruf bestätigte HTTP 200 und Titelsuche über q. Der Nutzer erlaubte einen Live-Test mit einem vorübergehenden Key. Die angemeldete Suche wurde mit HTTP 401 und API-Fehler 102 abgelehnt: Für API-Zugriff verlangt NZBFinder eine Premium-Mitgliedschaft. Die normale Ergänzung wurde trotz der Einschränkung des kostenlosen Testkontos beauftragt. Es gab keinen erfolgreichen angemeldeten Such- oder NZB-Abruf und keine SABnzbd-Übergabe. Der Test-Key wurde nicht in Projektdateien, Skripten oder App-Einstellungen gespeichert. Die App und das Script zeigen bei dieser Antwort einen verständlichen Hinweis auf die erforderliche API-Berechtigung.
+
+Alle 119 automatisierten Swift-Tests bestanden. Zusätzliche Tests prüfen UUIDs, die getrennten ID-Regeln, App-Kennung, Dateiabruf, API-Fehler 102 und gespeicherte Keys. Script-Syntax und simulierte vollständige Such- und Abrufwege für NZBFinder und den bisherigen Anbieter DrunkenSlug bestanden. Lokaler Build, Signatur und identische MacSoftware-Kopie wurden geprüft. Die Script-Kopien unter Downloads und im iCloud-Userscripts-Ordner sind identisch. Keine neue Bedienungssitzung und keine Veröffentlichung.
+
+## Release 0.2.5, Build 9
+
+23. November 2026: Auf ausdrücklichen Auftrag für das GitHub-Vorabrelease vorbereitet. Quellen und öffentliche Dokumentation enthalten die Änderungen seit 0.2.4: drei weitere Indexer, NZB-Speicherung, eigener Kategorienbereich mit bestätigtem Anlegen und Löschen in SABnzbd, getrennte Verbindungsbereiche und korrigierte automatische Fensterhöhe. Beide READMEs enthalten zehn Hauptfunktionen und verlinken die vollständigen Feature-Guides. Versionshinweise sind Englisch.
+
+Alle 119 Tests bestanden erneut für den Release-Stand. Die Pakete verwenden die öffentliche Bundle-ID; der normale lokale Build behält seine bestehende Kennung. Apple-Silicon-Architektur, Ad-hoc-Signaturen, ZIP-CRC, DMG-Integrität, die enthaltenen Apps, Applications-Verknüpfung und SHA-256-Prüfsummen wurden geprüft. Quellen, öffentliche Dokumente und Paketinhalt wurden auf echte Zugangsdaten, private Serveradressen, Benutzerpfade und private Kennungen geprüft. Lokale App-Einstellungen sind nicht enthalten. Die App wurde für diese Releaseprüfung nicht gestartet. Prüfnachweise liegen lokal unter Build/Verification/0.2.5; Pakete und englische Versionshinweise unter Build/Release/0.2.5. Das iOS-Userscript bleibt ein separates lokales Script und ist kein Bestandteil des Mac-Pakets.

@@ -48,3 +48,15 @@
 "The search service returned an invalid NZB download link." = "Der Suchdienst hat einen ungültigen NZB-Downloadlink geliefert.";
 "The search service could not download the NZB file." = "Die NZB-Datei konnte nicht vom Suchdienst geladen werden.";
 "The search service rate limit was reached. Wait a while, then try again." = "Das API-Anfragelimit ist erreicht. Warte eine Weile und versuche es erneut.";
+"The NZB password contains characters that XML cannot represent." = "Das Archivpasswort enthält Zeichen, die sich nicht in einer NZB-Datei speichern lassen.";
+"Enter a category name of 1 to 64 characters without an asterisk or control characters." = "Gib einen Kategorienamen mit 1 bis 64 Zeichen ohne Sternchen oder Steuerzeichen ein.";
+"SABnzbd could not check the current categories before creating one." = "Die vorhandenen Kategorien konnten vor dem Anlegen nicht von SABnzbd geprüft werden.";
+"SABnzbd returned an invalid category configuration." = "SABnzbd hat eine ungültige Kategorienkonfiguration geliefert.";
+"A category with this name already exists in SABnzbd." = "Eine Kategorie mit diesem Namen ist in SABnzbd bereits vorhanden.";
+"The connection to SABnzbd was interrupted while creating the category. Its status is unknown; refresh the category list before trying again." = "Die Verbindung zu SABnzbd wurde beim Anlegen der Kategorie unterbrochen. Ob sie angelegt wurde, ist unklar. Lade vor einem erneuten Versuch die Kategorienliste neu.";
+"The default SABnzbd category cannot be deleted." = "Die Standardkategorie von SABnzbd kann nicht gelöscht werden.";
+"SABnzbd could not check the current categories before deleting one." = "Die vorhandenen Kategorien konnten vor dem Löschen nicht von SABnzbd geprüft werden.";
+"This category no longer exists in SABnzbd." = "Diese Kategorie ist in SABnzbd nicht mehr vorhanden.";
+"The connection to SABnzbd was interrupted while deleting the category. Its status is unknown; refresh the category list before trying again." = "Die Verbindung zu SABnzbd wurde beim Löschen der Kategorie unterbrochen. Ob sie gelöscht wurde, ist unklar. Lade vor einem erneuten Versuch die Kategorienliste neu.";
+"SABnzbd did not remove the category. Refresh the category list and try again." = "SABnzbd hat die Kategorie nicht entfernt. Lade die Kategorienliste neu und versuche es erneut.";
+"NZBFinder requires a premium membership for API access." = "NZBFinder benötigt für den API-Zugriff eine Premium-Mitgliedschaft.";

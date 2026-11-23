@@ -1,12 +1,23 @@
 # Nächste Schritte – NZBPort
 
-Stand: 21. November 2026. Testversion 0.2.4, Build 8, ergänzt Treasure Maps und NewzBay. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
+Stand: 23. November 2026. Release-Stand 0.2.5, Build 9, ergänzt drei weitere Indexer, NZB-Speicherung und eigene Kategorienverwaltung. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
 
 ## Noch nicht gesondert bestätigte Bedienungsfälle
 
+- Die NZBFinder-Suche aus 0.2.5 in der Mac-App und im iOS-Userscript v2.3.6 im normalen Betrieb bestätigen, sobald der Nutzer API-Berechtigung hat. Der Live-Test lieferte HTTP 401 mit API-Fehler 102 wegen fehlender Premium-Mitgliedschaft. Öffentliche API-Erreichbarkeit, automatisierte Mac-Tests und simulierte Script-Abläufe wurden geprüft.
+
+- Die DrunkenSlug-Suche aus 0.2.5 in der Mac-App und im iOS-Userscript v2.3.6 mit eigenem API-Key im normalen Betrieb bestätigen. Der öffentliche Capabilities-Abruf, automatisierte Mac-Tests und simulierte Script-Anfragen waren erfolgreich; ein angemeldeter Live-Abruf wurde nicht ausgeführt.
+
+- Das Anlegen und Löschen im eigenen Kategorienbereich ist vom Nutzer als funktionierend bestätigt. Keine zusätzlichen Kategorien oder Löschungen nur für Tests ausführen. Die automatisierten Prüfungen verwenden ausschließlich synthetische Daten.
+
+- In der Mac-App „NZB-Datei speichern …“ mit dem nativen Speicherdialog prüfen und die gespeicherte Datei bei Bedarf manuell in SABnzbd öffnen. Automatisierte Tests decken Dateiabruf, unveränderte Passwortmetadaten, fehlende SABnzbd-Konfiguration, Abbrechen und Fehler ab.
+
+- Die NinjaCentral-Suche aus 0.2.5 in der Mac-App und im iOS-Userscript v2.3.6 mit gespeichertem API-Key im normalen Betrieb bestätigen. Direkte API-Abfragen, automatisierte Mac-Tests und simulierte Script-Anfragen waren erfolgreich. Die Erweiterung gehört zum Release-Stand 0.2.5. Das Speichern auf dem iPhone ist vom Nutzer bestätigt; der Fall mit nicht erreichbarem SABnzbd wurde noch nicht gesondert bestätigt.
+
 - NewzBay mit eigenem API-Key in den Verbindungseinstellungen prüfen. Der direkte Suchtest lieferte HTTP 429 und keine Trefferliste. Der Nutzer hat die drei ursprünglich fehlenden Releases bereits mit der integrierten Treasure-Maps-Suche gefunden.
-- Automatische Fensterhöhe in den Verbindungseinstellungen, Liste wartender Eingänge, Kategorieanzeige und Kurzstatus im geöffneten Menü im normalen Betrieb prüfen.
-- Den neuen Klappbereich und die Zwei-Sekunden-Aktualisierung im normalen Betrieb bestätigen.
+- Neue Gruppierung der Verbindungseinstellungen in SABnzbd und optionale Suchdienste im normalen Betrieb bestätigen. Der Nutzer hat die vorherige Korrektur der Fensterhöhe als funktionierend bestätigt.
+- Liste wartender Eingänge, Kategorieanzeige und Kurzstatus im geöffneten Menü im normalen Betrieb prüfen.
+- Die Zwei-Sekunden-Aktualisierung im normalen Betrieb bestätigen. Der bisherige Kategorien-Klappbereich in den Verbindungen ist durch die eigene Kategorienansicht ersetzt.
 - Echte Abschluss-/Fehlermeldungen mit erteilter macOS-Benachrichtigungsfreigabe beobachten, einschließlich geschlossenem Fenster bei weiterlaufender Menüleisten-App. Keine zusätzlichen Downloads oder künstlichen Fehler allein dafür auslösen.
 - Plattformkompatibilität auf macOS 26 und 27 getrennt bestätigen, bevor beide als praktisch getestet bezeichnet werden.
 

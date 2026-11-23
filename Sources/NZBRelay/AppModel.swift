@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 import Observation
 import RelayCore
 
-enum Screen { case downloads, settings, overview, updates }
+enum Screen { case downloads, settings, categories, overview, updates }
 struct Notice: Equatable {
     private let id = UUID()
     private let message: String.LocalizationValue?
@@ -34,6 +34,9 @@ struct Notice: Equatable {
 final class AppModel {
     private static let treasureMapsPreference = "treasureMapsAPIKey"
     private static let newzBayPreference = "newzBayAPIKey"
+    private static let ninjaCentralPreference = "ninjaCentralAPIKey"
+    private static let drunkenSlugPreference = "drunkenSlugAPIKey"
+    private static let nzbFinderPreference = "nzbFinderAPIKey"
 
     var screen: Screen = .downloads
     let appearanceSettings: AppearanceSettings
@@ -49,12 +52,21 @@ final class AppModel {
     var key = ""
     var treasureMapsKey = ""
     var newzBayKey = ""
+    var ninjaCentralKey = ""
+    var drunkenSlugKey = ""
+    var nzbFinderKey = ""
+    var newCategoryName = ""
+    var categoryToDelete: String?
+    private(set) var categoryMutationInProgress = false
     private(set) var categories: [String] = []
     private(set) var preferences = CategoryPreferences()
     private(set) var current: DownloadSubmission?
     private(set) var pending: [DownloadSubmission] = []
     private(set) var busy = false
     private(set) var sending = false
+    private(set) var exporting = false
+    private(set) var exportFile: NZBFile?
+    var exportPresented = false
     private(set) var progress: String.LocalizationValue = ""
     var notice: Notice?
     var query = ""
@@ -62,18 +74,23 @@ final class AppModel {
     private(set) var handlerRegistered = false
     private(set) var registeringHandler = false
     private let client: SABClient
+    private let exportResolver: NZBResolver?
     @ObservationIgnored private let defaults: UserDefaults
     private var categoryLoadRevision = 0
     private var savedAddress = ""
     private var savedKey = ""
     private var savedTreasureMapsKey = ""
     private var savedNewzBayKey = ""
+    private var savedNinjaCentralKey = ""
+    private var savedDrunkenSlugKey = ""
+    private var savedNZBFinderKey = ""
     @ObservationIgnored private(set) var task: Task<Void, Never>?
     @ObservationIgnored var closeAfterSuccess: (() -> Void)?
 
-    init(defaults: UserDefaults = .standard, client: SABClient = SABClient()) {
+    init(defaults: UserDefaults = .standard, client: SABClient = SABClient(), exportResolver: NZBResolver? = nil) {
         self.defaults = defaults
         self.client = client
+        self.exportResolver = exportResolver
         updateSettings = UpdateSettings(defaults: defaults)
         monitor = DownloadMonitor(client: client, defaults: defaults)
         appearanceSettings = AppearanceSettings(defaults: defaults)
@@ -86,11 +103,17 @@ final class AppModel {
         key = defaults.string(forKey: "sabAPIKey") ?? ""
         treasureMapsKey = defaults.string(forKey: Self.treasureMapsPreference) ?? ""
         newzBayKey = defaults.string(forKey: Self.newzBayPreference) ?? ""
+        ninjaCentralKey = defaults.string(forKey: Self.ninjaCentralPreference) ?? ""
+        drunkenSlugKey = defaults.string(forKey: Self.drunkenSlugPreference) ?? ""
+        nzbFinderKey = defaults.string(forKey: Self.nzbFinderPreference) ?? ""
         configured = (try? ServerConnection(address: address, apiKey: key)) != nil
         savedAddress = address
         savedKey = key
         savedTreasureMapsKey = treasureMapsKey
         savedNewzBayKey = newzBayKey
+        savedNinjaCentralKey = ninjaCentralKey
+        savedDrunkenSlugKey = drunkenSlugKey
+        savedNZBFinderKey = nzbFinderKey
         if !configured { screen = .settings }
         monitor.configure(try? ServerConnection(address: savedAddress, apiKey: savedKey))
     }
@@ -117,7 +140,7 @@ final class AppModel {
                 pending.append(submission)
             } catch { notice = Notice(error: error) }
         }
-        if current == nil, !sending, !pending.isEmpty { advance() }
+        if current == nil, !sending, !categoryMutationInProgress, !pending.isEmpty { advance() }
     }
 
     func chooseFiles() {
@@ -147,7 +170,7 @@ final class AppModel {
         do {
             let link = try NZBLink(text)
             pending.append(.link(link))
-            if current == nil, !sending { advance() }
+            if current == nil, !sending, !categoryMutationInProgress { advance() }
         } catch { notice = Notice(error: error) }
     }
 
@@ -155,6 +178,7 @@ final class AppModel {
         task?.cancel()
         query = ""
         duplicateCategory = nil
+        categoryToDelete = nil
         selectedPriority = .normal
         addPaused = false
         if !pending.isEmpty { current = pending.removeFirst() }
@@ -198,13 +222,14 @@ final class AppModel {
     }
 
     func loadCategories() {
-        guard !sending else { return }
+        guard !sending, !categoryMutationInProgress, !exporting, !exportPresented else { return }
         categoryLoadRevision += 1
         task?.cancel()
         busy = true
         progress = "Kategorien laden …"
         notice = nil
         categories = []
+        categoryToDelete = nil
         let useDraft = screen == .settings
         task = Task {
             defer { if !Task.isCancelled { busy = false } }
@@ -232,17 +257,113 @@ final class AppModel {
             savedKey = key
             treasureMapsKey = treasureMapsKey.trimmingCharacters(in: .whitespacesAndNewlines)
             savedTreasureMapsKey = treasureMapsKey
+            ninjaCentralKey = ninjaCentralKey.trimmingCharacters(in: .whitespacesAndNewlines)
+            drunkenSlugKey = drunkenSlugKey.trimmingCharacters(in: .whitespacesAndNewlines)
+            nzbFinderKey = nzbFinderKey.trimmingCharacters(in: .whitespacesAndNewlines)
             newzBayKey = newzBayKey.trimmingCharacters(in: .whitespacesAndNewlines)
             savedNewzBayKey = newzBayKey
+            savedNinjaCentralKey = ninjaCentralKey
+            savedDrunkenSlugKey = drunkenSlugKey
+            savedNZBFinderKey = nzbFinderKey
             monitor.configure(connection)
             defaults.set(address, forKey: "serverAddress")
             defaults.set(key, forKey: "sabAPIKey")
             defaults.set(treasureMapsKey.isEmpty ? nil : treasureMapsKey, forKey: Self.treasureMapsPreference)
             defaults.set(newzBayKey.isEmpty ? nil : newzBayKey, forKey: Self.newzBayPreference)
+            defaults.set(ninjaCentralKey.isEmpty ? nil : ninjaCentralKey, forKey: Self.ninjaCentralPreference)
+            defaults.set(drunkenSlugKey.isEmpty ? nil : drunkenSlugKey, forKey: Self.drunkenSlugPreference)
+            defaults.set(nzbFinderKey.isEmpty ? nil : nzbFinderKey, forKey: Self.nzbFinderPreference)
             configured = true
             screen = .downloads
             loadCategories()
         } catch { notice = Notice(error: error) }
+    }
+
+    func openCategories() {
+        guard !busy, !sending, !exportPresented else { return }
+        categoryToDelete = nil
+        screen = .categories
+        notice = nil
+        if configured { loadCategories() }
+    }
+
+    func addCategory() {
+        guard !busy, !exportPresented, configured else { return }
+        let name = newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        let connection: ServerConnection
+        do { connection = try ServerConnection(address: savedAddress, apiKey: savedKey) }
+        catch { notice = Notice(error: error); return }
+        categoryLoadRevision += 1
+        task?.cancel()
+        busy = true
+        categoryMutationInProgress = true
+        notice = nil
+        progress = "Kategorie in SABnzbd anlegen …"
+        task = Task {
+            defer {
+                busy = false
+                categoryMutationInProgress = false
+                if current == nil, !pending.isEmpty { advance() }
+            }
+            do {
+                try await client.createCategory(name, connection: connection)
+                newCategoryName = ""
+                do {
+                    categories = try await client.categories(connection)
+                    notice = Notice(text: "Kategorie in SABnzbd angelegt.", isError: false)
+                } catch {
+                    notice = Notice(text: "Die Kategorie wurde in SABnzbd angelegt. Die Liste konnte nicht aktualisiert werden. Bitte Kategorien erneut laden.", isError: true)
+                }
+            } catch {
+                notice = Notice(error: error)
+            }
+        }
+    }
+
+    func canDeleteCategory(_ name: String) -> Bool {
+        !name.isEmpty && name != "*" && categories.contains { $0.caseInsensitiveCompare(name) == .orderedSame }
+    }
+
+    func requestCategoryDeletion(_ name: String) {
+        guard !busy, !exportPresented, configured, canDeleteCategory(name) else { return }
+        categoryToDelete = name
+    }
+
+    func confirmCategoryDeletion(_ name: String) {
+        guard !busy, !exportPresented, configured, canDeleteCategory(name) else { return }
+        categoryToDelete = nil
+        let connection: ServerConnection
+        do { connection = try ServerConnection(address: savedAddress, apiKey: savedKey) }
+        catch { notice = Notice(error: error); return }
+        categoryLoadRevision += 1
+        task?.cancel()
+        busy = true
+        categoryMutationInProgress = true
+        notice = nil
+        progress = "Kategorie in SABnzbd löschen …"
+        task = Task {
+            defer {
+                busy = false
+                categoryMutationInProgress = false
+                if current == nil, !pending.isEmpty { advance() }
+            }
+            do {
+                try await client.deleteCategory(name, connection: connection)
+                categories.removeAll { $0.caseInsensitiveCompare(name) == .orderedSame }
+                preferences.setVisible(true, category: name)
+                preferences.setFavorite(false, category: name)
+                persistCategoryPreferences()
+                do {
+                    categories = try await client.categories(connection)
+                    notice = Notice(text: "Kategorie in SABnzbd gelöscht.", isError: false)
+                } catch {
+                    notice = Notice(text: "Die Kategorie wurde in SABnzbd gelöscht. Die Liste konnte nicht aktualisiert werden. Bitte Kategorien erneut laden.", isError: true)
+                }
+            } catch {
+                notice = Notice(error: error)
+            }
+        }
     }
 
     func setVisible(_ visible: Bool, category: String) {
@@ -275,7 +396,7 @@ final class AppModel {
     }
 
     private func performSend(category: String, allowDuplicate: Bool) {
-        guard !busy, let submission = current else { return }
+        guard !busy, !exportPresented, let submission = current else { return }
         let connection: ServerConnection
         do { connection = try ServerConnection(address: savedAddress, apiKey: savedKey) }
         catch { notice = Notice(error: error); return }
@@ -294,11 +415,7 @@ final class AppModel {
                 let ids: [String]
                 switch submission {
                 case .link(let link):
-                    let keys: [(NewznabClient.Service, String)] = [(.treasureMaps, savedTreasureMapsKey), (.newzBay, savedNewzBayKey)]
-                    let clients = keys.compactMap { service, key in
-                        key.isEmpty ? nil : NewznabClient(apiKey: key, service: service)
-                    }
-                    let resolver = NZBResolver(newznabClients: clients)
+                    let resolver = NZBResolver(newznabClients: searchClients())
                     let download = try await resolver.resolve(link) { [self] provider in
                         await self.showSearchProvider(provider)
                     }
@@ -331,13 +448,73 @@ final class AppModel {
         }
     }
 
+    private func searchClients() -> [NewznabClient] {
+        let keys: [(NewznabClient.Service, String)] = [
+            (.treasureMaps, savedTreasureMapsKey),
+            (.newzBay, savedNewzBayKey),
+            (.ninjaCentral, savedNinjaCentralKey),
+            (.drunkenSlug, savedDrunkenSlugKey),
+            (.nzbFinder, savedNZBFinderKey)
+        ]
+        return keys.compactMap { service, key in
+            key.isEmpty ? nil : NewznabClient(apiKey: key, service: service)
+        }
+    }
+
+    func prepareExport() {
+        guard !busy, !exportPresented, let submission = current else { return }
+        busy = true
+        exporting = true
+        progress = "NZB-Datei vorbereiten …"
+        notice = nil
+        task = Task {
+            defer {
+                if !Task.isCancelled { exporting = false; busy = false }
+            }
+            do {
+                let file: NZBFile
+                switch submission {
+                case .file(let imported): file = imported
+                case .link(let link):
+                    let resolver = exportResolver ?? NZBResolver(newznabClients: searchClients())
+                    file = try await resolver.fileForExport(link) { [self] provider in
+                        await self.showSearchProvider(provider)
+                    }
+                }
+                try Task.checkCancellation()
+                exportFile = file
+                exportPresented = true
+            } catch is CancellationError { }
+            catch let error as URLError where error.code == .cancelled { }
+            catch {
+                guard !Task.isCancelled else { return }
+                notice = Notice(error: error)
+            }
+        }
+    }
+
+    func completeExport(_ result: Result<URL, any Error>) {
+        exportPresented = false
+        exportFile = nil
+        switch result {
+        case .success: notice = Notice(text: "NZB-Datei gespeichert.", isError: false)
+        case .failure(let error): notice = Notice(error: error)
+        }
+    }
+
+    func cancelExport() {
+        exportPresented = false
+        exportFile = nil
+    }
+
     func removePending(id: UUID) {
         pending.removeAll { $0.id == id }
     }
 
     func discardCurrent() {
-        guard !sending else { return }
+        guard !sending, !categoryMutationInProgress, !exportPresented else { return }
         task?.cancel()
+        exporting = false
         busy = false
         current = nil
         notice = nil
@@ -370,11 +547,15 @@ final class AppModel {
     }
 
     func openSettings() {
-        guard !sending else { return }
+        guard !sending, !categoryMutationInProgress, !exporting, !exportPresented else { return }
+        categoryToDelete = nil
         address = savedAddress
         key = savedKey
         treasureMapsKey = savedTreasureMapsKey
         newzBayKey = savedNewzBayKey
+        ninjaCentralKey = savedNinjaCentralKey
+        drunkenSlugKey = savedDrunkenSlugKey
+        nzbFinderKey = savedNZBFinderKey
         screen = .settings
         notice = nil
     }

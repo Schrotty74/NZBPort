@@ -44,6 +44,7 @@ struct DownloadView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                SaveNZBButton(model: model)
                 Button(L("Link verwerfen")) { model.discardCurrent() }
                     .foregroundStyle(.secondary).disabled(model.sending)
             } else {
@@ -114,5 +115,16 @@ struct PendingSubmissionsView: View {
                 }
             }
         }
+    }
+}
+
+struct SaveNZBButton: View {
+    let model: AppModel
+
+    var body: some View {
+        Button { model.prepareExport() } label: {
+            Label(L("NZB-Datei speichern …"), systemImage: "square.and.arrow.down")
+        }
+        .disabled(model.busy || model.exportPresented)
     }
 }

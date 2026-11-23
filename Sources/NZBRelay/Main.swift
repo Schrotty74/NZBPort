@@ -7,7 +7,7 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuItemValidation, NSMenuDelegate {
     let model = AppModel()
     private var window: NSWindow?
-    private var contentOverflow: CGFloat = 0
+    private var desiredContentHeight: CGFloat = 0
     private var resizedByUser = false
     private var statusItem: NSStatusItem?
     private var statusSummary: NSMenuItem?
@@ -60,12 +60,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        if model.categoryMutationInProgress {
+            model.notice = Notice(text: "Die Kategorien werden noch aktualisiert. Bitte die Antwort von SABnzbd abwarten.", isError: false)
+            return .terminateCancel
+        }
         guard model.sending else { return .terminateNow }
         model.notice = Notice(text: "Der Auftrag wird noch verarbeitet. Bitte die Antwort von SABnzbd abwarten.", isError: false)
         return .terminateCancel
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
+        if model.categoryMutationInProgress {
+            model.notice = Notice(text: "Die Kategorien werden noch aktualisiert. Bitte die Antwort von SABnzbd abwarten.", isError: false)
+            return false
+        }
         if model.sending {
             model.notice = Notice(text: "Der Auftrag wird noch verarbeitet. Bitte die Antwort von SABnzbd abwarten.", isError: false)
             return false
@@ -91,8 +99,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             window.appearance = model.appearanceSettings.mode.native
             window.isReleasedWhenClosed = false
             window.minSize = RelayTheme.minimumWindowSize
-            window.contentView = NSHostingView(rootView: RelayRootView(model: model) { [weak self] overflow in
-                self?.contentOverflow = overflow
+            window.contentView = NSHostingView(rootView: RelayRootView(model: model) { [weak self] height in
+                self?.desiredContentHeight = height
                 self?.fitWindowToContent()
             })
             window.delegate = self
@@ -106,16 +114,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     }
 
     private func fitWindowToContent() {
-        guard !resizedByUser, contentOverflow > 0,
+        guard !resizedByUser, desiredContentHeight > 0,
               let window, window.isVisible, !window.isMiniaturized, !window.styleMask.contains(.fullScreen),
               let visibleFrame = window.screen?.visibleFrame else { return }
         var frame = window.frame
-        let growth = min(contentOverflow, visibleFrame.height - frame.height)
-        guard growth >= 1 else { return }
-        frame.size.height += growth
-        frame.origin.y = min(max(frame.origin.y - growth, visibleFrame.minY), visibleFrame.maxY - frame.height)
-        // Wait for the next measurement before applying another resize.
-        contentOverflow = 0
+        let contentRect = NSRect(x: 0, y: 0, width: frame.width, height: ceil(desiredContentHeight))
+        let desiredFrameHeight = NSWindow.frameRect(forContentRect: contentRect, styleMask: window.styleMask).height
+        let targetHeight = min(max(desiredFrameHeight, window.minSize.height), visibleFrame.height)
+        guard abs(targetHeight - frame.height) >= 1 else { return }
+        let top = frame.maxY
+        frame.size.height = targetHeight
+        frame.origin.y = min(max(top - targetHeight, visibleFrame.minY), visibleFrame.maxY - targetHeight)
         window.setFrame(frame, display: true)
     }
 
@@ -135,14 +144,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     }
 
     @objc private func settings() { showWindow(); model.openSettings() }
+    @objc private func manageCategories() { model.openCategories(); showWindow() }
     @objc private func pasteLink() { showWindow(); model.paste() }
     @objc private func openRelay() { showWindow() }
     @objc private func quitRelay() { NSApplication.shared.terminate(nil) }
 
     func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         if menuItem.action == #selector(settings) || menuItem.action == #selector(quitRelay) {
-            return !model.sending
+            return !model.sending && !model.categoryMutationInProgress
         }
+        if menuItem.action == #selector(manageCategories) { return !model.busy && !model.exportPresented }
         return true
     }
 
@@ -168,6 +179,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             (L("NZBPort öffnen"), #selector(openRelay)),
             (L("NZBlnk aus Zwischenablage"), #selector(pasteLink)),
             (L("Einstellungen …"), #selector(settings)),
+            (L("Kategorien …"), #selector(manageCategories)),
             (L("NZB-Dateien öffnen …"), #selector(openFiles)),
             (L("SABnzbd im Browser öffnen"), #selector(openSAB)),
             (L("Downloads"), #selector(overview)),
@@ -229,6 +241,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         let settings = NSMenuItem(title: L("Einstellungen …"), action: #selector(settings), keyEquivalent: ",")
         settings.target = self
         appMenu.addItem(settings)
+        let categories = NSMenuItem(title: L("Kategorien …"), action: #selector(manageCategories), keyEquivalent: "")
+        categories.target = self
+        appMenu.addItem(categories)
         appMenu.addItem(appearanceMenu.makeItem())
         appMenu.addItem(languageMenu.makeItem())
         appMenu.addItem(loginItemMenu.makeItem())

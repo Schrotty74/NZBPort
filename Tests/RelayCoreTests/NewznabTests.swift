@@ -138,3 +138,47 @@ func rejectsUnsafeEnclosureURLs(_ enclosure: String) async throws {
     let link = try NZBLink("nzblnk:?h=id&t=Title")
     await #expect(throws: (any Error).self) { try await client.resolve(link) }
 }
+
+@Test func ninjaCentralResolvesDetailsGUIDAndBuildsAuthenticatedDownload() async throws {
+    let id = "0123456789abcdef0123456789abcdef"
+    let transport = NewznabTestTransport("<rss><channel><item><title>Title.S01E01-GROUP</title><guid>https://ninjacentral.co.za/details/\(id)</guid></item></channel></rss>")
+    let client = NewznabClient(apiKey: "synthetic", service: .ninjaCentral, transport: transport)
+    let download = try await client.resolve(NZBLink("nzblnk:?h=id&t=Title.S01E01-GROUP"))
+    #expect(download.absoluteString == "https://ninjacentral.co.za/api?t=get&id=\(id)&apikey=synthetic")
+    let request = try #require(await transport.request())
+    #expect(request.url?.host == "ninjacentral.co.za")
+    #expect(request.url?.query?.contains("o=xml") == true)
+}
+
+@Test func ninjaCentralFetchesNZBBytesInsteadOfForwardingCredentials() async throws {
+    let client = NewznabClient(apiKey: "synthetic", service: .ninjaCentral,
+        transport: NewznabTestTransport("<nzb><file/></nzb>"))
+    let file = try #require(try await client.fetchIfApplicable(
+        URL(string: "https://ninjacentral.co.za/api?t=get&id=0123456789abcdef0123456789abcdef&apikey=synthetic")!))
+    #expect(file.data == Data("<nzb><file/></nzb>".utf8))
+    await #expect(throws: (any Error).self) {
+        try await client.fetchIfApplicable(URL(string: "https://ninjacentral.co.za/api?t=get&id=0123456789abcdef0123456789abcdef&apikey=wrong")!)
+    }
+}
+
+@Test(arguments: [
+    "http://ninjacentral.co.za/getnzb?id=x",
+    "https://ninjacentral.co.za.evil/getnzb?id=x",
+    "https://elsewhere.invalid/getnzb?id=x",
+    "https://user:password@ninjacentral.co.za/getnzb?id=x",
+    "https://ninjacentral.co.za:444/getnzb?id=x"
+])
+func ninjaCentralRejectsUnsafeRedirects(destination: String) {
+    let original = URL(string: "https://ninjacentral.co.za/api?t=get&id=synthetic")!
+    #expect(!NewznabClient.allowsNinjaRedirect(from: original, to: URL(string: destination)))
+}
+
+@Test func ninjaCentralAllowsOnlyDownloadRedirects() {
+    let destination = URL(string: "https://ninjacentral.co.za/getnzb?i=synthetic&r=synthetic&id=synthetic")!
+    #expect(NewznabClient.allowsNinjaRedirect(
+        from: URL(string: "https://ninjacentral.co.za/api?t=get&id=synthetic"), to: destination))
+    #expect(!NewznabClient.allowsNinjaRedirect(
+        from: URL(string: "https://ninjacentral.co.za/api?t=search&q=synthetic"), to: destination))
+    #expect(!NewznabClient.allowsNinjaRedirect(
+        from: URL(string: "https://newzbay.cc/api?t=get&id=synthetic"), to: destination))
+}

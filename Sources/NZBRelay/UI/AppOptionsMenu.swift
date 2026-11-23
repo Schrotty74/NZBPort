@@ -12,7 +12,9 @@ struct AppOptionsMenu: View {
             Button(L("Verbindungseinstellungen …"), systemImage: "network") {
                 model.openSettings()
             }
-            .disabled(model.sending || model.screen == .settings)
+            .disabled(model.sending || model.categoryMutationInProgress || model.screen == .settings)
+            Button(L("Kategorien …"), systemImage: "folder") { model.openCategories() }
+                .disabled(model.busy || model.screen == .categories)
             Button(L("NZB-Dateien öffnen …"), systemImage: "doc.badge.plus") { model.chooseFiles() }
             Button(L("SABnzbd im Browser öffnen"), systemImage: "safari") { model.openSABnzbd() }.disabled(!model.configured)
             Button(L("Downloads"), systemImage: "arrow.down.circle") { model.screen = .overview }

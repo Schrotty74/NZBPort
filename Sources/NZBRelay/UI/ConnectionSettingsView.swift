@@ -3,7 +3,6 @@ import RelayCore
 
 struct ConnectionSettingsView: View {
     @Bindable var model: AppModel
-    @State private var categoriesExpanded = true
     var body: some View {
         VStack(alignment: .leading, spacing: RelayTheme.sectionSpacing) {
             VStack(alignment: .leading, spacing: 7) {
@@ -16,101 +15,96 @@ struct ConnectionSettingsView: View {
                     Text(L("Wartet auf die Einrichtung: \(link.title)")).lineLimit(2)
                 } icon: { Image(systemName: "link") }
                 .font(.system(size: 12)).foregroundStyle(.secondary)
+                SaveNZBButton(model: model)
             }
-            VStack(alignment: .leading, spacing: 8) {
-                Text(L("SABnzbd-Adresse")).font(.system(size: 12, weight: .medium))
-                TextField("http://localhost:8080/api", text: $model.address)
-                    .textFieldStyle(.roundedBorder).controlSize(.large)
-                    .autocorrectionDisabled()
-                Text(L("Beispiel: http://localhost:8080/api oder die Adresse deines NAS."))
-                    .font(.system(size: 11)).foregroundStyle(.secondary)
-            }
-            VStack(alignment: .leading, spacing: 8) {
-                Text(L("API-Key")).font(.system(size: 12, weight: .medium))
-                SecureField(L("Vollständiger SABnzbd-API-Key"), text: $model.key)
-                    .textFieldStyle(.roundedBorder).controlSize(.large)
-                Text(L("Wird lokal und unverschlüsselt in den App-Einstellungen gespeichert."))
-                    .font(.system(size: 11)).foregroundStyle(.secondary)
-            }
-            VStack(alignment: .leading, spacing: 8) {
-                Text(L("Treasure-Maps-API-Key (optional)")).font(.system(size: 12, weight: .medium))
-                SecureField(L("Treasure-Maps-API-Key (optional)"), text: $model.treasureMapsKey)
-                    .textFieldStyle(.roundedBorder).controlSize(.large)
-            }
-            VStack(alignment: .leading, spacing: 8) {
-                Text(L("NewzBay-API-Key (optional)")).font(.system(size: 12, weight: .medium))
-                SecureField(L("NewzBay-API-Key (optional)"), text: $model.newzBayKey)
-                    .textFieldStyle(.roundedBorder).controlSize(.large)
-                Text(L("Bei Bedarf sucht NZBPort zuerst bei Treasure Maps und dann bei NewzBay nach dem Releasetitel. Die Keys werden lokal und unverschlüsselt gespeichert."))
-                    .font(.system(size: 11)).foregroundStyle(.secondary)
-            }
-            GlassEffectContainer(spacing: 16) {
-                HStack {
-                    Button(L("Verbindung prüfen")) { model.loadCategories() }
-                        .disabled(model.busy)
-                    Spacer()
-                    Button(L("Speichern")) { model.save() }
-                        .relayPrimaryAction().disabled(model.busy)
-                        .keyboardShortcut("s", modifiers: .command)
-                }
-            }
-            if model.busy { BusyRow(text: L(model.progress)) }
-            else if !model.categories.isEmpty {
-                Label(L("\(model.categories.count) Kategorien von SABnzbd geladen"), systemImage: "checkmark.circle.fill")
-                    .font(.system(size: 12)).foregroundStyle(.green)
-            }
-            Divider()
-            DisclosureGroup(isExpanded: $categoriesExpanded) {
-                VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 7) {
-                        HStack {
-                            Spacer()
-                            Button { model.loadCategories() } label: { Image(systemName: "arrow.clockwise") }
-                                .buttonBorderShape(.circle).help(L("Kategorien aktualisieren")).disabled(model.busy)
-                        }
-                        Text(L("Sterne heften Favoriten oben an. Mit den Pfeilen änderst du ihre Reihenfolge."))
-                            .font(.caption).foregroundStyle(.secondary)
-                        Text(L("Ausgeblendete Kategorien bleiben in SABnzbd erhalten. Neue Kategorien erscheinen automatisch."))
-                            .font(.system(size: 12)).foregroundStyle(.secondary)
-                    }
-                    VStack(spacing: 0) {
-                        ForEach(model.preferences.visible(in: model.categories), id: \.self) { category in
-                            VStack(spacing: 0) {
-                                HStack {
-                                    Button { model.setFavorite(!model.preferences.isFavorite(category), category: category) } label: {
-                                        Image(systemName: model.preferences.isFavorite(category) ? "star.fill" : "star")
-                                    }.help(L("Favorit umschalten"))
-                                    CategoryPreferenceRow(name: model.categoryName(category), hidden: false) { model.setVisible(false, category: category) }
-                                }
-                                if model.preferences.isFavorite(category) {
-                                    HStack {
-                                        Spacer()
-                                        Button(L("Nach oben"), systemImage: "arrow.up") { model.moveFavorite(category, by: -1) }
-                                        Button(L("Nach unten"), systemImage: "arrow.down") { model.moveFavorite(category, by: 1) }
-                                    }.controlSize(.mini).padding(.bottom, 8)
-                                }
-                            }
-                        }
-                        if model.categories.isEmpty {
-                            Text(L("Prüfe die Verbindung, um deine Kategorien zu laden."))
-                                .font(.system(size: 12)).foregroundStyle(.secondary)
-                                .frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 8)
-                        }
-                    }
-                    if !model.hiddenCategories.isEmpty {
-                        Text(L("Ausgeblendet")).font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
-                        VStack(spacing: 0) {
-                            ForEach(model.hiddenCategories, id: \.self) { category in
-                                CategoryPreferenceRow(name: model.categoryName(category), hidden: true) { model.setVisible(true, category: category) }
-                            }
-                        }
-                    }
-                }
-                .padding(.top, 8)
-            } label: {
-                Text(L("Deine Kategorien")).font(.headline)
+            SABConnectionSection(model: model)
+            IndexerSettingsSection(model: model)
+            HStack {
+                Spacer()
+                Button(L("Speichern")) { model.save() }
+                    .relayPrimaryAction().disabled(model.busy)
+                    .keyboardShortcut("s", modifiers: .command)
             }
         }
         .disabled(model.sending)
+    }
+}
+
+private struct SABConnectionSection: View {
+    @Bindable var model: AppModel
+
+    var body: some View {
+        GroupBox {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(L("SABnzbd-Adresse")).font(.system(size: 12, weight: .medium))
+                    TextField("http://localhost:8080/api", text: $model.address)
+                        .textFieldStyle(.roundedBorder).controlSize(.large)
+                        .autocorrectionDisabled()
+                    Text(L("Beispiel: http://localhost:8080/api oder die Adresse deines NAS."))
+                        .font(.system(size: 11)).foregroundStyle(.secondary)
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(L("API-Key")).font(.system(size: 12, weight: .medium))
+                    SecureField(L("Vollständiger SABnzbd-API-Key"), text: $model.key)
+                        .textFieldStyle(.roundedBorder).controlSize(.large)
+                    Text(L("Wird lokal und unverschlüsselt in den App-Einstellungen gespeichert."))
+                        .font(.system(size: 11)).foregroundStyle(.secondary)
+                }
+                Button(L("Verbindung prüfen")) { model.loadCategories() }
+                    .disabled(model.busy)
+                if model.busy { BusyRow(text: L(model.progress)) }
+                else if !model.categories.isEmpty {
+                    Label(L("\(model.categories.count) Kategorien von SABnzbd geladen"), systemImage: "checkmark.circle.fill")
+                        .font(.system(size: 12)).foregroundStyle(.green)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+        } label: {
+            Label("SABnzbd", systemImage: "server.rack").font(.headline)
+        }
+    }
+}
+
+private struct IndexerSettingsSection: View {
+    @Bindable var model: AppModel
+
+    var body: some View {
+        GroupBox {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(L("Nur Suchdienste mit gespeichertem API-Key werden verwendet."))
+                    .font(.system(size: 12)).foregroundStyle(.secondary)
+                IndexerKeyField(name: "Treasure Maps", key: $model.treasureMapsKey)
+                Divider()
+                IndexerKeyField(name: "NewzBay", key: $model.newzBayKey)
+                Divider()
+                IndexerKeyField(name: "NinjaCentral", key: $model.ninjaCentralKey)
+                Divider()
+                IndexerKeyField(name: "DrunkenSlug", key: $model.drunkenSlugKey)
+                Divider()
+                IndexerKeyField(name: "NZBFinder", key: $model.nzbFinderKey)
+                Text(L("Die API-Keys werden lokal und unverschlüsselt gespeichert."))
+                    .font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+        } label: {
+            Label(L("Optionale Suchdienste"), systemImage: "magnifyingglass").font(.headline)
+        }
+    }
+}
+
+private struct IndexerKeyField: View {
+    let name: String
+    @Binding var key: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(name).font(.system(size: 12, weight: .semibold))
+            SecureField(L("API-Key"), text: $key)
+                .textFieldStyle(.roundedBorder).controlSize(.large)
+                .accessibilityLabel("\(name) API-Key")
+        }
     }
 }

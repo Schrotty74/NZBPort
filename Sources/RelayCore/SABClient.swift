@@ -14,6 +14,153 @@ public actor SABClient {
         var seen = Set<String>(); return categories.filter { seen.insert($0).inserted }
     }
 
+    /// Creates one SABnzbd category using SAB's own defaults for its options.
+    /// This first reads the live category configuration and refuses to update an
+    /// existing category, since SAB's set_config endpoint also updates by name.
+    public func createCategory(_ name: String, connection: ServerConnection) async throws {
+        let categoryName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !categoryName.isEmpty,
+              categoryName.count <= 64,
+              !categoryName.contains("*"),
+              !categoryName.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) else {
+            throw RelayError.message("Enter a category name of 1 to 64 characters without an asterisk or control characters.")
+        }
+
+        let currentData = try await request(connection, fields: [
+            ("mode", "get_config"), ("section", "categories")
+        ], failureMessage: "SABnzbd could not check the current categories before creating one.")
+        let current = try decode(currentData, as: CategoryConfigurationResponse.self)
+        if let error = current.error { throw RelayError.message("SABnzbd: \(error)") }
+        guard let currentCategories = current.config?.categories,
+              !currentCategories.isEmpty,
+              currentCategories.allSatisfy({ !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) else {
+            throw RelayError.message("SABnzbd returned an invalid category configuration.")
+        }
+        guard !currentCategories.contains(where: { $0.name.caseInsensitiveCompare(categoryName) == .orderedSame }) else {
+            throw RelayError.message("A category with this name already exists in SABnzbd.")
+        }
+
+        var req = URLRequest(url: connection.endpoint)
+        req.timeoutInterval = 25
+        req.httpMethod = "POST"
+        req.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        req.setValue("application/json", forHTTPHeaderField: "Accept")
+        req.httpBody = FormEncoding.encode([
+            ("mode", "set_config"), ("section", "categories"),
+            ("name", categoryName), ("output", "json"), ("apikey", connection.apiKey)
+        ])
+
+        let data: Data
+        do {
+            data = try await perform(req, failureMessage: categoryCreateUnknownFailure)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch let error as URLError where error.code == .cancelled {
+            throw CancellationError()
+        } catch {
+            // Any transport or HTTP failure can happen after the server saved it.
+            throw RelayError.message(categoryCreateUnknownFailure)
+        }
+        let response: CategoryConfigurationResponse
+        do {
+            response = try decode(data, as: CategoryConfigurationResponse.self)
+        } catch {
+            throw RelayError.message(categoryCreateUnknownFailure)
+        }
+        if let error = response.error { throw RelayError.message("SABnzbd: \(error)") }
+        guard response.config?.categories?.contains(where: {
+            $0.name.caseInsensitiveCompare(categoryName) == .orderedSame
+        }) == true else {
+            throw RelayError.message(categoryCreateUnknownFailure)
+        }
+    }
+
+    /// Deletes one existing SABnzbd category. The built-in `*` category is
+    /// protected because SABnzbd replaces its default categories if it is deleted.
+    /// A configuration read before and after the write prevents accidental
+    /// deletion of a missing category and confirms the resulting state.
+    public func deleteCategory(_ name: String, connection: ServerConnection) async throws {
+        let requestedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !requestedName.isEmpty, requestedName != "*" else {
+            throw RelayError.message("The default SABnzbd category cannot be deleted.")
+        }
+
+        let currentData = try await request(connection, fields: [
+            ("mode", "get_config"), ("section", "categories")
+        ], failureMessage: "SABnzbd could not check the current categories before deleting one.")
+        let current = try decode(currentData, as: CategoryConfigurationResponse.self)
+        if let error = current.error { throw RelayError.message("SABnzbd: \(error)") }
+        guard let currentCategories = current.config?.categories,
+              !currentCategories.isEmpty,
+              currentCategories.allSatisfy({ !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) else {
+            throw RelayError.message("SABnzbd returned an invalid category configuration.")
+        }
+        guard let existing = currentCategories.first(where: {
+            $0.name.caseInsensitiveCompare(requestedName) == .orderedSame
+        }) else {
+            throw RelayError.message("This category no longer exists in SABnzbd.")
+        }
+        let categoryName = existing.name
+        guard categoryName != "*" else {
+            throw RelayError.message("The default SABnzbd category cannot be deleted.")
+        }
+
+        let unknownMessage: String.LocalizationValue = "The connection to SABnzbd was interrupted while deleting the category. Its status is unknown; refresh the category list before trying again."
+        let writeData: Data
+        do {
+            writeData = try await request(connection, fields: [
+                ("mode", "del_config"), ("section", "categories"), ("keyword", categoryName)
+            ], failureMessage: unknownMessage)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch let error as URLError where error.code == .cancelled {
+            throw CancellationError()
+        } catch {
+            // The request may have reached SABnzbd even if its response was lost.
+            throw RelayError.message(unknownMessage)
+        }
+
+        let writeResponse: CategoryDeletionResponse
+        do {
+            writeResponse = try decode(writeData, as: CategoryDeletionResponse.self)
+        } catch {
+            throw RelayError.message(unknownMessage)
+        }
+        if let error = writeResponse.error { throw RelayError.message("SABnzbd: \(error)") }
+        guard writeResponse.status == true else { throw RelayError.message(unknownMessage) }
+
+        // SAB documents a generic status response that can be true even when
+        // an operation failed, so only the refreshed configuration confirms deletion.
+        let updatedCategories: [CategoryConfigurationEntry]
+        do {
+            let updatedData = try await request(connection, fields: [
+                ("mode", "get_config"), ("section", "categories")
+            ], failureMessage: unknownMessage)
+            let updated = try decode(updatedData, as: CategoryConfigurationResponse.self)
+            if let error = updated.error { throw RelayError.message("SABnzbd: \(error)") }
+            guard let categories = updated.config?.categories,
+                  !categories.isEmpty,
+                  categories.allSatisfy({ !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) else {
+                throw RelayError.message(unknownMessage)
+            }
+            updatedCategories = categories
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch let error as URLError where error.code == .cancelled {
+            throw CancellationError()
+        } catch is RelayError {
+            throw RelayError.message(unknownMessage)
+        } catch {
+            throw RelayError.message(unknownMessage)
+        }
+
+        guard !updatedCategories.contains(where: {
+            $0.name.caseInsensitiveCompare(categoryName) == .orderedSame
+        }) else {
+            throw RelayError.message("SABnzbd did not remove the category. Refresh the category list and try again.")
+        }
+    }
+
     @discardableResult public func send(_ link: NZBLink, download: URL, category: String, connection: ServerConnection, options: SendOptions = SendOptions()) async throws -> [String] {
         var fields = [("mode", "addurl"), ("name", download.absoluteString), ("nzbname", link.title), ("cat", category), ("priority", String(options.addPaused ? -2 : options.priority.rawValue))]
         if let password = link.password { fields.append(("password", password)) }
@@ -72,6 +219,7 @@ public actor SABClient {
     }
 
     private let unknownSendFailure: String.LocalizationValue = "The connection to SABnzbd was interrupted. The download status is unknown; check the SABnzbd queue."
+    private let categoryCreateUnknownFailure: String.LocalizationValue = "The connection to SABnzbd was interrupted while creating the category. Its status is unknown; refresh the category list before trying again."
     private func confirmedIDs(_ data: Data) throws -> [String] {
         let p = try decode(data, as: AddResponse.self)
         if let error = p.error { throw RelayError.message("SABnzbd: \(error)") }
@@ -115,6 +263,13 @@ public actor SABClient {
 }
 
 private struct CategoriesResponse: Decodable { let categories: [String]?; let error: String? }
+private struct CategoryConfigurationResponse: Decodable {
+    let config: CategoryConfiguration?
+    let error: String?
+}
+private struct CategoryConfiguration: Decodable { let categories: [CategoryConfigurationEntry]? }
+private struct CategoryConfigurationEntry: Decodable { let name: String }
+private struct CategoryDeletionResponse: Decodable { let status: Bool?; let error: String? }
 private struct AddResponse: Decodable { let status: Bool?; let ids: [String]?; let error: String?; enum CodingKeys: String, CodingKey { case status, ids = "nzo_ids", error } }
 private struct StatusResponse: Decodable { let status: Bool?; let error: String? }
 private struct QueueResponse: Decodable { let queue: QueueData?; let error: String? }

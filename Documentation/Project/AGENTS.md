@@ -19,8 +19,8 @@
 
 ## Links, Kategorien und Downloads
 
-- Die Suche läuft nacheinander über NZBIndex, NZBKing und BinSearch. Danach folgen Treasure Maps und NewzBay in dieser Reihenfolge, sofern ihr jeweiliger API-Key gespeichert ist. Die öffentliche NZBIndex-Suche benötigt keinen separaten API-Key.
-- Kategorien von SABnzbd laden. Ausblenden, Wiederherstellen und Favoriten bleiben lokale Anzeigeentscheidungen; keine Kategorien in SABnzbd anlegen oder löschen.
+- Die Suche läuft nacheinander über NZBIndex, NZBKing und BinSearch. Danach folgen Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug und NZBFinder in dieser Reihenfolge, sofern ihr jeweiliger API-Key gespeichert ist. Die öffentliche NZBIndex-Suche benötigt keinen separaten API-Key.
+- Kategorien von SABnzbd laden. Neue Kategorien nur nach ausdrücklichem Hinzufügen durch den Nutzer in SABnzbd anlegen; vorhandene Kategorien nicht überschreiben. Kategorien nur nach ausdrücklicher Löschaktion mit Bestätigung auch in SABnzbd löschen; die Standardkategorie bleibt geschützt. Ausblenden, Wiederherstellen und Favoriten bleiben lokale Anzeigeentscheidungen.
 - Erst nach Kategorieauswahl senden. Erfolgreiche Übergabe nur nach SABnzbd-Bestätigung melden.
 - Unklare Übertragungsfehler nicht automatisch erneut senden. Duplikatwarnung und manuelle Entscheidung erhalten.
 - Nach erfolgreicher Übergabe Fenster schließen oder nächsten Auftrag zeigen; die App bleibt in der Menüleiste.
@@ -31,7 +31,7 @@
 - Kein Schlüsselbund: SABnzbd-Adresse und API-Key werden nach ausdrücklichem Speichern lokal und unverschlüsselt in App-Einstellungen gehalten. Das ist eine bestätigte Nutzerentscheidung.
 - Keine echten API-Keys, privaten Serveradressen, persönlichen NZBlnk-Links, Archivpasswörter oder unbereinigten Screenshots in Quellen, Dokumentation, Logs oder Veröffentlichungen aufnehmen.
 - SABnzbd-Key nur an den konfigurierten Server senden, nicht an Suchdienste oder in Browser-URLs.
-- Die API-Keys für Treasure Maps und NewzBay erst beim ausdrücklichen Speichern lokal und unverschlüsselt in den App-Einstellungen ablegen. Nur der jeweilige Anbieter erhält seinen Key für Suche und NZB-Abruf. NZBPort übergibt die geladene NZB-Datei an SABnzbd, da die Downloadadresse den Key enthalten kann.
+- Die API-Keys für Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug und NZBFinder erst beim ausdrücklichen Speichern lokal und unverschlüsselt in den App-Einstellungen ablegen. Nur der jeweilige Anbieter erhält seinen Key für Suche und NZB-Abruf. NZBPort übergibt die geladene NZB-Datei an SABnzbd, da die Downloadadresse den Key enthalten kann.
 - Keine festen lokalen Benutzer-, Installations- oder Datenträgerpfade einbauen. Ressourcen relativ zum Bundle und Projektdateien relativ zum Repository laden.
 - Die bestehende lokale Bundle-ID nicht unbemerkt durch die öffentliche Kennung ersetzen: Einstellungen sind daran gebunden. Keine privaten Kennungen in öffentliche Pakete übernehmen.
 
@@ -45,7 +45,7 @@
 - Bei beauftragter Veröffentlichung bereinigte Quellen, baurelevante Ressourcen, Tests und öffentliche Dokumentation gezielt auswählen. Private `Documentation`-Inhalte werden durch die vier erlaubten Projektdateien nicht freigegeben.
 - Beauftragte Downloadpakete als DMG mit Applications-Verknüpfung sowie ZIP bereitstellen; Signatur, Paketinhalt und Prüfsummen prüfen. Keine lokalen Einstellungen verpacken.
 - Öffentliche Beschreibung standardmäßig Englisch, zusätzlich Deutsch, gegenseitig verlinkt. Funktionen als Feature-Liste dokumentieren. Gatekeeper-Hinweis erhalten; Ad-hoc-Signierung nicht als Apple-Notarisierung darstellen.
-- Nach App-Änderungen einen Link zur gebauten App liefern. Selbst geöffnete Apps und Computersteuerung nach Abschluss beenden.
+- Nach App-Änderungen die gebaute App auch in die vom Nutzer festgelegte Kopie auf MacSoftware unter Download übernehmen; das bestätigte Ziel steht in PROJECT_CONTEXT.md. Kopie und Signatur prüfen und einen Link zur gebauten App liefern. Selbst geöffnete Apps und Computersteuerung nach Abschluss beenden.
 
 - Ein Auftrag wie „neue Version erstellen“ oder „neue Testversion erstellen“ umfasst Vorbereitung, erforderliche Prüfungen, bereinigte Dokumentation, Commit, Push, passenden Tag und GitHub-Release mit DMG, ZIP und Prüfsummen. Testversionen als Vorabrelease veröffentlichen. Lokale Dev-Builds bleiben immer lokal. Ein reiner Dev-Build-Auftrag umfasst keinen Commit, Push, Tag oder Release; diese Veröffentlichungskonvention gilt für neue Test- und Finalversionen.
 

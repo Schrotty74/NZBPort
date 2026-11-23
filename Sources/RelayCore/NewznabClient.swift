@@ -2,10 +2,10 @@ import Foundation
 
 /// Searches Newznab-compatible RSS APIs and resolves downloads without forwarding API credentials.
 public actor NewznabClient: NZBSearchProvider {
-    public enum Service: Sendable, Equatable { case treasureMaps, newzBay }
+    public enum Service: Sendable, Equatable { case treasureMaps, newzBay, ninjaCentral, drunkenSlug, nzbFinder }
 
     nonisolated public var name: String {
-        switch service { case .treasureMaps: "Treasure Maps"; case .newzBay: "NewzBay" }
+        switch service { case .treasureMaps: "Treasure Maps"; case .newzBay: "NewzBay"; case .ninjaCentral: "NinjaCentral"; case .drunkenSlug: "DrunkenSlug"; case .nzbFinder: "NZBFinder" }
     }
 
     private let service: Service
@@ -16,8 +16,16 @@ public actor NewznabClient: NZBSearchProvider {
     public init(apiKey: String, service: Service, transport: (any HTTPTransport)? = nil) {
         self.apiKey = apiKey
         self.service = service
-        self.endpoint = URL(string: service == .treasureMaps ? "https://treasure-maps.com/api" : "https://newzbay.cc/api")!
-        self.transport = transport ?? NewznabTransport()
+        self.endpoint = URL(string: {
+            switch service {
+            case .treasureMaps: "https://treasure-maps.com/api"
+            case .newzBay: "https://newzbay.cc/api"
+            case .ninjaCentral: "https://ninjacentral.co.za/api"
+            case .drunkenSlug: "https://drunkenslug.com/api"
+            case .nzbFinder: "https://nzbfinder.ws/api"
+            }
+        }())!
+        self.transport = transport ?? NewznabTransport(allowNinjaRedirects: service == .ninjaCentral)
     }
 
     public func resolve(_ link: NZBLink) async throws -> URL {
@@ -32,6 +40,12 @@ public actor NewznabClient: NZBSearchProvider {
             : [("t", "search"), ("q", link.title), ("o", "xml"), ("apikey", apiKey)]
         let request = try makeRequest(query, accept: "application/rss+xml, application/xml, text/xml")
         let result = try await perform(request, failure: "The search service is unavailable. Check the search service and network connection.")
+        if service == .nzbFinder, result.data.count <= 2 * 1024 * 1024 {
+            let providerResponse = NewznabRSSParser.parse(result.data)
+            if providerResponse.apiErrorCode == "102" {
+                throw RelayError.message("NZBFinder requires a premium membership for API access.")
+            }
+        }
         guard (200..<300).contains(result.status) else {
             if result.status == 429 { throw RelayError.message("The search service rate limit was reached. Wait a while, then try again.") }
             throw RelayError.message("The search service returned an HTTP error. Please try again later.")
@@ -55,9 +69,9 @@ public actor NewznabClient: NZBSearchProvider {
                 throw RelayError.message("The search service returned an invalid NZB download link.")
             }
             return download
-        case .newzBay:
-            guard let id = item.identifier else { throw RelayError.message("The search service returned an invalid NZB download link.") }
-            return try buildNewzBayDownload(id: id)
+        case .newzBay, .ninjaCentral, .drunkenSlug, .nzbFinder:
+            guard let id = item.identifier(host: endpoint.host!, allowUUID: service == .nzbFinder) else { throw RelayError.message("The search service returned an invalid NZB download link.") }
+            return try buildAuthenticatedDownload(id: id)
         }
     }
 
@@ -71,9 +85,9 @@ public actor NewznabClient: NZBSearchProvider {
                 throw RelayError.message("The search service returned an invalid NZB download link.")
             }
             identifier = download.lastPathComponent
-        case .newzBay:
-            guard download.host?.lowercased() == Self.newzBayHost else { return nil }
-            guard let id = Self.newzBayDownloadIdentifier(download, apiKey: apiKey) else {
+        case .newzBay, .ninjaCentral, .drunkenSlug, .nzbFinder:
+            guard download.host?.lowercased() == endpoint.host else { return nil }
+            guard let id = authenticatedDownloadIdentifier(download, apiKey: apiKey) else {
                 throw RelayError.message("The search service returned an invalid NZB download link.")
             }
             identifier = id
@@ -81,6 +95,7 @@ public actor NewznabClient: NZBSearchProvider {
         var request = URLRequest(url: download)
         request.timeoutInterval = 25
         request.setValue("application/x-nzb, application/xml, text/xml", forHTTPHeaderField: "Accept")
+        if service == .nzbFinder { request.setValue("NZBPort/0.2.5 (NZB link search; https://github.com/Schrotty74/NZBPort)", forHTTPHeaderField: "User-Agent") }
         let result = try await perform(request, failure: "The search service could not download the NZB file.")
         guard (200..<300).contains(result.status) else {
             throw RelayError.message("The search service could not download the NZB file.")
@@ -95,17 +110,34 @@ public actor NewznabClient: NZBSearchProvider {
         var request = URLRequest(url: url)
         request.timeoutInterval = 20
         request.setValue(accept, forHTTPHeaderField: "Accept")
+        if service == .nzbFinder { request.setValue("NZBPort/0.2.5 (NZB link search; https://github.com/Schrotty74/NZBPort)", forHTTPHeaderField: "User-Agent") }
         return request
     }
 
-    private func buildNewzBayDownload(id: String) throws -> URL {
-        guard NewznabClientIdentifier.isValid(id) else { throw RelayError.message("The search service returned an invalid NZB download link.") }
+    private func buildAuthenticatedDownload(id: String) throws -> URL {
+        guard isValidIdentifier(id) else { throw RelayError.message("The search service returned an invalid NZB download link.") }
         var components = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
         components.percentEncodedQuery = String(decoding: FormEncoding.encode([
             ("t", "get"), ("id", id), ("apikey", apiKey)
         ]), as: UTF8.self)
         guard let url = components.url else { throw RelayError.message("The search service returned an invalid NZB download link.") }
         return url
+    }
+
+    private func isValidIdentifier(_ value: String) -> Bool {
+        NewznabClientIdentifier.isValid(value, allowUUID: service == .nzbFinder)
+    }
+
+    static func allowsNinjaRedirect(from original: URL?, to destination: URL?) -> Bool {
+        guard let original, let destination,
+              let source = URLComponents(url: original, resolvingAgainstBaseURL: false),
+              let target = URLComponents(url: destination, resolvingAgainstBaseURL: false),
+              source.scheme == "https", source.host == "ninjacentral.co.za",
+              source.path == "/api", source.queryItems?.first(where: { $0.name == "t" })?.value == "get",
+              target.scheme == "https", target.host == source.host,
+              target.user == nil, target.password == nil, target.port == nil, target.fragment == nil
+        else { return false }
+        return true
     }
 
     private func perform(_ request: URLRequest, failure: String.LocalizationValue) async throws -> HTTPResult {
@@ -134,7 +166,7 @@ public actor NewznabClient: NZBSearchProvider {
     }
 
     private static let fileHost = "file.treasure-maps.com"
-    private static let newzBayHost = "newzbay.cc"
+
 
     private static func isSafeTreasureMapsDownload(_ url: URL) -> Bool {
         guard let c = URLComponents(url: url, resolvingAgainstBaseURL: false),
@@ -146,28 +178,29 @@ public actor NewznabClient: NZBSearchProvider {
         return items.count == 1 && items.first?.name == "r" && items.first?.value?.isEmpty == false
     }
 
-    private static func newzBayDownloadIdentifier(_ url: URL, apiKey: String) -> String? {
+    private func authenticatedDownloadIdentifier(_ url: URL, apiKey: String) -> String? {
         guard let c = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              c.scheme?.lowercased() == "https", c.host?.lowercased() == newzBayHost,
+              c.scheme?.lowercased() == "https", c.host?.lowercased() == endpoint.host,
               c.user == nil, c.password == nil, c.port == nil, c.path == "/api", c.fragment == nil else { return nil }
         let items = c.queryItems ?? []
         guard items.count == 3 else { return nil }
         let values = Dictionary(items.compactMap { item in item.value.map { (item.name, $0) } }, uniquingKeysWith: { first, _ in first })
         guard values["t"] == "get", values["apikey"] == apiKey,
-              let id = values["id"], NewznabClientIdentifier.isValid(id) else { return nil }
+              let id = values["id"], isValidIdentifier(id) else { return nil }
         return id
     }
 }
 
-/// Dedicated ephemeral session for API-key-bearing requests. Redirects are refused; cache and cookies are disabled.
+/// Ephemeral requests without cache or cookies; only NinjaCentral NZB downloads allow same-host HTTPS redirects.
 private struct NewznabTransport: HTTPTransport {
+    let allowNinjaRedirects: Bool
     func perform(_ request: URLRequest) async throws -> HTTPResult {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.urlCache = nil
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         configuration.httpCookieStorage = nil
         configuration.httpShouldSetCookies = false
-        let session = URLSession(configuration: configuration, delegate: NewznabRedirectDelegate(), delegateQueue: nil)
+        let session = URLSession(configuration: configuration, delegate: NewznabRedirectDelegate(allowNinjaRedirects: allowNinjaRedirects), delegateQueue: nil)
         defer { session.finishTasksAndInvalidate() }
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw RelayError.message("The service did not return an HTTP response.") }
@@ -176,9 +209,16 @@ private struct NewznabTransport: HTTPTransport {
 }
 
 private final class NewznabRedirectDelegate: NSObject, URLSessionTaskDelegate {
+    let allowNinjaRedirects: Bool
+
+    init(allowNinjaRedirects: Bool) { self.allowNinjaRedirects = allowNinjaRedirects }
+
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        completionHandler(nil)
+        let allowed = allowNinjaRedirects && NewznabClient.allowsNinjaRedirect(
+            from: task.originalRequest?.url, to: request.url
+        )
+        completionHandler(allowed ? request : nil)
     }
 }
 
@@ -193,20 +233,21 @@ private struct NewznabRSSResult {
     var items: [NewznabRSSItem] = []
     var apiError = false
     var validXML = false
+    var apiErrorCode: String?
 }
 
 private extension NewznabRSSItem {
-    var identifier: String? {
+    func identifier(host: String, allowUUID: Bool = false) -> String? {
         for raw in [guidAttribute, guid].compactMap({ $0 }) {
             let value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-            if NewznabClientIdentifier.isValid(value) { return value }
+            if NewznabClientIdentifier.isValid(value, allowUUID: allowUUID) { return value }
             if let url = URLComponents(string: value), url.scheme?.lowercased() == "https",
-               url.host?.lowercased() == "newzbay.cc", url.user == nil, url.password == nil,
+               url.host?.lowercased() == host, url.user == nil, url.password == nil,
                url.port == nil, url.fragment == nil {
                 let pathParts = url.path.split(separator: "/")
-                if pathParts.count == 2, pathParts[0] == "details", NewznabClientIdentifier.isValid(String(pathParts[1])) { return String(pathParts[1]) }
+                if pathParts.count == 2, pathParts[0] == "details", NewznabClientIdentifier.isValid(String(pathParts[1]), allowUUID: allowUUID) { return String(pathParts[1]) }
                 if url.path == "/api", let id = url.queryItems?.first(where: { $0.name == "id" })?.value,
-                   NewznabClientIdentifier.isValid(id) { return id }
+                   NewznabClientIdentifier.isValid(id, allowUUID: allowUUID) { return id }
             }
         }
         return nil
@@ -214,8 +255,11 @@ private extension NewznabRSSItem {
 }
 
 private enum NewznabClientIdentifier {
-    static func isValid(_ value: String) -> Bool {
-        value.range(of: #"^[0-9a-fA-F]{32}$"#, options: .regularExpression) != nil
+    static func isValid(_ value: String, allowUUID: Bool = false) -> Bool {
+        let pattern = allowUUID
+            ? #"^(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"#
+            : #"^[0-9a-fA-F]{32}$"#
+        return value.range(of: pattern, options: .regularExpression) != nil
     }
 }
 
@@ -238,7 +282,9 @@ private final class NewznabRSSParser: NSObject, XMLParserDelegate {
         elements.append(elementName)
         switch elements {
         case ["rss"]: hasRSSRoot = true
-        case ["error"]: result.apiError = true
+        case ["error"]:
+            result.apiError = true
+            result.apiErrorCode = attributes["code"]
         case ["rss", "channel", "item"]:
             current = NewznabRSSItem()
             current?.guidAttribute = attributes["guid"] ?? attributes["id"]
