@@ -7,14 +7,15 @@
 - **NZBlnk links:** Open a link from Safari, use **Paste NZBlnk** for a copied link, or drop a link into the window.
 - **macOS link association:** NZBPort checks the current association when it starts and when it becomes active. If it is already the default app, the registration button shows that it is set up.
 - **NZB files:** Use the file chooser, Finder’s **Open With** menu, or drag and drop. NZBPort accepts up to 16 MiB per file and holds up to 64 MiB of NZB file data across the current and waiting submissions.
-- **Save an NZB:** Save the current NZB to a location you choose. For a link with an archive password, NZBPort writes that exact password into the NZB file’s password metadata.
+- **Save an NZB:** Save the current NZB to a location you choose, including when SABnzbd is not configured or cannot be reached. Imported NZB files can be saved as copies. For a link with an archive password, NZBPort writes that exact password into the NZB file’s password metadata. Canceling the save dialog or a save error leaves the current submission available.
 - **Waiting links and files:** NZBPort handles submissions one at a time. The list shows what comes next and lets you remove individual entries before sending them. The current submission stays in place.
 
 ## Choose a category and send
 
 - **Fetch categories:** NZBPort reads the current SABnzbd categories at startup, when you open a submission, and on request. The startup check runs in the background.
 - **Find a category:** Filter the category buttons by name before sending.
-- **Manage categories:** The dedicated **Categories** page can add a category to SABnzbd or delete an existing one after confirmation. The default category is protected. These actions change SABnzbd’s category configuration; they do not delete queued jobs or downloaded files.
+- **Add a category:** On the dedicated **Categories** page, add a category to SABnzbd.
+- **Delete a category:** Confirm before deleting an existing category in SABnzbd. The default category is protected. Deleting a category changes SABnzbd’s configuration; it does not delete queued jobs or downloaded files.
 - **Local category preferences:** On the **Categories** page, hide or restore categories and pin or reorder favorites. These choices affect only NZBPort. New categories from SABnzbd appear automatically.
 - **Priority:** Choose Low, Normal, High, or Force before sending. Use **Add Paused** to add a job without starting it.
 - **Title and archive password:** NZBPort passes the title and any archive password from the NZBlnk link to SABnzbd with the selected category.
@@ -24,7 +25,19 @@
 ## Search providers
 
 - **Public search:** NZBIndex, NZBKing and BinSearch are tried in that order. NZBIndex uses its public API and does not need a search API key.
-- **Optional indexers:** If public search finds nothing, NZBPort tries configured providers in this order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug and NZBFinder. Each is enabled by its own optional API key in Connection Settings.
+- **Optional indexers:** If public search finds nothing, NZBPort tries providers with saved API keys in order. Each provider has its own optional API key in Connection Settings. The search ends when a provider returns a valid result; errors, unmatched titles and ambiguous API results let it continue to the next provider.
+
+| Order | Provider | Search API key |
+| --- | --- | --- |
+| 1 | NZBIndex | No, public API |
+| 2 | NZBKing | No |
+| 3 | BinSearch | No |
+| 4 | Treasure Maps | Optional, saved separately |
+| 5 | NewzBay | Optional, saved separately |
+| 6 | NinjaCentral | Optional, saved separately |
+| 7 | DrunkenSlug | Optional, saved separately |
+| 8 | NZBFinder | Optional, saved separately; premium membership required for API access |
+
 - **Provider requests:** A configured provider receives the release title and its own API key. Keys are stored locally without encryption only after you explicitly save them. To disable a provider, clear its key and save.
 - **NZB retrieval:** NZBPort downloads indexer results itself and passes the NZB file to SABnzbd. The indexer key is not sent to SABnzbd.
 - **Provider limits:** A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. An authenticated NewzBay test returned HTTP 429, so a live download from it remains unverified. DrunkenSlug's public capabilities confirmed title search, but an authenticated live search was not confirmed. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102. Provider availability and terms can change. HTML fallbacks may stop working if a provider changes its pages or blocks automated access. NZBPort does not bypass access controls or CAPTCHAs.
@@ -45,7 +58,7 @@
 - **Color themes:** Choose Standard, Coffee, Ivory, or Mint. Themes adapt to light and dark mode.
 - **Appearance and background:** Choose system, light, or dark appearance independently of the theme. The window background can follow the system or be transparent or opaque.
 - **Native macOS design:** NZBPort uses Liquid Glass controls. Its Icon Composer app icon supports the system icon appearances.
-- **Window height:** The window grows or shrinks to fit its content within the available screen height. Scroll when more space is needed. A size you set by hand stays in effect until you reopen the window.
+- **Connection settings and window height:** Separate group boxes organize the SABnzbd connection and optional search provider keys. The window grows or shrinks to fit its content within the available screen height. Scroll when more space is needed. A size you set by hand stays in effect until you reopen the window.
 - **Launch at login:** Enable or disable startup from the app menu, menu bar menu, or gear menu. Choose **Allow in macOS…** if macOS asks for approval. NZBPort stays in the menu bar at login; launching it manually opens the window. If SABnzbd is still starting, NZBPort retries the category request up to three times, waiting 2, 5, then 10 seconds. It still reports persistent failures and rejected credentials. Manual launches keep their existing behavior.
 
 ## Updates, project links and source code

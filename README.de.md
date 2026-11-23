@@ -10,14 +10,14 @@ NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links und NZB-Date
 
 - **NZBlnk-Links und NZB-Dateien öffnen**: aus Safari, der Zwischenablage, über „Öffnen mit“ im Finder, die Dateiauswahl oder per Drag-and-drop.
 - **NZB-Dateien speichern**: lokal und mit dem Link-Passwort unverändert als NZB-Metadatum, falls eines enthalten ist.
-- **NZBs suchen** bei NZBIndex, NZBKing und BinSearch, danach bei eingerichteten Konten von Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug und NZBFinder.
+- **NZBs suchen** bei bis zu acht Anbietern in dieser Reihenfolge: NZBIndex, NZBKing und BinSearch, danach bei Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug und NZBFinder, sofern für den jeweiligen Dienst ein API-Key gespeichert ist.
 - **SABnzbd-Kategorien wählen und verwalten**: Kategorien in SABnzbd anlegen oder löschen. Favoriten und ausgeblendete Kategorien verwaltest du lokal in NZBPort.
-- **Priorität festlegen** oder einen Auftrag pausiert übergeben.
-- **Wartende Links und Dateien verwalten**: vor der Übergabe ansehen und einzeln entfernen.
+- **Priorität festlegen, Aufträge pausiert übergeben und wartende Links und Dateien verwalten**: Einträge vor der Übergabe ansehen und einzeln entfernen.
 - **Downloads im Blick behalten**: Fortschritt, Kategorien und Verlauf sehen, einzelne Aufträge oder die ganze Warteschlange pausieren und fortsetzen.
 - **SABnzbd-Status im Menü abrufen**: Anzahl der Aufträge und, falls verfügbar, Downloadgeschwindigkeit sehen.
 - **macOS-Mitteilungen erhalten**, wenn Downloads abgeschlossen sind oder fehlschlagen.
 - **Bei der Anmeldung starten** und NZBPort direkt in der Menüleiste bereithalten.
+- **Verbindungseinstellungen** ordnen SABnzbd und optionale Suchdienste in getrennten Gruppen. Die Fensterhöhe passt sich dem Inhalt und dem verfügbaren Bildschirmplatz an. Eine von Hand geänderte Größe gilt bis zum nächsten Öffnen.
 
 [Alle Funktionen im Detail](docs/FEATURES.de.md).
 
@@ -63,6 +63,8 @@ SABnzbd-Adresse und API-Key werden lokal und unverschlüsselt in den App-Einstel
 NZBIndex, NZBKing und BinSearch erhalten die Suchkennung des Links. NZBIndex erhält zusätzlich die Newsgroups. Wenn diese Dienste nichts finden, sucht NZBPort bei eingerichteten Anbietern in dieser Reihenfolge: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug und NZBFinder. Jeder Anbieter erhält den Releasetitel und nur seinen eigenen API-Key. Die Anbieter-Keys sind optional und werden erst nach dem Speichern lokal und unverschlüsselt abgelegt. Um einen Dienst abzuschalten, leere sein Feld und speichere die Einstellungen. Ein direkter angemeldeter Test bei NinjaCentral lieferte einen passenden Treffer und eine gültige NZB-Datei. Ein angemeldeter NewzBay-Test endete mit HTTP 429; ein Live-Download ist daher nicht bestätigt. Die öffentlichen Capabilities von DrunkenSlug bestätigten die Titelsuche, eine angemeldete Live-Suche wurde jedoch nicht bestätigt. Für API-Zugriff auf NZBFinder ist eine Premium-Mitgliedschaft erforderlich; ein kostenloses Konto kann HTTP 401 mit API-Fehler 102 liefern.
 
 NZBPort lädt Treffer eingerichteter Indexer selbst und übergibt die NZB-Datei an SABnzbd. SABnzbd erhält außerdem den Titel, die gewählte Kategorie und das optionale Archivpasswort. Beim Speichern einer NZB-Datei trägt NZBPort das Link-Passwort unverändert als NZB-Metadatum ein. Den SABnzbd-Key erhält nur der von dir eingestellte SABnzbd-Server. Die Suche hängt von der Verfügbarkeit und den Bedingungen der Anbieter ab. Die HTML-Ausweichsuche kann ausfallen, wenn ein Anbieter seine Seiten ändert oder automatisierte Zugriffe sperrt. Zugangssperren und CAPTCHAs werden nicht umgangen.
+
+Das Speichern einer NZB-Datei ist auch möglich, wenn SABnzbd nicht eingerichtet oder nicht erreichbar ist. Importierte NZB-Dateien kannst du als Kopie speichern. Der aktuelle Link oder die Datei bleibt erhalten, wenn du den Speicherdialog abbrichst oder das Speichern fehlschlägt. Du kannst es erneut versuchen oder eine andere Aktion wählen.
 
 Der Anwendungscode wurde für dieses Projekt in Swift neu geschrieben: Link-Auswertung, Suchdienste, HTML-Parser, SABnzbd-Client und lokaler Kategorienfilter. Die App enthält keinen fremden Anwendungscode und keine externen Paketabhängigkeiten. Sie verwendet Apples Swift-Standardbibliothek und Systemframeworks wie Foundation, AppKit und SwiftUI. Auch das Markenzeichen wurde für dieses Projekt erstellt.
 

@@ -10,14 +10,14 @@ NZBPort is a small macOS menu bar app that opens `nzblnk:` links and NZB files, 
 
 - **Open NZBlnk links and NZB files** from Safari, the clipboard, Finder’s Open With menu, the file chooser or drag and drop.
 - **Save NZB files** locally, preserving the exact link password as NZB metadata when one is present.
-- **Find NZBs** through NZBIndex, NZBKing and BinSearch, followed by configured Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug and NZBFinder accounts.
+- **Find NZBs** through up to eight providers in order: NZBIndex, NZBKing and BinSearch, then Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug and NZBFinder when each has a saved API key.
 - **Choose and manage SABnzbd categories** before sending. Add or delete categories in SABnzbd, and pin favorites or hide categories locally in NZBPort.
-- **Set a priority** or add a job paused.
-- **Manage waiting links and files** before sending them. Remove individual entries if needed.
+- **Set a priority, add jobs paused and manage waiting links and files** before sending. Remove individual waiting entries if needed.
 - **Check downloads** with progress, categories and recent history. Pause or resume one job or the whole queue.
 - **See a quick SABnzbd status** in the menu bar, including the queue count and download speed when available.
 - **Get macOS notifications** when downloads finish or fail.
 - **Start at login** with NZBPort in the menu bar.
+- **Connection settings** keep SABnzbd and optional search providers in separate groups. The window adjusts to its content and available screen space. A manually chosen size lasts until you reopen it.
 
 [See all features and how they work](docs/FEATURES.md).
 
@@ -63,6 +63,8 @@ The SABnzbd URL and API key are stored locally, unencrypted, in app preferences.
 NZBIndex, NZBKing and BinSearch receive the link's search identifier. NZBIndex also receives its groups. When these services find nothing, NZBPort searches configured providers in this order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug and NZBFinder. Each provider receives the release title and only its own API key. Provider keys are optional and are stored locally without encryption only after you save them. To disable a provider, clear its key and save. A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. An authenticated NewzBay test returned HTTP 429, so a live download from it remains unverified. DrunkenSlug's public capabilities confirmed title search, but an authenticated live search was not confirmed. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102.
 
 NZBPort downloads configured indexer results locally and sends the NZB file to SABnzbd. SABnzbd also receives the title, selected category and optional archive password. When saving an NZB file, NZBPort adds the exact link password as NZB metadata. The SABnzbd key is sent only to your configured SABnzbd server. Search availability depends on the providers and their terms. HTML fallbacks can stop working when a provider changes its pages or blocks automated access. No access-control or CAPTCHA bypass is included.
+
+Saving an NZB is available even when SABnzbd is not configured or cannot be reached. Imported NZB files can be saved as copies. The current link or file remains available if you cancel the save dialog or saving fails, so you can try again or choose another action.
 
 NZBPort’s application code was written specifically for this project in Swift, including the NZBlnk parser, search providers, HTML parser, SABnzbd client and local category filter. It includes no third-party application code or package dependencies. It uses Apple’s Swift standard library and system frameworks such as Foundation, AppKit and SwiftUI. The brand artwork is also original to this project.
 
