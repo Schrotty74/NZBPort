@@ -72,7 +72,17 @@ public actor NewznabClient: NZBSearchProvider {
             }
             return download
         case .newzBay, .ninjaCentral, .drunkenSlug, .nzbFinder, .videothek:
-            guard let id = item.identifier(host: endpoint.host!, allowUUID: service == .nzbFinder || service == .videothek) else { throw RelayError.message("The search service returned an invalid NZB download link.") }
+            if service == .videothek {
+                for url in [item.enclosure, URL(string: item.link.trimmingCharacters(in: .whitespacesAndNewlines))].compactMap({ $0 }) {
+                    if let id = authenticatedDownloadIdentifier(url, apiKey: apiKey) {
+                        return try buildAuthenticatedDownload(id: id)
+                    }
+                }
+            }
+            guard let id = item.identifier(host: endpoint.host!, allowUUID: service == .nzbFinder || service == .videothek,
+                                           allowLongHex: service == .videothek) else {
+                throw RelayError.message("The search service returned an invalid NZB download link.")
+            }
             return try buildAuthenticatedDownload(id: id)
         }
     }
@@ -127,7 +137,7 @@ public actor NewznabClient: NZBSearchProvider {
     }
 
     private func isValidIdentifier(_ value: String) -> Bool {
-        NewznabClientIdentifier.isValid(value, allowUUID: service == .nzbFinder || service == .videothek)
+        NewznabClientIdentifier.isValid(value, allowUUID: service == .nzbFinder || service == .videothek, allowLongHex: service == .videothek)
     }
 
     static func allowsNinjaRedirect(from original: URL?, to destination: URL?) -> Bool {
@@ -227,6 +237,7 @@ private final class NewznabRedirectDelegate: NSObject, URLSessionTaskDelegate {
 private struct NewznabRSSItem {
     var title = ""
     var enclosure: URL?
+    var link = ""
     var guid = ""
     var guidAttribute: String?
 }
@@ -239,17 +250,17 @@ private struct NewznabRSSResult {
 }
 
 private extension NewznabRSSItem {
-    func identifier(host: String, allowUUID: Bool = false) -> String? {
+    func identifier(host: String, allowUUID: Bool = false, allowLongHex: Bool = false) -> String? {
         for raw in [guidAttribute, guid].compactMap({ $0 }) {
             let value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-            if NewznabClientIdentifier.isValid(value, allowUUID: allowUUID) { return value }
+            if NewznabClientIdentifier.isValid(value, allowUUID: allowUUID, allowLongHex: allowLongHex) { return value }
             if let url = URLComponents(string: value), url.scheme?.lowercased() == "https",
                url.host?.lowercased() == host, url.user == nil, url.password == nil,
                url.port == nil, url.fragment == nil {
                 let pathParts = url.path.split(separator: "/")
-                if pathParts.count == 2, pathParts[0] == "details", NewznabClientIdentifier.isValid(String(pathParts[1]), allowUUID: allowUUID) { return String(pathParts[1]) }
+                if pathParts.count == 2, pathParts[0] == "details", NewznabClientIdentifier.isValid(String(pathParts[1]), allowUUID: allowUUID, allowLongHex: allowLongHex) { return String(pathParts[1]) }
                 if url.path == "/api", let id = url.queryItems?.first(where: { $0.name == "id" })?.value,
-                   NewznabClientIdentifier.isValid(id, allowUUID: allowUUID) { return id }
+                   NewznabClientIdentifier.isValid(id, allowUUID: allowUUID, allowLongHex: allowLongHex) { return id }
             }
         }
         return nil
@@ -257,7 +268,10 @@ private extension NewznabRSSItem {
 }
 
 private enum NewznabClientIdentifier {
-    static func isValid(_ value: String, allowUUID: Bool = false) -> Bool {
+    static func isValid(_ value: String, allowUUID: Bool = false, allowLongHex: Bool = false) -> Bool {
+        if allowLongHex, value.utf8.count == 40 {
+            return value.utf8.allSatisfy { (48...57).contains($0) || (65...70).contains($0) || (97...102).contains($0) }
+        }
         let pattern = allowUUID
             ? #"^(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"#
             : #"^[0-9a-fA-F]{32}$"#
@@ -307,6 +321,7 @@ private final class NewznabRSSParser: NSObject, XMLParserDelegate {
     func parser(_ parser: XMLParser, foundCharacters string: String) {
         if elements == ["rss", "channel", "item", "title"] { current?.title += string }
         if elements == ["rss", "channel", "item", "guid"] { current?.guid += string }
+        if elements == ["rss", "channel", "item", "link"] { current?.link += string }
     }
 
     func parser(_ parser: XMLParser, foundCDATA data: Data) { self.parser(parser, foundCharacters: String(decoding: data, as: UTF8.self)) }

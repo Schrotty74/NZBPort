@@ -23,6 +23,7 @@ private func videothekRSS(guid: String) -> String {
 }
 
 @Test(arguments: [
+    "0123456789abcdef0123456789abcdef01234567",
     "ae5bc13116be4abb855dfdb7dee1739f",
     "ae5bc131-16be-4abb-855d-fdb7dee1739f"
 ])
@@ -71,4 +72,18 @@ func videothekRejectsMalformedOrUntrustedIdentifiers(_ id: String) async throws 
 @Test func videothekDoesNotFetchCredentialsForOtherHosts() async throws {
     let client = NewznabClient(apiKey: "synthetic", service: .videothek, transport: VideothekTransport([]))
     #expect(try await client.fetchIfApplicable(URL(string: "https://videothek.io.evil/api?t=get&id=ae5bc13116be4abb855dfdb7dee1739f&apikey=synthetic")!) == nil)
+}
+
+@Test(arguments: [true, false])
+func videothekResolvesTrustedDownloadWithoutGUID(_ enclosure: Bool) async throws {
+    let id = "0123456789abcdef0123456789abcdef01234567"
+    let address = "https://videothek.io/api?t=get&amp;id=\(id)&amp;apikey=synthetic"
+    let download = enclosure
+        ? "<enclosure url='\(address)' type='application/x-nzb'/>"
+        : "<link>\(address)</link>"
+    let rss = "<rss><channel><item><title>Title.S01E01-GROUP</title>\(download)</item></channel></rss>"
+    let client = NewznabClient(apiKey: "synthetic", service: .videothek, transport: VideothekTransport([rss]))
+    let result = try await client.resolve(NZBLink("nzblnk:?h=id&t=Title.S01E01-GROUP"))
+    let query = URLComponents(url: result, resolvingAgainstBaseURL: false)?.queryItems
+    #expect(query?.first(where: { $0.name == "id" })?.value == id)
 }

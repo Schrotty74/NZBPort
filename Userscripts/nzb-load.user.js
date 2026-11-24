@@ -3,7 +3,7 @@
 // @description         Finds NZBs from NZBlnk links and sends them to SABnzbd.
 // @description:de_DE   Sucht NZBs zu NZBlnk-Links und übergibt sie an SABnzbd.
 // @author              LordBex
-// @version             v2.3.7
+// @version             v2.3.8
 // @match               *://*/*
 // @inject-into         content
 // @grant               GM_xmlhttpRequest
@@ -2205,7 +2205,7 @@ function drunkenSlugDownload(item, apiKey) {
     }
 }
 
-const videothekID = /^(?:[a-f0-9]{32}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i;
+const videothekID = /^(?:[a-f0-9]{40}|[a-f0-9]{32}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i;
 
 function videothekDownload(item, apiKey) {
     const attrNS = 'http://www.newznab.com/DTD/2010/feeds/attributes/';
@@ -2213,6 +2213,17 @@ function videothekDownload(item, apiKey) {
     const guidAttribute = attrs.find(attribute => attribute.getAttribute('name') === 'guid')?.getAttribute('value');
     const guid = item.querySelector('guid');
     const detailsAttribute = attrs.find(attribute => ['details', 'detailsurl', 'detailsUrl'].includes(attribute.getAttribute('name')))?.getAttribute('value');
+    for (const value of [item.querySelector('enclosure')?.getAttribute('url'), item.querySelector('link')?.textContent]) {
+        if (!value) continue;
+        const url = parseIndexerURL(value.trim());
+        if (url?.origin !== 'https://videothek.io' || url.username || url.password || url.hash || url.pathname !== '/api') continue;
+        const params = url.searchParams;
+        const id = params.get('id');
+        if ([...params].length === 3 && params.get('t') === 'get' && params.get('apikey') === apiKey && id && videothekID.test(id)) {
+            url.search = new URLSearchParams({ t: 'get', id, apikey: apiKey, o: 'xml' });
+            return url;
+        }
+    }
     for (const value of [guidAttribute, guid?.textContent, guid?.getAttribute('id'), item.getAttribute('guid'), detailsAttribute]) {
         if (!value) continue;
         const text = value.trim();
@@ -2237,7 +2248,7 @@ const additionalIndexers = [
     { info: 'NinjaCentral', key: 'ninjacentral_api_key', endpoint: 'https://ninjacentral.co.za/api', download: ninjaCentralDownload, allowRedirectHost: 'ninjacentral.co.za' },
     { info: 'DrunkenSlug', key: 'drunkenslug_api_key', endpoint: 'https://drunkenslug.com/api', download: drunkenSlugDownload },
     { info: 'NZBFinder', key: 'nzbfinder_api_key', endpoint: 'https://nzbfinder.ws/api', download: nzbFinderDownload, userAgent: 'nzb-load/2.3.6 (NZB link search; iOS Userscripts)' },
-    { info: 'Videothek.io', key: 'videothek_api_key', endpoint: 'https://videothek.io/api', download: videothekDownload, userAgent: 'NZBPort/nzb-load/2.3.7 (NZB link search; iOS Userscripts)', xmlOutput: true, apiErrors: true }
+    { info: 'Videothek.io', key: 'videothek_api_key', endpoint: 'https://videothek.io/api', download: videothekDownload, userAgent: 'NZBPort/nzb-load/2.3.8 (NZB link search; iOS Userscripts)', xmlOutput: true, apiErrors: true }
 ];
 
 async function loadFromNewznab(indexer, apiKey, nzb_info, when_failed) {

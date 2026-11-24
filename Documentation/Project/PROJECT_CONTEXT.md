@@ -278,3 +278,9 @@ Der lokale Build und seine Signatur sowie die identische Kopie auf MacSoftware u
 Eine einmalige direkte HTTPS-Anfrage an Videothek mit dem vom Nutzer bereitgestellten Key, t=caps und der aus dem Quellcode gelesenen Mac-Kennung lieferte HTTP 200 und eine XML-Capabilities-Antwort. Diese Anfrage lief als separates lokales Prüfprogramm, nicht als Bedienung der Mac-App. Sie bestätigt keine Such- oder Downloadberechtigung. Es wurde kein zweiter Live-Aufruf und kein iPhone-Netzwerkmitschnitt ausgeführt. Der Key wurde nur im Arbeitsspeicher verwendet, nicht in Dateien oder App-Einstellungen gespeichert und nicht ausgegeben. Der bereinigte Nachweis enthält nur Zeitpunkt, Kennung, Status und XML-Wurzelelement.
 
 Alle 125 automatisierten Tests bestanden für den aktuellen Quellstand, einschließlich der erwarteten Mac-Kennung bei Videothek-Suche und Dateiabruf. Script-Syntax, Quellstand und Script wurden auf private Daten geprüft. Das Script enthält keine ursprüngliche Lizenz- oder Herkunfts-URL-Metadaten; die vorhandene Autorenangabe wurde beibehalten. Die READMEs unterscheiden den neuen Quellstand von den unveränderten Downloadpaketen des Releases 0.2.5. Es wird für diese Quellenbereitstellung kein neues Release oder Tag erstellt.
+
+## Videothek verwendet 40-stellige Hex-IDs
+
+Videothek hat das Format seiner Treffer-IDs bestätigt. Mac-App und iOS-Skript v2.3.8 akzeptieren diese IDs für Videothek, auch aus geprüften Abrufadressen in `link` und `enclosure`. Die Prüfungen mit simulierten Antworten bestanden. Die Mac-App wurde lokal gebaut, ihre Kopie auf MacSoftware geprüft und das Skript unter Downloads und in iCloud aktualisiert. Ein weiterer Live-Abruf steht aus.
+
+Laut Videothek gilt die Freigabe für die festen Präfixe `NZBPort/` und `NZBPort/nzb-load/`. Künftige Versionsnummern sind von derselben Freigabe abgedeckt.

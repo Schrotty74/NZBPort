@@ -4,7 +4,7 @@
 
 Das ursprüngliche [nzb-load-Skript](https://github.com/LordBex/nzb-load) stammt von LordBex. Wir pflegen [unsere Fassung](nzb-load.user.js) als Ergänzung zu NZBPort. Das Skript läuft unabhängig von der Mac-App.
 
-Version `v2.3.7`
+Version `v2.3.8`
 
 ## Änderungen gegenüber dem Original
 
