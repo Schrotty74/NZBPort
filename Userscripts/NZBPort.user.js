@@ -39,6 +39,62 @@
     if (Array.isArray(input.sab_categories)) out.sab_categories=input.sab_categories.flatMap(x=>typeof x==='string'?[{value:x,fav:false}]:typeof x?.value==='string'?[{value:x.value,fav:x.fav===true}]:[]);
     return out;
   };
+  // Versioned backup format; local storage and legacy imports stay unchanged.
+  const backupIndexers = {
+    treasureMaps:'treasure_maps_api_key',
+    newzbay:'newzbay_api_key',
+    ninjaCentral:'ninjacentral_api_key',
+    drunkenSlug:'drunkenslug_api_key',
+    nzbFinder:'nzbfinder_api_key',
+    videothek:'videothek_api_key'
+  };
+  function exportPreferences(input){
+    const v=clean(input);
+    return {
+      format:'NZBPort',
+      schemaVersion:1,
+      general:{outputMode:v.ausgabe},
+      indexers:Object.fromEntries(Object.entries(backupIndexers).map(([name,key])=>[name,v[key]])),
+      sabnzbd:{
+        apiUrl:v.sab_url,
+        apiKey:v.sab_api_key,
+        defaultCategory:v.sab_default_category,
+        categorySubmenu:v.sab_sub_menu,
+        categories:v.sab_categories.map(c=>({name:c.value,favorite:c.fav})),
+        hiddenCategories:[...v.sab_hidden_categories]
+      }
+    };
+  }
+  function importPreferences(input){
+    const record=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
+    if(!record(input))throw Error('Ungültige Einstellungsdatei');
+    if(!Object.hasOwn(input,'format')&&!Object.hasOwn(input,'schemaVersion')){
+      if(!Object.keys(defaults).some(k=>Object.hasOwn(input,k)))throw Error('Keine NZBPort-kompatiblen Einstellungen gefunden');
+      return clean(input);
+    }
+    if(input.format!=='NZBPort')throw Error('Unbekanntes Einstellungsformat');
+    if(input.schemaVersion!==1)throw Error('Nicht unterstützte NZBPort-Formatversion');
+    const {general,indexers,sabnzbd:sab}=input;
+    if(!record(general)||!record(indexers)||!record(sab)||
+      !['sab_menu','sabnzbd','download'].includes(general.outputMode)||
+      !Object.keys(backupIndexers).every(k=>typeof indexers[k]==='string')||
+      !['apiUrl','apiKey','defaultCategory'].every(k=>typeof sab[k]==='string')||
+      typeof sab.categorySubmenu!=='boolean'||
+      !Array.isArray(sab.categories)||!sab.categories.every(c=>record(c)&&typeof c.name==='string'&&typeof c.favorite==='boolean')||
+      !Array.isArray(sab.hiddenCategories)||!sab.hiddenCategories.every(c=>typeof c==='string')){
+      throw Error('Unvollständige oder ungültige NZBPort-Einstellungsdatei');
+    }
+    return clean({
+      ausgabe:general.outputMode,
+      ...Object.fromEntries(Object.entries(backupIndexers).map(([name,key])=>[key,indexers[name]])),
+      sab_url:sab.apiUrl,
+      sab_api_key:sab.apiKey,
+      sab_default_category:sab.defaultCategory,
+      sab_sub_menu:sab.categorySubmenu,
+      sab_categories:sab.categories.map(c=>({value:c.name,fav:c.favorite})),
+      sab_hidden_categories:sab.hiddenCategories
+    });
+  }
   const ready = (async()=>{config=clean(await GM.getValue(storage,defaults));})();
   const persist = async value => {const next=clean(value); await GM.setValue(storage,next); const check=await GM.getValue(storage); if(JSON.stringify(clean(check))!==JSON.stringify(next)) throw Error('Speichern nicht bestätigt'); config=next;};
   function address(base, params={}) {const u=new URL(base); for(const [k,v] of Object.entries(params)) u.searchParams.set(k,String(v)); return u;}
@@ -269,14 +325,14 @@
         }
       } else {
         say(body,'Die Einstellungsdatei enthält API-Schlüssel. Nur privat aufbewahren.','muted');
-        body.append(button('Einstellungen exportieren',()=>saveFile(JSON.stringify(clean(draft),null,2),'NZBPort-settings.json','application/json'),'btn-secondary'));
+        body.append(button('Einstellungen exportieren',()=>saveFile(JSON.stringify(exportPreferences(draft),null,2),'NZBPort-settings.json','application/json'),'btn-secondary'));
         const fileWrap=element('label','Einstellungen importieren');
         const file=element('input',null,{type:'file',accept:'.json,application/json'});
         file.addEventListener('change',async()=>{
           try{
             if(!file.files[0])return;
             if(file.files[0].size>1048576)throw Error('Datei zu groß');
-            draft=clean(JSON.parse(await file.files[0].text()));
+            draft=importPreferences(JSON.parse(await file.files[0].text()));
             status.textContent='Importiert – zum Übernehmen speichern.';
             draw('transfer');
             status.textContent='Importiert – zum Übernehmen speichern.';
