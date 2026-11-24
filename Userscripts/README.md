@@ -28,5 +28,3 @@ The native Mac client has its own fixed identification string in [NewznabClient.
 ```text
 NZBPort/0.2.5 (+https://github.com/Schrotty74/NZBPort)
 ```
-
-Do not put API keys in this repository, download links, issues, or support messages.

@@ -28,5 +28,3 @@ Der Mac-Client verwendet eine eigene feste Kennung. Sie steht im [Quellcode des 
 ```text
 NZBPort/0.2.5 (+https://github.com/Schrotty74/NZBPort)
 ```
-
-API-Keys gehören weder ins Repository noch in Downloadlinks, GitHub-Issues oder Support-Nachrichten.
