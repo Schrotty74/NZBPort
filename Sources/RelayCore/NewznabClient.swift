@@ -2,10 +2,11 @@ import Foundation
 
 /// Searches Newznab-compatible RSS APIs and resolves downloads without forwarding API credentials.
 public actor NewznabClient: NZBSearchProvider {
-    public enum Service: Sendable, Equatable { case treasureMaps, newzBay, ninjaCentral, drunkenSlug, nzbFinder }
+    public static let userAgent = "NZBPort/0.2.5 (+https://github.com/Schrotty74/NZBPort)"
+    public enum Service: Sendable, Equatable { case treasureMaps, newzBay, ninjaCentral, drunkenSlug, nzbFinder, videothek }
 
     nonisolated public var name: String {
-        switch service { case .treasureMaps: "Treasure Maps"; case .newzBay: "NewzBay"; case .ninjaCentral: "NinjaCentral"; case .drunkenSlug: "DrunkenSlug"; case .nzbFinder: "NZBFinder" }
+        switch service { case .treasureMaps: "Treasure Maps"; case .newzBay: "NewzBay"; case .ninjaCentral: "NinjaCentral"; case .drunkenSlug: "DrunkenSlug"; case .nzbFinder: "NZBFinder"; case .videothek: "Videothek.io" }
     }
 
     private let service: Service
@@ -23,6 +24,7 @@ public actor NewznabClient: NZBSearchProvider {
             case .ninjaCentral: "https://ninjacentral.co.za/api"
             case .drunkenSlug: "https://drunkenslug.com/api"
             case .nzbFinder: "https://nzbfinder.ws/api"
+            case .videothek: "https://videothek.io/api"
             }
         }())!
         self.transport = transport ?? NewznabTransport(allowNinjaRedirects: service == .ninjaCentral)
@@ -69,8 +71,8 @@ public actor NewznabClient: NZBSearchProvider {
                 throw RelayError.message("The search service returned an invalid NZB download link.")
             }
             return download
-        case .newzBay, .ninjaCentral, .drunkenSlug, .nzbFinder:
-            guard let id = item.identifier(host: endpoint.host!, allowUUID: service == .nzbFinder) else { throw RelayError.message("The search service returned an invalid NZB download link.") }
+        case .newzBay, .ninjaCentral, .drunkenSlug, .nzbFinder, .videothek:
+            guard let id = item.identifier(host: endpoint.host!, allowUUID: service == .nzbFinder || service == .videothek) else { throw RelayError.message("The search service returned an invalid NZB download link.") }
             return try buildAuthenticatedDownload(id: id)
         }
     }
@@ -85,7 +87,7 @@ public actor NewznabClient: NZBSearchProvider {
                 throw RelayError.message("The search service returned an invalid NZB download link.")
             }
             identifier = download.lastPathComponent
-        case .newzBay, .ninjaCentral, .drunkenSlug, .nzbFinder:
+        case .newzBay, .ninjaCentral, .drunkenSlug, .nzbFinder, .videothek:
             guard download.host?.lowercased() == endpoint.host else { return nil }
             guard let id = authenticatedDownloadIdentifier(download, apiKey: apiKey) else {
                 throw RelayError.message("The search service returned an invalid NZB download link.")
@@ -95,7 +97,7 @@ public actor NewznabClient: NZBSearchProvider {
         var request = URLRequest(url: download)
         request.timeoutInterval = 25
         request.setValue("application/x-nzb, application/xml, text/xml", forHTTPHeaderField: "Accept")
-        if service == .nzbFinder { request.setValue("NZBPort/0.2.5 (NZB link search; https://github.com/Schrotty74/NZBPort)", forHTTPHeaderField: "User-Agent") }
+        request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
         let result = try await perform(request, failure: "The search service could not download the NZB file.")
         guard (200..<300).contains(result.status) else {
             throw RelayError.message("The search service could not download the NZB file.")
@@ -110,7 +112,7 @@ public actor NewznabClient: NZBSearchProvider {
         var request = URLRequest(url: url)
         request.timeoutInterval = 20
         request.setValue(accept, forHTTPHeaderField: "Accept")
-        if service == .nzbFinder { request.setValue("NZBPort/0.2.5 (NZB link search; https://github.com/Schrotty74/NZBPort)", forHTTPHeaderField: "User-Agent") }
+        request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
         return request
     }
 
@@ -125,7 +127,7 @@ public actor NewznabClient: NZBSearchProvider {
     }
 
     private func isValidIdentifier(_ value: String) -> Bool {
-        NewznabClientIdentifier.isValid(value, allowUUID: service == .nzbFinder)
+        NewznabClientIdentifier.isValid(value, allowUUID: service == .nzbFinder || service == .videothek)
     }
 
     static func allowsNinjaRedirect(from original: URL?, to destination: URL?) -> Bool {

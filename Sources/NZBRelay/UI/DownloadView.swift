@@ -26,7 +26,9 @@ struct DownloadView: View {
                     Text(L("Kategorie wählen")).font(.headline)
                     Spacer()
                     Button { model.loadCategories() } label: { Image(systemName: "arrow.clockwise") }
-                        .buttonBorderShape(.circle).help(L("Kategorien aktualisieren")).disabled(model.busy)
+                        .buttonBorderShape(.circle)
+                        .relayInteractiveRoundControl()
+                        .help(L("Kategorien aktualisieren")).disabled(model.busy)
                 }
                 if model.busy { BusyRow(text: L(model.progress)) }
                 if !model.categories.isEmpty {

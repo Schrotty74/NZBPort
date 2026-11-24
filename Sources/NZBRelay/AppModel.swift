@@ -37,6 +37,7 @@ final class AppModel {
     private static let ninjaCentralPreference = "ninjaCentralAPIKey"
     private static let drunkenSlugPreference = "drunkenSlugAPIKey"
     private static let nzbFinderPreference = "nzbFinderAPIKey"
+    private static let videothekPreference = "videothekAPIKey"
 
     var screen: Screen = .downloads
     let appearanceSettings: AppearanceSettings
@@ -55,6 +56,7 @@ final class AppModel {
     var ninjaCentralKey = ""
     var drunkenSlugKey = ""
     var nzbFinderKey = ""
+    var videothekKey = ""
     var newCategoryName = ""
     var categoryToDelete: String?
     private(set) var categoryMutationInProgress = false
@@ -84,6 +86,7 @@ final class AppModel {
     private var savedNinjaCentralKey = ""
     private var savedDrunkenSlugKey = ""
     private var savedNZBFinderKey = ""
+    private var savedVideothekKey = ""
     @ObservationIgnored private(set) var task: Task<Void, Never>?
     @ObservationIgnored var closeAfterSuccess: (() -> Void)?
 
@@ -106,6 +109,7 @@ final class AppModel {
         ninjaCentralKey = defaults.string(forKey: Self.ninjaCentralPreference) ?? ""
         drunkenSlugKey = defaults.string(forKey: Self.drunkenSlugPreference) ?? ""
         nzbFinderKey = defaults.string(forKey: Self.nzbFinderPreference) ?? ""
+        videothekKey = defaults.string(forKey: Self.videothekPreference) ?? ""
         configured = (try? ServerConnection(address: address, apiKey: key)) != nil
         savedAddress = address
         savedKey = key
@@ -114,6 +118,7 @@ final class AppModel {
         savedNinjaCentralKey = ninjaCentralKey
         savedDrunkenSlugKey = drunkenSlugKey
         savedNZBFinderKey = nzbFinderKey
+        savedVideothekKey = videothekKey
         if !configured { screen = .settings }
         monitor.configure(try? ServerConnection(address: savedAddress, apiKey: savedKey))
     }
@@ -260,11 +265,13 @@ final class AppModel {
             ninjaCentralKey = ninjaCentralKey.trimmingCharacters(in: .whitespacesAndNewlines)
             drunkenSlugKey = drunkenSlugKey.trimmingCharacters(in: .whitespacesAndNewlines)
             nzbFinderKey = nzbFinderKey.trimmingCharacters(in: .whitespacesAndNewlines)
+            videothekKey = videothekKey.trimmingCharacters(in: .whitespacesAndNewlines)
             newzBayKey = newzBayKey.trimmingCharacters(in: .whitespacesAndNewlines)
             savedNewzBayKey = newzBayKey
             savedNinjaCentralKey = ninjaCentralKey
             savedDrunkenSlugKey = drunkenSlugKey
             savedNZBFinderKey = nzbFinderKey
+            savedVideothekKey = videothekKey
             monitor.configure(connection)
             defaults.set(address, forKey: "serverAddress")
             defaults.set(key, forKey: "sabAPIKey")
@@ -273,6 +280,7 @@ final class AppModel {
             defaults.set(ninjaCentralKey.isEmpty ? nil : ninjaCentralKey, forKey: Self.ninjaCentralPreference)
             defaults.set(drunkenSlugKey.isEmpty ? nil : drunkenSlugKey, forKey: Self.drunkenSlugPreference)
             defaults.set(nzbFinderKey.isEmpty ? nil : nzbFinderKey, forKey: Self.nzbFinderPreference)
+            defaults.set(videothekKey.isEmpty ? nil : videothekKey, forKey: Self.videothekPreference)
             configured = true
             screen = .downloads
             loadCategories()
@@ -383,6 +391,11 @@ final class AppModel {
         persistCategoryPreferences()
     }
 
+    func reorderFavorites(_ visibleFavorites: [String], moving sources: [String], before destination: String?) {
+        preferences.reorderFavorites(visibleFavorites, moving: sources, before: destination)
+        persistCategoryPreferences()
+    }
+
     private func persistCategoryPreferences() {
         if let data = try? JSONEncoder().encode(preferences) { defaults.set(data, forKey: "categoryPreferences") }
     }
@@ -454,7 +467,8 @@ final class AppModel {
             (.newzBay, savedNewzBayKey),
             (.ninjaCentral, savedNinjaCentralKey),
             (.drunkenSlug, savedDrunkenSlugKey),
-            (.nzbFinder, savedNZBFinderKey)
+            (.nzbFinder, savedNZBFinderKey),
+            (.videothek, savedVideothekKey)
         ]
         return keys.compactMap { service, key in
             key.isEmpty ? nil : NewznabClient(apiKey: key, service: service)
@@ -556,6 +570,7 @@ final class AppModel {
         ninjaCentralKey = savedNinjaCentralKey
         drunkenSlugKey = savedDrunkenSlugKey
         nzbFinderKey = savedNZBFinderKey
+        videothekKey = savedVideothekKey
         screen = .settings
         notice = nil
     }

@@ -37,6 +37,7 @@
 | 6 | NinjaCentral | Optional, separat gespeichert |
 | 7 | DrunkenSlug | Optional, separat gespeichert |
 | 8 | NZBFinder | Optional, separat gespeichert; API-Zugriff erfordert Premium-Mitgliedschaft |
+| 9 | Videothek | Optional, separat gespeichert; API-Berechtigung und zugelassenes Tool erforderlich |
 
 - **Anfragen an Anbieter:** Ein eingerichteter Anbieter erhält den Releasetitel und nur seinen eigenen API-Key. Die Keys werden erst nach dem ausdrücklichen Speichern lokal und unverschlüsselt abgelegt. Zum Deaktivieren leerst du das jeweilige Feld und speicherst erneut.
 - **NZB-Abruf:** NZBPort lädt Treffer der Indexer selbst und übergibt die NZB-Datei an SABnzbd. Der Indexer-Key wird nicht an SABnzbd gesendet.
@@ -72,8 +73,10 @@
 1. Der Browser übergibt einen `nzblnk:`-Link an die registrierte macOS-App. Zuvor kann der Browser eine Bestätigung verlangen.
 2. NZBPort liest Suchkennung (`h`), Titel (`t`), optionales Passwort (`p`) und wiederholte Gruppenfelder (`g`). Prozentkodierter Text wird unterstützt; abgekürzte `a.b.`-Gruppen werden für NZBIndex ausgeschrieben.
 3. Die App ruft die aktuellen SABnzbd-Kategorien ab und berücksichtigt deine lokal ausgeblendeten Kategorien. Über das Suchfeld kannst du die Kategoriebuttons nach Namen filtern.
-4. Mit der Kategorieauswahl beginnt die Suche bei NZBIndex, NZBKing und BinSearch. Bleibt sie erfolglos, sucht die App bei eingerichteten Anbietern in dieser Reihenfolge nach dem Releasetitel: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug und NZBFinder. Für jeden ist ein eigener gespeicherter API-Key nötig.
+4. Mit der Kategorieauswahl beginnt die Suche bei NZBIndex, NZBKing und BinSearch. Bleibt sie erfolglos, sucht die App bei eingerichteten Anbietern in dieser Reihenfolge nach dem Releasetitel: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek. Für jeden ist ein eigener gespeicherter API-Key nötig.
 5. NZBPort übergibt die öffentliche Downloadadresse oder die von einem Indexer geladene NZB-Datei zusammen mit Titel, Kategorie und optionalem Archivpasswort an SABnzbd. SABnzbd lädt die Usenet-Artikel.
 6. Nach einer bestätigten Übergabe schließt sich das Fenster oder der nächste wartende Link erscheint. Bei einem Fehler bleibt die Meldung sichtbar. Läuft eine Übergabe in ein Timeout, prüfe vor einem neuen Versuch die SABnzbd-Warteschlange, um doppelte Aufträge zu vermeiden.
 
 Mehrere unterschiedliche Trefferkennungen lehnt der NZBIndex-Provider ab; anschließend geht die Ausweichsuche weiter. Die HTML-Provider verwenden den ersten unterstützten Treffer ihrer Antwort. Suchtreffer garantieren weder Inhalt noch Verfügbarkeit. NZBPort verwaltet keine Usenet-Zugänge.
+
+Videothek wurde im Quellstand nach Release 0.2.5 ergänzt. Eine direkte angemeldete Capabilities-Anfrage lieferte HTTP 200; Suche und NZB-Abruf sind damit nicht bestätigt. Die Freigabe des Tools durch den Anbieter steht noch aus.

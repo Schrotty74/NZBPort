@@ -19,7 +19,7 @@
 
 ## Links, Kategorien und Downloads
 
-- Die Suche läuft nacheinander über NZBIndex, NZBKing und BinSearch. Danach folgen Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug und NZBFinder in dieser Reihenfolge, sofern ihr jeweiliger API-Key gespeichert ist. Die öffentliche NZBIndex-Suche benötigt keinen separaten API-Key.
+- Die Suche läuft nacheinander über NZBIndex, NZBKing und BinSearch. Danach folgen Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek in dieser Reihenfolge, sofern ihr jeweiliger API-Key gespeichert ist. Die öffentliche NZBIndex-Suche benötigt keinen separaten API-Key.
 - Kategorien von SABnzbd laden. Neue Kategorien nur nach ausdrücklichem Hinzufügen durch den Nutzer in SABnzbd anlegen; vorhandene Kategorien nicht überschreiben. Kategorien nur nach ausdrücklicher Löschaktion mit Bestätigung auch in SABnzbd löschen; die Standardkategorie bleibt geschützt. Ausblenden, Wiederherstellen und Favoriten bleiben lokale Anzeigeentscheidungen.
 - Erst nach Kategorieauswahl senden. Erfolgreiche Übergabe nur nach SABnzbd-Bestätigung melden.
 - Unklare Übertragungsfehler nicht automatisch erneut senden. Duplikatwarnung und manuelle Entscheidung erhalten.
@@ -31,7 +31,7 @@
 - Kein Schlüsselbund: SABnzbd-Adresse und API-Key werden nach ausdrücklichem Speichern lokal und unverschlüsselt in App-Einstellungen gehalten. Das ist eine bestätigte Nutzerentscheidung.
 - Keine echten API-Keys, privaten Serveradressen, persönlichen NZBlnk-Links, Archivpasswörter oder unbereinigten Screenshots in Quellen, Dokumentation, Logs oder Veröffentlichungen aufnehmen.
 - SABnzbd-Key nur an den konfigurierten Server senden, nicht an Suchdienste oder in Browser-URLs.
-- Die API-Keys für Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug und NZBFinder erst beim ausdrücklichen Speichern lokal und unverschlüsselt in den App-Einstellungen ablegen. Nur der jeweilige Anbieter erhält seinen Key für Suche und NZB-Abruf. NZBPort übergibt die geladene NZB-Datei an SABnzbd, da die Downloadadresse den Key enthalten kann.
+- Die API-Keys für Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek erst beim ausdrücklichen Speichern lokal und unverschlüsselt in den App-Einstellungen ablegen. Nur der jeweilige Anbieter erhält seinen Key für Suche und NZB-Abruf. NZBPort übergibt die geladene NZB-Datei an SABnzbd, da die Downloadadresse den Key enthalten kann.
 - Keine festen lokalen Benutzer-, Installations- oder Datenträgerpfade einbauen. Ressourcen relativ zum Bundle und Projektdateien relativ zum Repository laden.
 - Die bestehende lokale Bundle-ID nicht unbemerkt durch die öffentliche Kennung ersetzen: Einstellungen sind daran gebunden. Keine privaten Kennungen in öffentliche Pakete übernehmen.
 

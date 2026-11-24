@@ -159,18 +159,21 @@ func loginRefreshReportsPermanentOrExhaustedFailure(status: Int) async {
     model.ninjaCentralKey = "unsaved"
     model.drunkenSlugKey = "unsaved"
     model.nzbFinderKey = "unsaved"
+    model.videothekKey = "unsaved"
     model.openSettings()
     #expect(model.treasureMapsKey.isEmpty)
     #expect(model.newzBayKey.isEmpty)
     #expect(model.ninjaCentralKey.isEmpty)
     #expect(model.drunkenSlugKey.isEmpty)
     #expect(model.nzbFinderKey.isEmpty)
+    #expect(model.videothekKey.isEmpty)
 
     model.treasureMapsKey = " synthetic-treasure-key "
     model.newzBayKey = " synthetic-newzbay-key "
     model.ninjaCentralKey = " synthetic-ninja-key "
     model.drunkenSlugKey = " synthetic-drunken-key "
     model.nzbFinderKey = " synthetic-finder-key "
+    model.videothekKey = " synthetic-videothek-key "
     model.save()
     await model.task?.value
     let restored = AppModel(defaults: defaults, client: client)
@@ -179,17 +182,20 @@ func loginRefreshReportsPermanentOrExhaustedFailure(status: Int) async {
     #expect(restored.ninjaCentralKey == "synthetic-ninja-key")
     #expect(restored.drunkenSlugKey == "synthetic-drunken-key")
     #expect(restored.nzbFinderKey == "synthetic-finder-key")
+    #expect(restored.videothekKey == "synthetic-videothek-key")
 
     restored.treasureMapsKey = " "
     restored.ninjaCentralKey = " "
     restored.drunkenSlugKey = " "
     restored.nzbFinderKey = " "
+    restored.videothekKey = " "
     restored.save()
     await restored.task?.value
     #expect(defaults.string(forKey: "treasureMapsAPIKey") == nil)
     #expect(defaults.string(forKey: "ninjaCentralAPIKey") == nil)
     #expect(defaults.string(forKey: "drunkenSlugAPIKey") == nil)
     #expect(defaults.string(forKey: "nzbFinderAPIKey") == nil)
+    #expect(defaults.string(forKey: "videothekAPIKey") == nil)
     #expect(defaults.string(forKey: "newzBayAPIKey") == "synthetic-newzbay-key")
     #expect(defaults.string(forKey: "sabAPIKey") == "synthetic-sab-key")
 }

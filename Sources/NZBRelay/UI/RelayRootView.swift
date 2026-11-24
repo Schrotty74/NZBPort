@@ -10,6 +10,10 @@ struct RelayRootView: View {
     @State private var measuredBodyHeight: CGFloat?
     @State private var measuredFooterHeight: CGFloat?
 
+    private var scrollEdgeStyle: ScrollEdgeEffectStyle? {
+        if #available(macOS 27.0, *) { .hard } else { nil }
+    }
+
     private func reportMeasuredHeight() {
         guard let measuredHeaderHeight, let measuredBodyHeight, let measuredFooterHeight else { return }
         fitContent(measuredHeaderHeight + measuredBodyHeight + measuredFooterHeight)
@@ -62,6 +66,7 @@ struct RelayRootView: View {
                         reportMeasuredHeight()
                     }
                 }
+                .scrollEdgeEffectStyle(scrollEdgeStyle, for: [.top, .bottom])
                 .onChange(of: model.notice) { _, notice in
                     if notice != nil { reader.scrollTo("relayNotice", anchor: .top) }
                 }
@@ -85,20 +90,13 @@ struct RelayRootView: View {
             }
         }
         .overlay { if dropTargeted { RoundedRectangle(cornerRadius: 12).stroke(model.appearanceSettings.theme.accent, lineWidth: 3).allowsHitTesting(false) } }
-        .onDrop(of: [.fileURL, .url], isTargeted: $dropTargeted) { providers in
-            for provider in providers {
-                let type = provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) ? UTType.fileURL.identifier : UTType.url.identifier
-                provider.loadItem(forTypeIdentifier: type, options: nil) { item, _ in
-                    let url: URL?
-                    if let data = item as? Data { url = URL(dataRepresentation: data, relativeTo: nil) }
-                    else if let value = item as? URL { url = value }
-                    else if let value = item as? String { url = URL(string: value) }
-                    else { url = nil }
-                    if let url { Task { @MainActor in model.receive([url]) } }
-                }
-            }
-            return !providers.isEmpty
+        .onDrop(of: [.fileURL, .url], delegate: RelayImportDropDelegate(
+            isTargeted: $dropTargeted, receive: importProviders
+        ))
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
+            dropTargeted = false
         }
+        .onChange(of: model.screen) { _, _ in dropTargeted = false }
         .fileExporter(
             isPresented: $model.exportPresented,
             item: model.exportFile.map { NZBExportItem(data: $0.data) },
@@ -141,5 +139,39 @@ struct RelayRootView: View {
         .background { RelayBackground(style: model.appearanceSettings.background) }
         .preferredColorScheme(model.appearanceSettings.mode.colorScheme)
         .relayGlassControls()
+    }
+    private func importProviders(_ providers: [NSItemProvider]) -> Bool {
+        for provider in providers {
+            let type = provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) ? UTType.fileURL.identifier : UTType.url.identifier
+            provider.loadItem(forTypeIdentifier: type, options: nil) { item, _ in
+                let url: URL?
+                if let data = item as? Data { url = URL(dataRepresentation: data, relativeTo: nil) }
+                else if let value = item as? URL { url = value }
+                else if let value = item as? String { url = URL(string: value) }
+                else { url = nil }
+                if let url { Task { @MainActor in model.receive([url]) } }
+            }
+        }
+        return !providers.isEmpty
+    }
+}
+
+
+private struct RelayImportDropDelegate: DropDelegate {
+    @Binding var isTargeted: Bool
+    let receive: ([NSItemProvider]) -> Bool
+
+    func validateDrop(info: DropInfo) -> Bool {
+        info.hasItemsConforming(to: [.fileURL, .url])
+    }
+
+    func dropEntered(info: DropInfo) { isTargeted = validateDrop(info: info) }
+    func dropExited(info: DropInfo) { isTargeted = false }
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: validateDrop(info: info) ? .copy : .cancel)
+    }
+    func performDrop(info: DropInfo) -> Bool {
+        isTargeted = false
+        return receive(info.itemProviders(for: [.fileURL, .url]))
     }
 }

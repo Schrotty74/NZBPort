@@ -84,6 +84,8 @@ private struct IndexerSettingsSection: View {
                 IndexerKeyField(name: "DrunkenSlug", key: $model.drunkenSlugKey)
                 Divider()
                 IndexerKeyField(name: "NZBFinder", key: $model.nzbFinderKey)
+                Divider()
+                IndexerKeyField(name: L("Videothek.io"), key: $model.videothekKey)
                 Text(L("Die API-Keys werden lokal und unverschlüsselt gespeichert."))
                     .font(.system(size: 11)).foregroundStyle(.secondary)
             }

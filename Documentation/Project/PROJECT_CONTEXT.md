@@ -1,6 +1,6 @@
 # Projektkontext – NZBPort
 
-Stand: 23. November 2026.
+Stand: 24. November 2026.
 
 ## Projekt und Git-Stand
 
@@ -224,3 +224,57 @@ Alle 119 automatisierten Swift-Tests bestanden. Zusätzliche Tests prüfen UUIDs
 23. November 2026: Auf ausdrücklichen Auftrag für das GitHub-Vorabrelease vorbereitet. Quellen und öffentliche Dokumentation enthalten die Änderungen seit 0.2.4: drei weitere Indexer, NZB-Speicherung, eigener Kategorienbereich mit bestätigtem Anlegen und Löschen in SABnzbd, getrennte Verbindungsbereiche und korrigierte automatische Fensterhöhe. Beide READMEs enthalten zehn Hauptfunktionen und verlinken die vollständigen Feature-Guides. Versionshinweise sind Englisch.
 
 Alle 119 Tests bestanden erneut für den Release-Stand. Die Pakete verwenden die öffentliche Bundle-ID; der normale lokale Build behält seine bestehende Kennung. Apple-Silicon-Architektur, Ad-hoc-Signaturen, ZIP-CRC, DMG-Integrität, die enthaltenen Apps, Applications-Verknüpfung und SHA-256-Prüfsummen wurden geprüft. Quellen, öffentliche Dokumente und Paketinhalt wurden auf echte Zugangsdaten, private Serveradressen, Benutzerpfade und private Kennungen geprüft. Lokale App-Einstellungen sind nicht enthalten. Die App wurde für diese Releaseprüfung nicht gestartet. Prüfnachweise liegen lokal unter Build/Verification/0.2.5; Pakete und englische Versionshinweise unter Build/Release/0.2.5. Das iOS-Userscript bleibt ein separates lokales Script und ist kein Bestandteil des Mac-Pakets.
+
+## Lokale Videothek-Ergänzung
+
+24. November 2026: Videothek.io ist als optionaler Suchdienst nach NZBFinder ergänzt. Ein eigenes API-Key-Feld folgt den bisherigen Speicherregeln; ohne gespeicherten Key wird der Anbieter übersprungen. Suche und NZB-Abruf verwenden https://videothek.io/api und eine ehrliche NZBPort-Kennung. Streng geprüfte 32-stellige Hex-IDs und UUIDs werden unterstützt; diese Formate sind für Videothek nur mit synthetischen Antworten geprüft. Der öffentliche Capabilities-Abruf bestätigt die Titelsuche. Laut [Anbieterdokumentation](https://videothek.io/wiki?article=api-und-feeds) benötigt die tatsächliche API-Nutzung Premium und ein zugelassenes Tool. Die Ergänzung wurde auf Nutzerwunsch zunächst ohne Premium vorbereitet; eine angemeldete Suche und ein NZB-Abruf wurden nicht getestet.
+
+Alle 122 automatisierten Swift-Tests bestanden. Lokaler Build und Signaturprüfung waren erfolgreich; die bisherige lokale Bundle-ID blieb erhalten. Die identische App-Kopie unter MacSoftware/Download wurde aktualisiert und geprüft. Die App wurde nicht gestartet und die neue Zeile nicht in einer Bedienungssitzung geprüft. Keine Veröffentlichung.
+
+Das separate iOS-Userscript v2.3.7 enthält Videothek ebenfalls als letzten optionalen Anbieter. Die vorhandene iCloud-Kopie war die Grundlage; die fehlende Downloads-Kopie wurde daraus wiederhergestellt. Beide Dateien sind identisch. Syntax und statische Prüfungen bestanden. Die simulierten Anfrageabläufe konnten nicht erfolgreich ausgeführt werden; eine Prüfung auf dem iPhone steht aus. Die Kennung für die Freigabe lautet `NZBPort/nzb-load/2.3.7 (NZB link search; iOS Userscripts)`.
+
+## Lokale Oberflächenergänzungen für macOS 27
+
+24. November 2026: Der Zahnradknopf ist unter macOS 27 ein eigener SwiftUI-Button mit nativem Liquid-Glass-Hintergrund. Beim Darüberfahren wächst er auf 118 Prozent, beim Drücken schrumpft er auf 82 Prozent; eine Federanimation verbindet die Zustände. Eine Akzentumrandung und ein Lichtschein verstärken die Rückmeldung. Bei reduzierter Bewegung entfallen Skalierung und Animation. Der Button öffnet über NSHostingMenu weiterhin ein natives Menü mit den bisherigen Aktionen und Untermenüs. Sein unsichtbarer Positionsanker nimmt keine Mausereignisse an. Die vorherige Ergänzung am nativen Menu hatte keine deutlich sichtbare Federbewegung ergeben. Das Kategorie-Suchfeld verwendet weiterhin interaktives reguläres Glas. Unter macOS 26 bleibt die bisherige Darstellung erhalten.
+
+Favorisierte Kategorien lassen sich unter macOS 27 mit den neuen SwiftUI-Reorder-Funktionen ziehen. Nur angezeigte Favoriten ändern ihre lokal gespeicherte Reihenfolge. Verborgene und nicht verfügbare Favoriten behalten ihre Plätze; Ablegen auf sich selbst ändert nichts. Die Pfeile bleiben für Tastaturbedienung und macOS 26 erhalten. Es werden keine Kategorien in SABnzbd geändert.
+
+Zahnrad, Kategoriebuttons, Kategorie-Suchfeld und Hinweiskarten berücksichtigen unter macOS 27 die Systemeinstellung „Ränder anzeigen“. Hinweiskarten verwenden konzentrische Rundungen relativ zur umgebenden Containerform; unter macOS 26 bleibt der bisherige feste Radius erhalten. Die verwendete ConcentricRectangle-API ist bereits ab macOS 26 verfügbar; ihr Einsatz ist hier zur Wahrung der bisherigen Darstellung auf macOS 27 begrenzt.
+
+Alle 125 automatisierten Tests bestanden, einschließlich Favoritenreihenfolge und Speicherung, verschiedener gerenderter Knopfzustände sowie erhaltener nativer Menüaktionen und Untermenüs. Ruhe-, Hover- und Druckzustand wurden ohne sichtbares Fenster gerendert und visuell verglichen. Dies prüft die dargestellten Zustände, nicht die vollständige zeitliche Animation. Bildnachweise liegen lokal unter Build/Verification/interactive-glass; macos27-tests.log und interactive-glass-build.log halten die Prüfungen fest. Die Systemeinstellung für Umrandungen wurde nicht verändert. Ein echter Drag-and-drop-Vorgang und die endgültige Klickanimation wurden nach dem Nutzerwunsch nach Hintergrundarbeit nicht erneut im Vordergrund bedient.
+
+Lokaler Build, Sprachdateien, Ad-hoc-Signatur und identische MacSoftware-Kopie unter Download wurden geprüft. Die lokale Bundle-ID blieb erhalten. Die App wurde für den letzten Build nicht neu gestartet oder in den Vordergrund geholt. Keine Veröffentlichung.
+
+## Suchfeld geprüft, Aktualisieren-Button erweitert
+
+24. November 2026: Nach ausdrücklicher Zustimmung des Nutzers wurde „Kategorie suchen“ in der laufenden App unter macOS 27 beim Darüberfahren und Anklicken aufgenommen. Der laufende Prozess war nach dem Build vom 24. November um 07:04:20 gestartet. In der Aufnahme ändern sich die Glasreflexe leicht; eine deutliche Federbewegung wie am Zahnrad ist nicht erkennbar. Die frühere Beschreibung eines deutlich sichtbaren neuen Suchfeldeffekts ist damit nicht bestätigt. Ein auf das Suchfeld zugeschnittener Mitschnitt und die Bildfolge liegen lokal unter Build/Verification/searchfield; die vollständige Fensteraufnahme wurde gelöscht. Kein Download wurde gesendet und keine Einstellung geändert.
+
+Auf weiteren Nutzerauftrag verwendet der Aktualisieren-Button rechts neben „Kategorie wählen“ unter macOS 27 denselben eigenen Glas-Buttonstil wie das Zahnrad. Der Kategorienabruf und die Sperre während laufender Aktionen bleiben erhalten; unter macOS 26 bleibt der bisherige Stil. Ruhe-, Hover- und Druckzustand wurden für beide Symbole im Hintergrund gerendert und visuell verglichen. Der gezielte Rendering-Test bestand mit zwei Testfällen. Ein tatsächlicher Klick auf den neuen Aktualisieren-Button wurde nicht ausgeführt; die zeitliche Animation dieses Buttons ist damit nicht separat bestätigt. Der neue Build und seine Signatur sowie die identische Kopie unter MacSoftware/Download wurden geprüft. Kein erneuter vollständiger Testlauf und keine Veröffentlichung; die laufende App wurde nicht neu gestartet.
+
+## Zweiter Refresh-Button in der Kategorienverwaltung
+
+24. November 2026: Die Hintergrundaufnahme der laufenden Ansicht zeigte den weiteren Refresh-Button auf „Deine Kategorien“. Dieser verwendete im vorherigen Stand noch den normalen Stil; nur der Button neben „Kategorie wählen“ war zuvor angepasst. Auch der zweite Button nutzt jetzt unter macOS 27 denselben interaktiven Glas-Buttonstil wie das Zahnrad. Seine Aktion und Sperrbedingungen sind unverändert.
+
+Nach ausdrücklicher Zustimmung zur sichtbaren Bedienung wurde die App nach dem Build neu gestartet, „Deine Kategorien“ geöffnet und der tatsächliche Button beim Darüberfahren und Anklicken aufgenommen. Die Bildfolge zeigt Kreis, Vergrößerung, Druckbewegung und Rückbewegung am echten Button. Der Klick rief nur die Kategorien ab; es wurde keine Kategorie geändert und kein Download gesendet. Der zugeschnittene Mitschnitt liegt unter Build/Verification/category-refresh; die vollständige Fensteraufnahme wurde entfernt. Build, Signatur und identische MacSoftware-Kopie unter Download wurden geprüft. Die bisherigen Rendering-Tests des unveränderten gemeinsamen Stils wurden nicht erneut ausgeführt. Keine Veröffentlichung.
+
+## Favoriten-Ziehen und Drop-Markierung korrigiert
+
+24. November 2026: Die zunächst verwendete Reorder-Anbindung startete beziehungsweise übernahm den Drag in der tatsächlichen Kategorienansicht nicht zuverlässig. Sie wurde unter macOS 27 durch eine direkte Ziehgeste der Favoritenzeile ersetzt. Die gemessene Zeilenhöhe bestimmt die neue Position; geändert und gespeichert wird die lokale Reihenfolge erst beim Loslassen. Die Pfeile und der bisherige macOS-26-Weg bleiben erhalten. Es wird nichts in SABnzbd geändert.
+
+Die gelbe Fensterumrandung war die hängen gebliebene Datei-/Link-Drop-Markierung. Ein DropDelegate setzt sie beim Verlassen und Ablegen zurück; zusätzlich wird sie bei Ansichtswechsel und Deaktivierung der App entfernt. Der bisherige Datei-/Link-Import bleibt bestehen.
+
+Im zuletzt gebauten und laufenden Stand wurde mit Nutzerzustimmung ein echter Maus-Drag geprüft: „serien, filme“ änderte sich sichtbar und in den gespeicherten Einstellungen zu „filme, serien“. Dabei erschien keine gelbe Drop-Umrandung. Beide vorübergehend gesetzten Favoriten wurden anschließend per Oberfläche entfernt, entsprechend dem vorgefundenen Zustand ohne Favoriten. Build und Signatur sowie die identische MacSoftware-Kopie unter Download wurden geprüft. Auf ausdrücklichen Nutzerwunsch keine weiteren wiederholten Prüfungen oder neuen vollständigen Testläufe. Kein Commit, Push oder Release.
+
+## Native Scrollkanten
+
+24. November 2026: Der ScrollView im Hauptfenster verwendet unter macOS 27 ausdrücklich Apples harten Scrollkanteneffekt oben und unten. Unter macOS 26 bleibt die automatische Darstellung erhalten. Die API scrollEdgeEffectStyle und der Stil hard sind bereits ab macOS 26 verfügbar; die Auswahl ist hier auf macOS 27 begrenzt. Der Effekt ist eine native Systemfunktion, keine zusätzliche selbst gezeichnete Animation.
+
+Der lokale Build und seine Signatur sowie die identische Kopie auf MacSoftware unter Download wurden geprüft. Die App wurde nach anfänglicher Zustimmung zur sichtbaren Prüfung neu gestartet und die Verbindungseinstellungen geöffnet. Die eigentliche Scrollaufnahme wurde nicht durchgeführt, nachdem der Nutzer erneut ausschließlich Hintergrundbedienung verlangte. Eine sichtbare Wirkung der Scrollkante ist deshalb nicht bestätigt. Kein weiterer Funktionstest, keine Änderung gespeicherter Einstellungen und keine Veröffentlichung.
+
+## Videothek-Prüfung und Veröffentlichung des Quellstands
+
+24. November 2026: Auf Nutzerauftrag werden der aktuelle Quellstand nach Release 0.2.5 und das separate iOS-Userscript für die Anbieterprüfung zugänglich gemacht. Das Script v2.3.7 liegt unter Userscripts/nzb-load.user.js; die Autorenangabe LordBex bleibt erhalten. Die Mac-App bettet das Script weiterhin nicht ein. Der Newznab-Client verwendet bei allen seinen Such- und Dateiabrufen die feste Kennung `NZBPort/0.2.5 (+https://github.com/Schrotty74/NZBPort)`. Die Script-Kennung bleibt `NZBPort/nzb-load/2.3.7 (NZB link search; iOS Userscripts)`.
+
+Eine einmalige direkte HTTPS-Anfrage an Videothek mit dem vom Nutzer bereitgestellten Key, t=caps und der aus dem Quellcode gelesenen Mac-Kennung lieferte HTTP 200 und eine XML-Capabilities-Antwort. Diese Anfrage lief als separates lokales Prüfprogramm, nicht als Bedienung der Mac-App. Sie bestätigt keine Such- oder Downloadberechtigung. Es wurde kein zweiter Live-Aufruf und kein iPhone-Netzwerkmitschnitt ausgeführt. Der Key wurde nur im Arbeitsspeicher verwendet, nicht in Dateien oder App-Einstellungen gespeichert und nicht ausgegeben. Der bereinigte Nachweis enthält nur Zeitpunkt, Kennung, Status und XML-Wurzelelement.
+
+Alle 125 automatisierten Tests bestanden für den aktuellen Quellstand, einschließlich der erwarteten Mac-Kennung bei Videothek-Suche und Dateiabruf. Script-Syntax, Quellstand und Script wurden auf private Daten geprüft. Das Script enthält keine ursprüngliche Lizenz- oder Herkunfts-URL-Metadaten; die vorhandene Autorenangabe wurde beibehalten. Die READMEs unterscheiden den neuen Quellstand von den unveränderten Downloadpaketen des Releases 0.2.5. Es wird für diese Quellenbereitstellung kein neues Release oder Tag erstellt.

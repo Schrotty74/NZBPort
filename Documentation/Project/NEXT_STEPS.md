@@ -4,6 +4,10 @@ Stand: 23. November 2026. Release-Stand 0.2.5, Build 9, ergänzt drei weitere In
 
 ## Noch nicht gesondert bestätigte Bedienungsfälle
 
+- Die lokale macOS-27-Oberfläche im Alltag bestätigen: endgültige Federanimation des eigenen Zahnradbuttons und Darstellung mit aktivierter Systemeinstellung „Ränder anzeigen“. Knopfzustände wurden im Hintergrund gerendert, native Menüinhalte und lokale Favoritenreihenfolge automatisiert geprüft. Keine sichtbare Bedienung oder Änderung der Systemeinstellungen allein für weitere Prüfungen ausführen. Das Kategorie-Suchfeld wurde inzwischen tatsächlich aufgenommen: leichte Änderung der Glasreflexe, keine deutlich sichtbare Federbewegung. Der Aktualisieren-Button neben „Kategorie wählen“ verwendet lokal denselben Stil wie das Zahnrad; seine dargestellten Zustände wurden im Hintergrund geprüft. Der weitere Refresh-Button auf „Deine Kategorien“ wurde anschließend ebenfalls ergänzt und in der neu gestarteten App aufgenommen: Kreis, Vergrößerung sowie Druck- und Rückbewegung sind dort sichtbar. Das unveränderte Verhalten unter macOS 26 ist noch nicht gesondert bestätigt.
+
+- Videothek nach der lokalen Ergänzung mit einem berechtigten Konto prüfen. Der Nutzer hat derzeit kein Premium und möchte den Anbieter zunächst in der Liste haben. Die öffentliche API bestätigt die Titelsuche; eine angemeldete Suche und ein NZB-Abruf sind nicht geprüft. Laut Anbieter werden Premium und die Freigabe des verwendeten Tools benötigt.
+
 - Die NZBFinder-Suche aus 0.2.5 in der Mac-App und im iOS-Userscript v2.3.6 im normalen Betrieb bestätigen, sobald der Nutzer API-Berechtigung hat. Der Live-Test lieferte HTTP 401 mit API-Fehler 102 wegen fehlender Premium-Mitgliedschaft. Öffentliche API-Erreichbarkeit, automatisierte Mac-Tests und simulierte Script-Abläufe wurden geprüft.
 
 - Die DrunkenSlug-Suche aus 0.2.5 in der Mac-App und im iOS-Userscript v2.3.6 mit eigenem API-Key im normalen Betrieb bestätigen. Der öffentliche Capabilities-Abruf, automatisierte Mac-Tests und simulierte Script-Anfragen waren erfolgreich; ein angemeldeter Live-Abruf wurde nicht ausgeführt.
@@ -44,3 +48,7 @@ Den Direktdownload zunächst zusätzlich zur SABnzbd-Übergabe anbieten. So lass
 NZBPort lädt ausschließlich auf dem Mac herunter und verarbeitet die Dateien dort. Ein separater Dienst auf einem NAS oder Server ist nicht vorgesehen. Bei geschlossenem Fenster kann der Download weiterlaufen, solange NZBPort in der Menüleiste aktiv und der Mac wach ist. Im Ruhezustand oder bei ausgeschaltetem Mac sind Download und Fernsteuerung nicht verfügbar.
 
 Für die Bedienung am Handy soll NZBPort eine Weboberfläche bereitstellen. Im selben Heimnetz öffnest du sie im Handy-Browser über die lokale IP-Adresse des Macs, ähnlich wie bisher die SABnzbd-Oberfläche. Dort sollst du die Warteschlange und den Fortschritt sehen sowie Downloads starten, pausieren und fortsetzen können. Die Weboberfläche steuert dieselbe Warteschlange wie die Mac-App. Das Handy lädt selbst keine Usenet-Daten herunter.
+
+- Favoriten-Ziehen ist im korrigierten lokalen Stand mit einem echten Maus-Drag und gespeicherter Reihenfolge bestätigt. Die Testfavoriten wurden entfernt. Keine erneuten Versuche ohne konkreten neuen Fehler; Details im letzten Nachtrag von PROJECT_CONTEXT.md.
+
+- Die native harte Scrollkante ist unter macOS 27 lokal konfiguriert und gebaut. Eine tatsächliche Scrollaufnahme liegt noch nicht vor. Keine Vordergrundaktivierung; nur eine störungsfreie Hintergrundprüfung verwenden.

@@ -18,6 +18,7 @@ struct CategorySendButton: View {
         }
         .buttonBorderShape(.roundedRectangle(radius: RelayTheme.rowRadius))
         .controlSize(.large)
+        .modifier(RelayControlBorder(shape: ButtonBorderShape.roundedRectangle(radius: RelayTheme.rowRadius)))
         .accessibilityLabel(L("An SABnzbd senden: \(name)"))
     }
 }
@@ -53,7 +54,8 @@ struct SearchField: View {
             TextField(L("Kategorie suchen"), text: $text).textFieldStyle(.plain)
         }
         .padding(10)
-        .glassEffect(.regular, in: .capsule)
+        .glassEffect(RelayGlass.interactiveControl, in: .capsule)
+        .modifier(RelayControlBorder(shape: Capsule()))
     }
 }
 
@@ -75,6 +77,7 @@ struct NoticeView: View {
             .font(.system(size: 13)).textSelection(.enabled)
             .foregroundStyle(notice.isError ? Color.orange : Color.secondary)
             .padding(14).frame(maxWidth: .infinity, alignment: .leading)
-            .background((notice.isError ? Color.orange : Color.secondary).opacity(0.08), in: .rect(cornerRadius: RelayTheme.rowRadius))
+            .background((notice.isError ? Color.orange : Color.secondary).opacity(0.08), in: RelayControlShape.notice)
+            .modifier(RelayControlBorder(shape: RelayControlShape.notice, tint: notice.isError ? .orange : .secondary))
     }
 }

@@ -41,7 +41,7 @@ func nzbFinderResolvesUUIDsFromRawDetailsAndAPIGUIDs(_ guid: String) async throw
     #expect(components.queryItems?.first(where: { $0.name == "id" })?.value == "ae5bc131-16be-4abb-855d-fdb7dee1739f")
     #expect(components.queryItems?.first(where: { $0.name == "apikey" })?.value == "synthetic")
     let search = try #require(await transport.captured().first)
-    #expect(search.value(forHTTPHeaderField: "User-Agent") == "NZBPort/0.2.5 (NZB link search; https://github.com/Schrotty74/NZBPort)")
+    #expect(search.value(forHTTPHeaderField: "User-Agent") == "NZBPort/0.2.5 (+https://github.com/Schrotty74/NZBPort)")
     #expect(URLComponents(url: try #require(search.url), resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "o" })?.value == "xml")
 }
 
@@ -58,7 +58,7 @@ func nzbFinderResolvesUUIDsFromRawDetailsAndAPIGUIDs(_ guid: String) async throw
     let requests = await transport.captured()
     #expect(requests.count == 2)
     #expect(requests.allSatisfy { $0.url?.host == "nzbfinder.ws" })
-    #expect(requests.allSatisfy { $0.value(forHTTPHeaderField: "User-Agent") == "NZBPort/0.2.5 (NZB link search; https://github.com/Schrotty74/NZBPort)" })
+    #expect(requests.allSatisfy { $0.value(forHTTPHeaderField: "User-Agent") == "NZBPort/0.2.5 (+https://github.com/Schrotty74/NZBPort)" })
     #expect(requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == nil })
     #expect(requests[1].url?.query?.contains("synthetic-secret") == true)
     #expect(try await client.fetchIfApplicable(URL(string: "https://elsewhere.invalid/api?t=get&id=\(uuid)&apikey=synthetic-secret")!) == nil)

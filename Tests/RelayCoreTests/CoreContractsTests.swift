@@ -32,6 +32,21 @@ func invalidOrConflictingLinksAreRejected(_ value: String) {
     #expect(restored.visible(in: ["Musik", "Neu"]) == ["Musik", "Neu"])
 }
 
+@Test func favoriteReorderingPersistsOnlyDisplayedFavorites() throws {
+    var preferences = CategoryPreferences(hidden: ["Hidden"], favorites: ["Alpha", "Hidden", "Beta"])
+    preferences.reorderFavorites(["Alpha", "Beta"], moving: ["Beta"], before: "Alpha")
+    #expect(preferences.favorites == ["Beta", "Hidden", "Alpha"])
+
+    let restored = try JSONDecoder().decode(CategoryPreferences.self, from: JSONEncoder().encode(preferences))
+    #expect(restored.visible(in: ["Alpha", "Hidden", "Beta", "Regular"]) == ["Beta", "Alpha", "Regular"])
+    #expect(!restored.isFavorite("Regular"))
+
+    preferences.reorderFavorites(["Beta", "Alpha"], moving: ["Regular"], before: "Alpha")
+    preferences.reorderFavorites(["Beta", "Alpha"], moving: ["Beta"], before: "Regular")
+    preferences.reorderFavorites(["Beta", "Alpha"], moving: ["Beta"], before: "Beta")
+    #expect(preferences.favorites == ["Beta", "Hidden", "Alpha"])
+}
+
 @Test(arguments: [
     ("http://localhost:8080", "http://localhost:8080/api"),
     ("https://host/sab/", "https://host/sab/api"),

@@ -25,6 +25,7 @@
 "Verbindung prüfen" = "Test Connection";
 "Treasure-Maps-API-Key (optional)" = "Treasure Maps API key (optional)";
 "NewzBay-API-Key (optional)" = "NewzBay API key (optional)";
+"Videothek.io" = "Videothek.io";
 "Bei Bedarf sucht NZBPort zuerst bei Treasure Maps und dann bei NewzBay nach dem Releasetitel. Die Keys werden lokal und unverschlüsselt gespeichert." = "If the other services find nothing, NZBPort searches by release title on Treasure Maps, then NewzBay. Both keys are stored locally without encryption.";
 "Speichern" = "Save";
 "%lld Kategorien von SABnzbd geladen" = "Categories loaded from SABnzbd: %lld";
@@ -117,6 +118,7 @@
 "Pausieren" = "Pause";
 "Downloads laden …" = "Loading Downloads…";
 "Abschluss und Fehler melden" = "Notify About Completions and Failures";
+"Sterne heften Favoriten oben an. Ziehe sie zum Sortieren oder nutze die Pfeile." = "Stars pin favorites to the top. Drag to reorder or use the arrows.";
 "Sterne heften Favoriten oben an. Mit den Pfeilen änderst du ihre Reihenfolge." = "Stars pin favorites to the top. Use the arrows to change their order.";
 "Statusabfrage alle 2 Sekunden, solange diese Übersicht offen ist oder Benachrichtigungen eingeschaltet sind." = "Status is checked every 2 seconds while this overview is open or notifications are enabled.";
 "Letzte Aufträge" = "Recent Jobs";

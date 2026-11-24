@@ -27,6 +27,40 @@ public struct CategoryPreferences: Codable, Equatable, Sendable {
         favorites.swapAt(index, index + offset)
     }
 
+    /// Reorders displayed favorites while leaving hidden or unavailable favorites in place.
+    public mutating func reorderFavorites(_ visibleFavorites: [String], moving sources: [String], before destination: String?) {
+        guard !sources.isEmpty,
+              destination.map({ target in
+                  !sources.contains { $0.caseInsensitiveCompare(target) == .orderedSame }
+              }) ?? true,
+              sources.allSatisfy({ source in
+                  visibleFavorites.contains { $0.caseInsensitiveCompare(source) == .orderedSame }
+                      && isFavorite(source)
+              }),
+              destination.map({ target in
+                  visibleFavorites.contains { $0.caseInsensitiveCompare(target) == .orderedSame }
+                      && isFavorite(target)
+              }) ?? true else { return }
+
+        var reordered = visibleFavorites
+        let moving = reordered.filter { item in
+            sources.contains { $0.caseInsensitiveCompare(item) == .orderedSame }
+        }
+        reordered.removeAll { item in sources.contains { $0.caseInsensitiveCompare(item) == .orderedSame } }
+        let insertionIndex = destination.flatMap { target in
+            reordered.firstIndex { $0.caseInsensitiveCompare(target) == .orderedSame }
+        } ?? reordered.endIndex
+        reordered.insert(contentsOf: moving, at: insertionIndex)
+
+        var nextVisibleIndex = reordered.makeIterator()
+        favorites = favorites.map { favorite in
+            guard visibleFavorites.contains(where: { $0.caseInsensitiveCompare(favorite) == .orderedSame }) else {
+                return favorite
+            }
+            return nextVisibleIndex.next() ?? favorite
+        }
+    }
+
     public func visible(in categories: [String]) -> [String] {
         let visible = categories.filter { candidate in
             !hidden.contains { $0.caseInsensitiveCompare(candidate) == .orderedSame }

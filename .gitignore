@@ -10,6 +10,10 @@
 !/Tests/
 !/Scripts/
 !/Resources/
+!/Userscripts/
+/Userscripts/*
+!/Userscripts/nzb-load.user.js
+!/Userscripts/README.md
 /Resources/*
 !/Resources/Info.plist
 !/Resources/NZBPort.icon/

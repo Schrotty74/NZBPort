@@ -37,6 +37,7 @@
 | 6 | NinjaCentral | Optional, saved separately |
 | 7 | DrunkenSlug | Optional, saved separately |
 | 8 | NZBFinder | Optional, saved separately; premium membership required for API access |
+| 9 | Videothek | Optional, saved separately; API permission and an approved tool required |
 
 - **Provider requests:** A configured provider receives the release title and its own API key. Keys are stored locally without encryption only after you explicitly save them. To disable a provider, clear its key and save.
 - **NZB retrieval:** NZBPort downloads indexer results itself and passes the NZB file to SABnzbd. The indexer key is not sent to SABnzbd.
@@ -72,8 +73,10 @@
 1. A browser hands a `nzblnk:` URL to the registered macOS app. A browser confirmation may appear first.
 2. NZBPort parses the search identifier (`h`), title (`t`), optional password (`p`) and repeated group fields (`g`). It accepts percent-encoded text and expands abbreviated `a.b.` groups for NZBIndex.
 3. The app fetches the current SABnzbd categories and applies your local hidden-category choices. You can filter the category buttons by name.
-4. Selecting a category starts the lookup in NZBIndex, NZBKing and BinSearch. If none finds the NZB, the app searches configured providers by release title, in order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug and NZBFinder. Each provider needs its own saved API key.
+4. Selecting a category starts the lookup in NZBIndex, NZBKing and BinSearch. If none finds the NZB, the app searches configured providers by release title, in order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder and Videothek. Each provider needs its own saved API key.
 5. NZBPort sends SABnzbd the public download URL or the NZB file it retrieved from an indexer, along with the title, category and optional archive password. SABnzbd downloads the Usenet articles.
 6. A confirmed submission closes the window or advances to the next waiting link. An error remains visible in the window. If a submission times out, check the SABnzbd queue before trying again to avoid duplicate jobs.
 
 NZBIndex results with multiple distinct collection IDs are rejected by that provider; the fallback then continues. The HTML providers use the first supported result in their response. Search results are not a guarantee of the content or its availability. NZBPort does not manage Usenet accounts.
+
+Videothek was added after release 0.2.5. A direct authenticated capabilities request returned HTTP 200; this does not confirm search or NZB retrieval. Provider approval of the tool is still pending.
