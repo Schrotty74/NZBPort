@@ -45,6 +45,7 @@
 - Veröffentlichungsziel: https://github.com/Schrotty74/NZBPort . Derzeit besteht nur `main`; keine Dev-/Beta-/Final-Branchstruktur anderer Apps übernehmen.
 - Bei beauftragter Veröffentlichung bereinigte Quellen, baurelevante Ressourcen, Tests und öffentliche Dokumentation gezielt auswählen. Private `Documentation`-Inhalte werden durch die vier erlaubten Projektdateien nicht freigegeben.
 - Beauftragte Downloadpakete als DMG mit Applications-Verknüpfung sowie ZIP bereitstellen; Signatur, Paketinhalt und Prüfsummen prüfen. Keine lokalen Einstellungen verpacken.
+- Sobald die veröffentlichten Downloadpakete samt Prüfsummen auf GitHub geprüft sind, den jeweiligen lokalen Versionsordner unter `Build/Release` in den Papierkorb legen. `Build/NZBPort.app` und die App-Kopie auf MacSoftware unter Download bleiben verfügbar.
 - Öffentliche Beschreibung standardmäßig Englisch, zusätzlich Deutsch, gegenseitig verlinkt. Funktionen als Feature-Liste dokumentieren. Gatekeeper-Hinweis erhalten; Ad-hoc-Signierung nicht als Apple-Notarisierung darstellen.
 - Nach App-Änderungen die gebaute App auch in die vom Nutzer festgelegte Kopie auf MacSoftware unter Download übernehmen; das bestätigte Ziel steht in PROJECT_CONTEXT.md. Kopie und Signatur prüfen und einen Link zur gebauten App liefern. Selbst geöffnete Apps und Computersteuerung nach Abschluss beenden.
 
