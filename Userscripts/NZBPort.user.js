@@ -2,7 +2,7 @@
 // @name         NZBPort
 // @namespace    https://github.com/Schrotty74/NZBPort
 // @version      0.1.1
-// @description  Resolve NZBlnk links, save NZBs or submit them to SABnzbd.
+// @description  Resolve NZBlnk links and NewzBay downloads; save NZBs or submit them to SABnzbd.
 // @author       Schrotty74
 // @match        http://*/*
 // @match        https://*/*
@@ -46,7 +46,7 @@
   function request(url, options={}) {
     return new Promise((resolve,reject)=>{
       const target=new URL(url); const fail=()=>reject(Error(`Netzwerkfehler bei ${target.hostname}`));
-      const receive=r=>{if(r.status<200||r.status>=300){reject(Error(`${target.hostname}: HTTP ${r.status}`));return;} const final=r.finalUrl||r.responseURL; if(final){try{const dest=new URL(final,target);if(dest.origin!==target.origin){reject(Error('Unerwartete Weiterleitung'));return;}}catch{return fail();}} resolve(String(r.responseText??r.response??''));};
+      const receive=r=>{if(r.status<200||r.status>=300){let detail='HTTP '+r.status;if(r.status===429)detail+=' – API-Limit erreicht';if(r.status===401||r.status===403)detail+=' – API-Key oder Kontoberechtigung prüfen';if(target.hostname==='nzbfinder.ws'&&r.status===401&&/<error\b[^>]*\bcode=["']102["']/i.test(String(r.responseText||'').slice(0,65536)))detail+=' – Premium-Mitgliedschaft erforderlich';reject(Error(target.hostname+': '+detail));return;} const final=r.finalUrl||r.responseURL; if(final){try{const dest=new URL(final,target);if(dest.origin!==target.origin || dest.username || dest.password){reject(Error('Unerwartete Weiterleitung'));return;}if(options.allowSlugDownload && dest.pathname!==target.pathname){if(dest.pathname!=='/getnzb'||dest.hash||!['i','r'].every(k=>dest.searchParams.getAll(k).length===1&&dest.searchParams.get(k))){reject(Error('Ungültige DrunkenSlug-Weiterleitung'));return;}}}catch{return fail();}} resolve(String(r.responseText??r.response??''));};
       const headers={...options.headers};
       if(target.origin==='https://videothek.io' && target.pathname==='/api' && (options.method||'GET')==='GET') headers['User-Agent']='NZBPort/nzb-load/0.1.1 (NZB link search; iOS Userscripts)';
       const args={method:options.method||'GET',url:target.href,headers,data:options.body,timeout:30000,responseType:'text',onload:receive,onerror:fail,ontimeout:()=>reject(Error(`Zeitüberschreitung bei ${target.hostname}`)),onabort:fail};
@@ -78,13 +78,13 @@
     const pattern=host==='nzbfinder.ws'||host==='videothek.io'?/^(?:[a-f0-9]{32}|[a-f0-9]{40}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i:host==='drunkenslug.com'?/^(?:[a-f0-9]{32}|[a-f0-9]{40})$/i:/^[a-f0-9]{32}$/i;
     for(const raw of candidates){if(!raw)continue;let id=raw.trim();if(!pattern.test(id)){const u=safeURL(id,origin);if(!u)continue;id=u.pathname==='/api'?u.searchParams.get('id'):u.pathname.match(/^\/details\/([^/]+)\/?$/)?.[1];}if(id&&pattern.test(id))return address(origin+'/api',{t:'get',id,apikey:key,...(host==='videothek.io'?{o:'xml'}:{})});}return null;
   }
-  async function privateSearch(provider,link){const [name,field,host]=provider;const key=config[field];if(!key||!link.title)return null;const url=address('https://'+host+'/api',{t:'search',q:link.title,apikey:key,o:'xml'});const doc=xml(await request(url,{headers:{Accept:'application/rss+xml, application/xml, text/xml','User-Agent':'NZBPort/0.1.1'}}));if(doc.documentElement.localName==='error')throw Error(`${name}: API-Zugriff abgelehnt`);const matches=[...doc.querySelectorAll('channel > item')].filter(i=>normalize(i.querySelector('title')?.textContent||'')===normalize(link.title));if(matches.length>1)throw Error('Mehrdeutiger Releasetitel');return matches.length?releaseURL(matches[0],host,key):null;}
+  async function privateSearch(provider,link){const [name,field,host]=provider;const key=config[field];if(!key||!link.title)return null;const url=address('https://'+host+'/api',{t:'search',q:link.title,apikey:key,o:'xml'});const doc=xml(await request(url,{headers:{Accept:'application/rss+xml, application/xml, text/xml','User-Agent':'NZBPort/0.1.1'}}));if(doc.documentElement.localName==='error'){const code=doc.documentElement.getAttribute('code')||'unbekannt';throw Error(name+': API-Fehler '+code+(host==='videothek.io'?' – Premium und Tool-Freigabe prüfen':host==='nzbfinder.ws'&&code==='102'?' – Premium-Mitgliedschaft erforderlich':' – API-Key und Kontoberechtigung prüfen'));}const matches=[...doc.querySelectorAll('channel > item')].filter(i=>normalize(i.querySelector('title')?.textContent||'')===normalize(link.title));if(matches.length>1)throw Error('Mehrdeutiger Releasetitel');return matches.length?releaseURL(matches[0],host,key):null;}
   function endpoint(settings=config){const u=new URL(settings.sab_url);if(!['http:','https:'].includes(u.protocol)||u.username||u.password||u.hash||!settings.sab_api_key)throw Error('SABnzbd-Adresse oder API-Key fehlt');return u;}
   async function categories(settings){const data=JSON.parse(await request(address(endpoint(settings),{mode:'get_cats',output:'json',apikey:settings.sab_api_key})));if(!Array.isArray(data.categories))throw Error('Keine Kategorien erhalten');const old=new Map(settings.sab_categories.map(c=>[c.value.toLowerCase(),c.fav]));const hidden=new Set(settings.sab_hidden_categories.map(c=>c.toLowerCase()));return [...new Set(data.categories.filter(x=>typeof x==='string'))].filter(x=>!hidden.has(x.toLowerCase())).map(value=>({value,fav:old.get(value.toLowerCase())===true}));}
   const filename=link=>((link.title||link.header).replace(/\.nzb$/i,'')+(link.password?'{{'+link.password+'}}':'')).replace(/[\\/\x00-\x1f\x7f"]/g,'_').replace(/\.nzb$/i,'')+'.nzb';
   function saveFile(content,name,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
   async function submit(found,link,cat){const fields={mode:found.private?'addfile':'addurl',output:'json',apikey:config.sab_api_key,cat,nzbname:link.title||link.header};if(link.password)fields.password=link.password;let body,contentType;
-    if(found.private){const payload=nzb(await request(found.url));const boundary='NZBPort'+Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join('');const parts=[];for(const [key,value] of Object.entries(fields))parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="${key}"\r\n\r\n${value}\r\n`);parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="name"; filename="${filename(link)}"\r\nContent-Type: application/x-nzb\r\n\r\n${payload}\r\n--${boundary}--\r\n`);body=parts.join('');contentType='multipart/form-data; boundary='+boundary;}
+    if(found.private){const payload=await obtainNZB(found);const boundary='NZBPort'+Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join('');const parts=[];for(const [key,value] of Object.entries(fields))parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="${key}"\r\n\r\n${value}\r\n`);parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="name"; filename="${filename(link)}"\r\nContent-Type: application/x-nzb\r\n\r\n${payload}\r\n--${boundary}--\r\n`);body=parts.join('');contentType='multipart/form-data; boundary='+boundary;}
     else{body=new URLSearchParams({...fields,name:found.url.href}).toString();contentType='application/x-www-form-urlencoded';}
     const result=JSON.parse(await request(endpoint(),{method:'POST',body,headers:{'Content-Type':contentType,Accept:'application/json'}}));if(result.status!==true)throw Error('SABnzbd hat den Auftrag nicht bestätigt');
   }
@@ -293,7 +293,13 @@
     );
     draw(tab);
   }
-  async function download(found,link){saveFile(nzb(await request(found.url)),filename(link),'application/x-nzb');}
+  async function obtainNZB(found){
+    if(found.read) return found.read();
+    const headers={Accept:'application/x-nzb, application/xml, text/xml'};
+    if(found.url.hostname==='nzbfinder.ws') headers['User-Agent']='NZBPort/0.1.1 (NZB link search; iOS Userscripts)';
+    return nzb(await request(found.url,{headers,allowSlugDownload:found.private&&found.url.hostname==='drunkenslug.com'}));
+  }
+  async function download(found,link){saveFile(await obtainNZB(found),filename(link),'application/x-nzb');}
   function choose(found,link){
     const content=dialog('NZBPort');
     say(content,link.title||link.header);
@@ -325,6 +331,65 @@
     }).finally(()=>clearTimeout(timer));
   }
   async function process(raw){if(active)return;active=true;try{await ready;const link=parseLink(raw);const progress=dialog('NZBPort – Suche');say(progress,link.title||link.header);let found;const jobs=[...['NZBIndex','NZBKing','BinSearch'].map(name=>({name,run:()=>publicSearch(name,link),private:false})),...providers.filter(p=>config[p[1]]).map(p=>({name:p[0],run:()=>privateSearch(p,link),private:true}))];for(const job of jobs){if(!panel)return;say(progress,'Suche bei '+job.name+' …');try{const url=await job.run();if(url){found={url,private:job.private};break;}}catch(e){say(progress,e.message);}}if(!panel)return;if(!found){say(progress,'Keine passende NZB gefunden.');return;}if(config.ausgabe==='download'){await download(found,link);close();}else if(config.ausgabe==='sabnzbd'&&config.sab_api_key&&config.sab_url){try{await submit(found,link,config.sab_default_category||'*');close();}catch(e){const err=dialog('Übergabe fehlgeschlagen');say(err,e.message+'. Vor erneutem Senden die Warteschlange prüfen.');err.append(button('NZB-Datei speichern',async()=>{await download(found,link);close();},'btn-save'),button('SABnzbd-Einstellungen',()=>settings('sab'),'btn-settings'));}}else await choose(found,link);}catch(e){say(dialog('NZBPort – Fehler'),e.message);}finally{active=false;}}
+  // NewzBay website integration. The original download link is left intact.
+  const newzBayOrigins = new Set(['https://newzbay.cc','https://www.newzbay.cc']);
+  function pageNZB(anchor, pageOrigin){
+    if(!newzBayOrigins.has(pageOrigin)) return null;
+    const target=safeURL(anchor.href,pageOrigin);
+    if(!target) return null;
+    const segments=target.pathname.split('/').filter(Boolean);
+    if(segments.length<2||segments.length>3||segments[0].toLowerCase()!=='getnzb'||!/^[0-9a-f]{32}$/i.test(segments[1])) return null;
+    let title=segments[1];
+    if(segments.length===3){
+      try {title=decodeURIComponent(segments[2]).replace(/[\\/"\x00-\x1f\x7f]/g,'_').slice(0,240)||title;} catch {}
+    }
+    return {url:new URL(target.pathname,pageOrigin),title};
+  }
+  function pageSource(entry){
+    let pending;
+    return {url:entry.url,private:true,read(){
+      if(!pending) pending=(async()=>{
+        const response=await fetch(entry.url.href,{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/x-nzb, application/xml, text/xml'}});
+        const destination=safeURL(response.url,entry.url.origin);
+        if(!response.ok||!destination||!/^\/getnzb(?:\/|$)/i.test(destination.pathname)) throw Error('NewzBay: NZB-Abruf fehlgeschlagen. Bitte Anmeldung prüfen.');
+        return nzb(await response.text());
+      })().catch(error=>{pending=undefined;throw error;});
+      return pending;
+    }};
+  }
+  function installNewzBayActions(){
+    const controls=new Map();
+    const sync=()=>{
+      for(const [anchor,control] of controls){
+        if(!anchor.isConnected||!pageNZB(anchor,location.origin)||control.previousElementSibling!==anchor){control.remove();controls.delete(anchor);}
+      }
+      for(const anchor of document.querySelectorAll('a[href*="/getnzb/"]')){
+        if(controls.has(anchor)||!pageNZB(anchor,location.origin)) continue;
+        const control=element('button',navigator.language.toLowerCase().startsWith('de')?'An SABnzbd senden':'Send to SABnzbd',{type:'button'});
+        control.style.cssText='display:block;width:100%;padding:8px 12px;margin:4px 0;border:1px solid #d2ad39;border-radius:8px;background:#f4ce51;color:#302400;font:inherit;cursor:pointer;text-align:center';
+        control.addEventListener('click',async event=>{
+          event.preventDefault();event.stopPropagation();
+          const entry=pageNZB(anchor,location.origin);
+          if(!entry||active)return;
+          active=true;
+          try{await ready;choose(pageSource(entry),{header:entry.title,title:entry.title,password:''});}
+          catch(error){say(dialog('NZBPort – Fehler'),error.message);}
+          finally{active=false;}
+        });
+        anchor.insertAdjacentElement('afterend',control);
+        controls.set(anchor,control);
+      }
+    };
+    let scheduled=false;
+    const observer=new MutationObserver(()=>{
+      if(scheduled)return;
+      scheduled=true;
+      requestAnimationFrame(()=>{scheduled=false;sync();});
+    });
+    sync();
+    observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['href']});
+  }
+  if(window.top===window&&newzBayOrigins.has(location.origin))installNewzBayActions();
   document.addEventListener('click',e=>{const anchor=e.target instanceof Element?e.target.closest('a[href]'):null;const href=anchor?.getAttribute('href');if(href&&/^nzblnk:/i.test(href)){e.preventDefault();e.stopPropagation();void process(href);}},true);
   if(typeof GM.registerMenuCommand==='function')GM.registerMenuCommand('NZBPort – Einstellungen',()=>settings().catch(e=>alert(e.message)));
   document.addEventListener('open-nzbport-settings',()=>settings().catch(e=>alert(e.message)));
