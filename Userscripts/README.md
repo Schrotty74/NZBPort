@@ -1,6 +1,6 @@
 # nzb-load for iOS Userscripts
 
-[nzb-load.user.js](nzb-load.user.js) is the separate browser userscript used alongside NZBPort. It is not embedded in the Mac app. The script retains its original `LordBex` author attribution; this copy includes the changes maintained for NZBPort.
+LordBex wrote the original [nzb-load userscript](https://github.com/LordBex/nzb-load). We adapted [this copy](nzb-load.user.js) for use alongside NZBPort and added support for Videothek. The userscript runs separately from the Mac app.
 
 Version: `v2.3.7`.
 
