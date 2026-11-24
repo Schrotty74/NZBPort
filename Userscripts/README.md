@@ -1,5 +1,7 @@
 # nzb-load for iOS Userscripts
 
+[Deutsch](README.de.md)
+
 LordBex wrote the original [nzb-load userscript](https://github.com/LordBex/nzb-load). [This version](nzb-load.user.js) is maintained alongside NZBPort. The userscript runs separately from the Mac app.
 
 Version: `v2.3.7`.

@@ -4,7 +4,7 @@
 
 > Aktuelle Testversion: **0.2.5**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.5).
 
-Der Quellstand auf `main` enthält spätere Änderungen, darunter Videothek. Diese sind noch nicht in den Downloadpaketen von 0.2.5 enthalten. Das separate [iOS-Userscript](Userscripts/nzb-load.user.js) und seine [Dokumentation](Userscripts/README.md) liegen im Repository.
+Der Quellstand auf `main` enthält spätere Änderungen, darunter Videothek. Diese sind noch nicht in den Downloadpaketen von 0.2.5 enthalten. Das separate [iOS-Userscript](Userscripts/nzb-load.user.js) und seine [deutsche Dokumentation](Userscripts/README.de.md) liegen im Repository.
 
 NZBPort ist eine kleine macOS-Menüleisten-App, die `nzblnk:`-Links und NZB-Dateien öffnet und Downloads an SABnzbd übergibt. Nach deiner Kategorieauswahl sucht sie bei Bedarf nacheinander über NZBIndex, NZBKing und BinSearch sowie anschließend bei eingerichteten Indexern. NZB-Dateien kannst du auch lokal speichern. Sobald SABnzbd die Übergabe bestätigt, schließt sich das Fenster. Die App bleibt in der Menüleiste erreichbar.
 
