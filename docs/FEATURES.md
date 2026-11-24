@@ -41,7 +41,7 @@
 
 - **Provider requests:** A configured provider receives the release title and its own API key. Keys are stored locally without encryption only after you explicitly save them. To disable a provider, clear its key and save.
 - **NZB retrieval:** NZBPort downloads indexer results itself and passes the NZB file to SABnzbd. The indexer key is not sent to SABnzbd.
-- **Provider limits:** A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. An authenticated NewzBay test returned HTTP 429, so a live download from it remains unverified. DrunkenSlug's public capabilities confirmed title search, but an authenticated live search was not confirmed. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102. Provider availability and terms can change. HTML fallbacks may stop working if a provider changes its pages or blocks automated access. NZBPort does not bypass access controls or CAPTCHAs.
+- **Provider limits:** A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. An authenticated NewzBay test returned HTTP 429, so a live download from it remains unverified. A live search and NZB retrieval succeeded for DrunkenSlug with a 40-character hexadecimal ID. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102. Provider availability and terms can change. HTML fallbacks may stop working if a provider changes its pages or blocks automated access. NZBPort does not bypass access controls or CAPTCHAs.
 
 ## Downloads, menu bar and notifications
 
@@ -79,4 +79,4 @@
 
 NZBIndex results with multiple distinct collection IDs are rejected by that provider; the fallback then continues. The HTML providers use the first supported result in their response. Search results are not a guarantee of the content or its availability. NZBPort does not manage Usenet accounts.
 
-Videothek was added after release 0.2.5. A direct authenticated capabilities request returned HTTP 200; this does not confirm search or NZB retrieval. Provider approval of the tool is still pending.
+Videothek is available from 0.2.6. Videothek approved both the Mac app and the iOS userscript. The latest authenticated test returned API code 500, so search and NZB retrieval remain unverified.

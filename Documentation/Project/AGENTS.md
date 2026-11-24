@@ -20,6 +20,7 @@
 ## Links, Kategorien und Downloads
 
 - Die Suche läuft nacheinander über NZBIndex, NZBKing und BinSearch. Danach folgen Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek in dieser Reihenfolge, sofern ihr jeweiliger API-Key gespeichert ist. Die öffentliche NZBIndex-Suche benötigt keinen separaten API-Key.
+- Bei neuen oder geänderten Indexern mit berechtigtem Testzugang eine echte Suche ausführen. Gibt es einen passenden Treffer, auch die NZB-Datei abrufen und prüfen, ohne einen Auftrag an SABnzbd zu senden. Ein Capabilities-Aufruf belegt weder die Suche noch den Abruf. Fehlt der Testzugang oder ein passender Treffer, festhalten, welche Schritte offen sind und welche mit simulierten Antworten geprüft wurden.
 - Kategorien von SABnzbd laden. Neue Kategorien nur nach ausdrücklichem Hinzufügen durch den Nutzer in SABnzbd anlegen; vorhandene Kategorien nicht überschreiben. Kategorien nur nach ausdrücklicher Löschaktion mit Bestätigung auch in SABnzbd löschen; die Standardkategorie bleibt geschützt. Ausblenden, Wiederherstellen und Favoriten bleiben lokale Anzeigeentscheidungen.
 - Erst nach Kategorieauswahl senden. Erfolgreiche Übergabe nur nach SABnzbd-Bestätigung melden.
 - Unklare Übertragungsfehler nicht automatisch erneut senden. Duplikatwarnung und manuelle Entscheidung erhalten.

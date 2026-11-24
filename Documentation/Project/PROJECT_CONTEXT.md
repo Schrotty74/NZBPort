@@ -7,7 +7,7 @@ Stand: 24. November 2026.
 - Repository: https://github.com/Schrotty74/NZBPort
 - Projektpfade beziehen sich auf den Repository-Root; der lokale Ordner trägt historisch den Namen `NZBRelay`.
 - Entwicklungsbranch: `main`. Der App-Quellcommit für 0.2 war `74c25ba`; danach folgten Dokumentationscommits.
-- Aktueller Release-Stand: Testversion 0.2.5, Build 9, mit NinjaCentral, DrunkenSlug und NZBFinder, NZB-Speicherung, eigenem Kategorienbereich sowie überarbeiteten Verbindungsansichten und Fensterhöhen. GitHub-Tag: `v0.2.5`.
+- Vorheriger Release-Stand: Testversion 0.2.5, Build 9, mit NinjaCentral, DrunkenSlug und NZBFinder, NZB-Speicherung, eigenem Kategorienbereich sowie überarbeiteten Verbindungsansichten und Fensterhöhen. GitHub-Tag: `v0.2.5`.
 - Testversion 0.2.4, Build 8, ergänzte Treasure Maps und NewzBay. In 0.2.3, Build 7, kam das Warten auf SABnzbd beim Anmeldestart hinzu.
 - Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`; alle fünf sind auf GitHub enthalten.
 
@@ -284,3 +284,11 @@ Alle 125 automatisierten Tests bestanden für den aktuellen Quellstand, einschli
 Videothek hat das Format seiner Treffer-IDs bestätigt. Mac-App und iOS-Skript v2.3.8 akzeptieren diese IDs für Videothek, auch aus geprüften Abrufadressen in `link` und `enclosure`. Die Prüfungen mit simulierten Antworten bestanden. Die Mac-App wurde lokal gebaut, ihre Kopie auf MacSoftware geprüft und das Skript unter Downloads und in iCloud aktualisiert. Ein weiterer Live-Abruf steht aus.
 
 Laut Videothek gilt die Freigabe für die festen Präfixe `NZBPort/` und `NZBPort/nzb-load/`. Künftige Versionsnummern sind von derselben Freigabe abgedeckt.
+
+## Testversion 0.2.6, Build 10
+
+Dieses Vorabrelease ergänzt Videothek und die lokalen Änderungen unter macOS 27 für Zahnrad, Aktualisieren-Knöpfe, Favoritensortierung und Scrollkanten. Die Mac-Kennung lautet `NZBPort/0.2.6 (+https://github.com/Schrotty74/NZBPort)`. Videothek hat die Mac-App und das separate iOS-Skript über ihre festen Präfixe freigegeben.
+
+DrunkenSlug lieferte 40-stellige Hex-IDs. Der direkte Live-Abruf folgte einer Weiterleitung zum eigenen NZB-Endpunkt und lieferte eine gültige NZB. NZBFinder akzeptiert zusätzlich 40 Hex-Zeichen, was mit simulierten Antworten geprüft wurde. Die Live-Suche war mit dem vorhandenen Konto nicht möglich. Videothek lieferte beim letzten Suchtest API-Fehler 500. NewzBay wurde mangels Zugang ausgelassen.
+
+Für den Release-Stand bestanden 127 automatisierte Swift-Tests. Build, Signaturen, Apple-Silicon-Architektur, ZIP, DMG und Prüfsummen wurden geprüft. Das separate iOS-Skript wurde auf v2.3.9 erhöht. Eine neue Bedienungsprüfung fand für diesen Build nicht statt.

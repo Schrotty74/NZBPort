@@ -2,9 +2,9 @@
 
 [Deutsch](README.de.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
-> Current test version: **0.2.5**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.5).
+> Current test version: **0.2.6**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.6).
 
-The source on `main` includes later changes, including Videothek support. These changes are not in the 0.2.5 download packages. The separate [iOS userscript](Userscripts/nzb-load.user.js) and its [documentation](Userscripts/README.md) are available in this repository.
+The separate [iOS userscript](Userscripts/nzb-load.user.js) has its own [documentation](Userscripts/README.md).
 
 NZBPort is a small macOS menu bar app that opens `nzblnk:` links and NZB files, then sends downloads to SABnzbd. Choose a category, and the app searches NZBIndex, NZBKing, then BinSearch as needed, followed by any configured indexers. You can also save an NZB file locally. The window closes when SABnzbd confirms the submission; NZBPort stays in the menu bar.
 
@@ -62,7 +62,7 @@ See [Apple’s instructions for opening apps safely](https://support.apple.com/e
 
 The SABnzbd URL and API key are stored locally, unencrypted, in app preferences. The app does not use Keychain. The API key is sent in a POST body to the configured SABnzbd endpoint. HTTP is supported; use HTTPS or a trusted VPN for untrusted networks.
 
-NZBIndex, NZBKing and BinSearch receive the link's search identifier. NZBIndex also receives its groups. When these services find nothing, NZBPort searches configured providers in this order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder and Videothek. Each provider receives the release title and only its own API key. Provider keys are optional and are stored locally without encryption only after you save them. To disable a provider, clear its key and save. A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. An authenticated NewzBay test returned HTTP 429, so a live download from it remains unverified. DrunkenSlug's public capabilities confirmed title search, but an authenticated live search was not confirmed. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102.
+NZBIndex, NZBKing and BinSearch receive the link's search identifier. NZBIndex also receives its groups. When these services find nothing, NZBPort searches configured providers in this order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder and Videothek. Each provider receives the release title and only its own API key. Provider keys are optional and are stored locally without encryption only after you save them. To disable a provider, clear its key and save. A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. An authenticated NewzBay test returned HTTP 429, so a live download from it remains unverified. A live search and NZB retrieval succeeded for DrunkenSlug with a 40-character hexadecimal ID. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102.
 
 NZBPort downloads configured indexer results locally and sends the NZB file to SABnzbd. SABnzbd also receives the title, selected category and optional archive password. When saving an NZB file, NZBPort adds the exact link password as NZB metadata. The SABnzbd key is sent only to your configured SABnzbd server. Search availability depends on the providers and their terms. HTML fallbacks can stop working when a provider changes its pages or blocks automated access. No access-control or CAPTCHA bypass is included.
 

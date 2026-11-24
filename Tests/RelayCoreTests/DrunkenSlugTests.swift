@@ -16,8 +16,8 @@ private actor DrunkenSlugTestTransport: HTTPTransport {
     func requests() -> [URLRequest] { captured }
 }
 
-@Test func drunkenSlugSearchUsesNewznabAPIAndRawGUID() async throws {
-    let id = "0123456789abcdef0123456789abcdef"
+@Test(arguments: ["0123456789abcdef0123456789abcdef", "0123456789abcdef0123456789abcdef01234567"])
+func drunkenSlugSearchUsesNewznabAPIAndRawGUID(_ id: String) async throws {
     let body = "<rss><channel><item><title>Title.S01E01-GROUP</title><guid isPermaLink='false'>\(id)</guid></item></channel></rss>"
     let transport = DrunkenSlugTestTransport(body)
     let client = NewznabClient(apiKey: "synthetic-secret", service: .drunkenSlug, transport: transport)
@@ -51,15 +51,16 @@ private actor DrunkenSlugTestTransport: HTTPTransport {
     #expect(try await fromDetails.resolve(link).query?.contains("id=\(id)") == true)
 }
 
-@Test func drunkenSlugFetchesAuthenticatedNZBBytesLocally() async throws {
+@Test(arguments: ["0123456789abcdef0123456789abcdef", "0123456789abcdef0123456789abcdef01234567"])
+func drunkenSlugFetchesAuthenticatedNZBBytesLocally(_ id: String) async throws {
     let secret = "synthetic-secret"
     let transport = DrunkenSlugTestTransport("<nzb><file/></nzb>")
     let client = NewznabClient(apiKey: secret, service: .drunkenSlug, transport: transport)
-    let url = URL(string: "https://drunkenslug.com/api?t=get&id=0123456789abcdef0123456789abcdef&apikey=synthetic-secret")!
+    let url = URL(string: "https://drunkenslug.com/api?t=get&id=\(id)&apikey=synthetic-secret")!
 
     let file = try #require(try await client.fetchIfApplicable(url))
     #expect(file.data == Data("<nzb><file/></nzb>".utf8))
-    #expect(file.title == "0123456789abcdef0123456789abcdef")
+    #expect(file.title == id)
     let request = try #require(await transport.requests().last)
     #expect(request.url == url)
     #expect(!request.url!.host!.contains(secret))
@@ -85,4 +86,13 @@ func drunkenSlugRejectsUnsafeAuthenticatedDownloadURLs(_ raw: String) async thro
     } else {
         await #expect(throws: (any Error).self) { try await client.fetchIfApplicable(URL(string: raw)!) }
     }
+}
+
+@Test func drunkenSlugRedirectIsLimitedToItsFileEndpoint() {
+    let original = URL(string: "https://drunkenslug.com/api?t=get&id=synthetic")!
+    let target = URL(string: "https://drunkenslug.com/getnzb?i=123&r=synthetic&filename=example.nzb")!
+    #expect(NewznabClient.allowsDrunkenSlugRedirect(from: original, to: target))
+    #expect(!NewznabClient.allowsDrunkenSlugRedirect(from: original, to: URL(string: "https://elsewhere.invalid/getnzb?i=123&r=synthetic")))
+    #expect(!NewznabClient.allowsDrunkenSlugRedirect(from: original, to: URL(string: "https://drunkenslug.com/account?i=123&r=synthetic")))
+    #expect(!NewznabClient.allowsDrunkenSlugRedirect(from: URL(string: "https://drunkenslug.com/api?t=search"), to: target))
 }

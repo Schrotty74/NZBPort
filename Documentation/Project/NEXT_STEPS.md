@@ -1,6 +1,6 @@
 # Nächste Schritte – NZBPort
 
-Stand: 23. November 2026. Release-Stand 0.2.5, Build 9, ergänzt drei weitere Indexer, NZB-Speicherung und eigene Kategorienverwaltung. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
+Stand: 23. November 2026. Testversion 0.2.6, Build 10, ergänzt Videothek und die Unterstützung längerer Indexer-IDs. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
 
 ## Noch nicht gesondert bestätigte Bedienungsfälle
 
@@ -10,7 +10,7 @@ Stand: 23. November 2026. Release-Stand 0.2.5, Build 9, ergänzt drei weitere In
 
 - Die NZBFinder-Suche aus 0.2.5 in der Mac-App und im iOS-Userscript v2.3.6 im normalen Betrieb bestätigen, sobald der Nutzer API-Berechtigung hat. Der Live-Test lieferte HTTP 401 mit API-Fehler 102 wegen fehlender Premium-Mitgliedschaft. Öffentliche API-Erreichbarkeit, automatisierte Mac-Tests und simulierte Script-Abläufe wurden geprüft.
 
-- Die DrunkenSlug-Suche aus 0.2.5 in der Mac-App und im iOS-Userscript v2.3.6 mit eigenem API-Key im normalen Betrieb bestätigen. Der öffentliche Capabilities-Abruf, automatisierte Mac-Tests und simulierte Script-Anfragen waren erfolgreich; ein angemeldeter Live-Abruf wurde nicht ausgeführt.
+- Direkte Live-Suche und NZB-Abruf bei DrunkenSlug funktionierten mit einer 40-stelligen ID und einer Weiterleitung beim selben Anbieter. Die Bedienung im iOS-Userscript wurde nicht live geprüft.
 
 - Das Anlegen und Löschen im eigenen Kategorienbereich ist vom Nutzer als funktionierend bestätigt. Keine zusätzlichen Kategorien oder Löschungen nur für Tests ausführen. Die automatisierten Prüfungen verwenden ausschließlich synthetische Daten.
 

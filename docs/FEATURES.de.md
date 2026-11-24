@@ -41,7 +41,7 @@
 
 - **Anfragen an Anbieter:** Ein eingerichteter Anbieter erhält den Releasetitel und nur seinen eigenen API-Key. Die Keys werden erst nach dem ausdrücklichen Speichern lokal und unverschlüsselt abgelegt. Zum Deaktivieren leerst du das jeweilige Feld und speicherst erneut.
 - **NZB-Abruf:** NZBPort lädt Treffer der Indexer selbst und übergibt die NZB-Datei an SABnzbd. Der Indexer-Key wird nicht an SABnzbd gesendet.
-- **Grenzen der Anbieter:** Ein direkter angemeldeter Test bei NinjaCentral lieferte einen passenden Treffer und eine gültige NZB-Datei. Ein angemeldeter NewzBay-Test endete mit HTTP 429; ein Live-Download ist daher nicht bestätigt. Die öffentlichen Capabilities von DrunkenSlug bestätigten die Titelsuche, eine angemeldete Live-Suche wurde jedoch nicht bestätigt. Für API-Zugriff auf NZBFinder ist eine Premium-Mitgliedschaft erforderlich; ein kostenloses Konto kann HTTP 401 mit API-Fehler 102 liefern. Verfügbarkeit und Bedingungen der Anbieter können sich ändern. HTML-Ausweichsuchen können ausfallen, wenn ein Anbieter Seiten ändert oder automatisierte Zugriffe sperrt. NZBPort umgeht keine Zugangssperren oder CAPTCHAs.
+- **Grenzen der Anbieter:** Ein direkter angemeldeter Test bei NinjaCentral lieferte einen passenden Treffer und eine gültige NZB-Datei. Ein angemeldeter NewzBay-Test endete mit HTTP 429; ein Live-Download ist daher nicht bestätigt. Bei DrunkenSlug waren eine Live-Suche und der NZB-Abruf mit einer 40-stelligen Hex-ID erfolgreich. Für API-Zugriff auf NZBFinder ist eine Premium-Mitgliedschaft erforderlich; ein kostenloses Konto kann HTTP 401 mit API-Fehler 102 liefern. Verfügbarkeit und Bedingungen der Anbieter können sich ändern. HTML-Ausweichsuchen können ausfallen, wenn ein Anbieter Seiten ändert oder automatisierte Zugriffe sperrt. NZBPort umgeht keine Zugangssperren oder CAPTCHAs.
 
 ## Downloads, Menüleiste und Mitteilungen
 
@@ -79,4 +79,4 @@
 
 Mehrere unterschiedliche Trefferkennungen lehnt der NZBIndex-Provider ab; anschließend geht die Ausweichsuche weiter. Die HTML-Provider verwenden den ersten unterstützten Treffer ihrer Antwort. Suchtreffer garantieren weder Inhalt noch Verfügbarkeit. NZBPort verwaltet keine Usenet-Zugänge.
 
-Videothek wurde im Quellstand nach Release 0.2.5 ergänzt. Eine direkte angemeldete Capabilities-Anfrage lieferte HTTP 200; Suche und NZB-Abruf sind damit nicht bestätigt. Die Freigabe des Tools durch den Anbieter steht noch aus.
+Videothek ist ab 0.2.6 verfügbar. Der Anbieter hat Mac-App und iOS-Userscript freigegeben. Der letzte Test mit API-Key lieferte Fehlercode 500. Eine erfolgreiche Suche und der NZB-Abruf stehen noch aus.

@@ -2,7 +2,7 @@ import Foundation
 
 /// Searches Newznab-compatible RSS APIs and resolves downloads without forwarding API credentials.
 public actor NewznabClient: NZBSearchProvider {
-    public static let userAgent = "NZBPort/0.2.5 (+https://github.com/Schrotty74/NZBPort)"
+    public static let userAgent = "NZBPort/0.2.6 (+https://github.com/Schrotty74/NZBPort)"
     public enum Service: Sendable, Equatable { case treasureMaps, newzBay, ninjaCentral, drunkenSlug, nzbFinder, videothek }
 
     nonisolated public var name: String {
@@ -27,7 +27,7 @@ public actor NewznabClient: NZBSearchProvider {
             case .videothek: "https://videothek.io/api"
             }
         }())!
-        self.transport = transport ?? NewznabTransport(allowNinjaRedirects: service == .ninjaCentral)
+        self.transport = transport ?? NewznabTransport(service: service)
     }
 
     public func resolve(_ link: NZBLink) async throws -> URL {
@@ -80,7 +80,7 @@ public actor NewznabClient: NZBSearchProvider {
                 }
             }
             guard let id = item.identifier(host: endpoint.host!, allowUUID: service == .nzbFinder || service == .videothek,
-                                           allowLongHex: service == .videothek) else {
+                                           allowLongHex: service == .videothek || service == .drunkenSlug || service == .nzbFinder) else {
                 throw RelayError.message("The search service returned an invalid NZB download link.")
             }
             return try buildAuthenticatedDownload(id: id)
@@ -137,7 +137,7 @@ public actor NewznabClient: NZBSearchProvider {
     }
 
     private func isValidIdentifier(_ value: String) -> Bool {
-        NewznabClientIdentifier.isValid(value, allowUUID: service == .nzbFinder || service == .videothek, allowLongHex: service == .videothek)
+        NewznabClientIdentifier.isValid(value, allowUUID: service == .nzbFinder || service == .videothek, allowLongHex: service == .videothek || service == .drunkenSlug || service == .nzbFinder)
     }
 
     static func allowsNinjaRedirect(from original: URL?, to destination: URL?) -> Bool {
@@ -150,6 +150,21 @@ public actor NewznabClient: NZBSearchProvider {
               target.user == nil, target.password == nil, target.port == nil, target.fragment == nil
         else { return false }
         return true
+    }
+
+    static func allowsDrunkenSlugRedirect(from original: URL?, to destination: URL?) -> Bool {
+        guard let original, let destination,
+              let source = URLComponents(url: original, resolvingAgainstBaseURL: false),
+              let target = URLComponents(url: destination, resolvingAgainstBaseURL: false),
+              source.scheme == "https", source.host == "drunkenslug.com", source.path == "/api",
+              source.queryItems?.contains(URLQueryItem(name: "t", value: "get")) == true,
+              target.scheme == "https", target.host == source.host, target.path == "/getnzb",
+              target.user == nil, target.password == nil, target.port == nil, target.fragment == nil,
+              let items = target.queryItems else { return false }
+        return ["i", "r"].allSatisfy { name in
+            let values = items.filter { $0.name == name }
+            return values.count == 1 && values[0].value?.isEmpty == false
+        }
     }
 
     private func perform(_ request: URLRequest, failure: String.LocalizationValue) async throws -> HTTPResult {
@@ -203,16 +218,16 @@ public actor NewznabClient: NZBSearchProvider {
     }
 }
 
-/// Ephemeral requests without cache or cookies; only NinjaCentral NZB downloads allow same-host HTTPS redirects.
+/// Ephemeral requests without cache or cookies; only approved NZB download redirects stay on the provider’s HTTPS host.
 private struct NewznabTransport: HTTPTransport {
-    let allowNinjaRedirects: Bool
+    let service: NewznabClient.Service
     func perform(_ request: URLRequest) async throws -> HTTPResult {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.urlCache = nil
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         configuration.httpCookieStorage = nil
         configuration.httpShouldSetCookies = false
-        let session = URLSession(configuration: configuration, delegate: NewznabRedirectDelegate(allowNinjaRedirects: allowNinjaRedirects), delegateQueue: nil)
+        let session = URLSession(configuration: configuration, delegate: NewznabRedirectDelegate(service: service), delegateQueue: nil)
         defer { session.finishTasksAndInvalidate() }
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw RelayError.message("The service did not return an HTTP response.") }
@@ -221,15 +236,17 @@ private struct NewznabTransport: HTTPTransport {
 }
 
 private final class NewznabRedirectDelegate: NSObject, URLSessionTaskDelegate {
-    let allowNinjaRedirects: Bool
+    let service: NewznabClient.Service
 
-    init(allowNinjaRedirects: Bool) { self.allowNinjaRedirects = allowNinjaRedirects }
+    init(service: NewznabClient.Service) { self.service = service }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        let allowed = allowNinjaRedirects && NewznabClient.allowsNinjaRedirect(
-            from: task.originalRequest?.url, to: request.url
-        )
+        let allowed = switch service {
+        case .ninjaCentral: NewznabClient.allowsNinjaRedirect(from: task.originalRequest?.url, to: request.url)
+        case .drunkenSlug: NewznabClient.allowsDrunkenSlugRedirect(from: task.originalRequest?.url, to: request.url)
+        default: false
+        }
         completionHandler(allowed ? request : nil)
     }
 }

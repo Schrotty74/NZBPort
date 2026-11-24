@@ -3,7 +3,7 @@
 // @description         Finds NZBs from NZBlnk links and sends them to SABnzbd.
 // @description:de_DE   Sucht NZBs zu NZBlnk-Links und übergibt sie an SABnzbd.
 // @author              LordBex
-// @version             v2.3.8
+// @version             v2.3.9
 // @match               *://*/*
 // @inject-into         content
 // @grant               GM_xmlhttpRequest
@@ -2050,7 +2050,9 @@ function indexerRequest(url, accept, allowedRedirectHost = null, extraHeaders = 
                 }
                 const redirectAllowed = allowedRedirectHost && finalURL?.protocol === 'https:' &&
                     finalURL.hostname === allowedRedirectHost && !finalURL.username && !finalURL.password &&
-                    (!finalURL.port || finalURL.port === '443') && !finalURL.hash;
+                    (!finalURL.port || finalURL.port === '443') && !finalURL.hash &&
+                    (allowedRedirectHost !== 'drunkenslug.com' || (finalURL.pathname === '/getnzb' &&
+                        ['i', 'r'].every(name => finalURL.searchParams.getAll(name).length === 1 && finalURL.searchParams.get(name))));
                 if (allowedRedirectHost ? !redirectAllowed : finalURL?.origin !== url.origin) {
                     fail('Der Suchdienst hat auf eine andere Domain umgeleitet.');
                     return;
@@ -2156,7 +2158,7 @@ function ninjaCentralDownload(item, apiKey) {
     }
 }
 
-const nzbFinderID = /^(?:[a-f0-9]{32}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i;
+const nzbFinderID = /^(?:[a-f0-9]{40}|[a-f0-9]{32}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i;
 
 function nzbFinderDownload(item, apiKey) {
     const attrNS = 'http://www.newznab.com/DTD/2010/feeds/attributes/';
@@ -2184,6 +2186,7 @@ function nzbFinderDownload(item, apiKey) {
 }
 
 function drunkenSlugDownload(item, apiKey) {
+    const idPattern = /^(?:[a-f0-9]{32}|[a-f0-9]{40})$/i;
     const guidAttribute = [...item.getElementsByTagNameNS('http://www.newznab.com/DTD/2010/feeds/attributes/', 'attr')]
         .find(attribute => attribute.getAttribute('name') === 'guid')?.getAttribute('value');
     const guid = item.querySelector('guid');
@@ -2191,13 +2194,13 @@ function drunkenSlugDownload(item, apiKey) {
         if (!value) continue;
         const text = value.trim();
         let id = text;
-        if (!releaseID.test(id)) {
+        if (!idPattern.test(id)) {
             const source = parseIndexerURL(text);
             if (source?.origin !== 'https://drunkenslug.com' || source.username || source.password) continue;
             id = source.pathname === '/api' ? source.searchParams.get('id')
                 : source.pathname.match(/^\/details\/([^/]+)\/?$/)?.[1];
         }
-        if (id && releaseID.test(id)) {
+        if (id && idPattern.test(id)) {
             const download = new URL('https://drunkenslug.com/api');
             download.search = new URLSearchParams({ t: 'get', id, apikey: apiKey });
             return download;
@@ -2246,9 +2249,9 @@ const additionalIndexers = [
     { info: 'Treasure Maps', key: 'treasure_maps_api_key', endpoint: 'https://treasure-maps.com/api', download: treasureMapsDownload },
     { info: 'NewzBay', key: 'newzbay_api_key', endpoint: 'https://newzbay.cc/api', download: newzBayDownload },
     { info: 'NinjaCentral', key: 'ninjacentral_api_key', endpoint: 'https://ninjacentral.co.za/api', download: ninjaCentralDownload, allowRedirectHost: 'ninjacentral.co.za' },
-    { info: 'DrunkenSlug', key: 'drunkenslug_api_key', endpoint: 'https://drunkenslug.com/api', download: drunkenSlugDownload },
+    { info: 'DrunkenSlug', key: 'drunkenslug_api_key', endpoint: 'https://drunkenslug.com/api', download: drunkenSlugDownload, allowRedirectHost: 'drunkenslug.com' },
     { info: 'NZBFinder', key: 'nzbfinder_api_key', endpoint: 'https://nzbfinder.ws/api', download: nzbFinderDownload, userAgent: 'nzb-load/2.3.6 (NZB link search; iOS Userscripts)' },
-    { info: 'Videothek.io', key: 'videothek_api_key', endpoint: 'https://videothek.io/api', download: videothekDownload, userAgent: 'NZBPort/nzb-load/2.3.8 (NZB link search; iOS Userscripts)', xmlOutput: true, apiErrors: true }
+    { info: 'Videothek.io', key: 'videothek_api_key', endpoint: 'https://videothek.io/api', download: videothekDownload, userAgent: 'NZBPort/nzb-load/2.3.9 (NZB link search; iOS Userscripts)', xmlOutput: true, apiErrors: true }
 ];
 
 async function loadFromNewznab(indexer, apiKey, nzb_info, when_failed) {
