@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NZBPort
 // @namespace    https://github.com/Schrotty74/NZBPort
-// @version      0.1.1
+// @version      0.1.2
 // @description  Resolve NZBlnk links and NewzBay downloads; save NZBs or submit them to SABnzbd.
 // @author       Schrotty74
 // @match        http://*/*
@@ -104,8 +104,8 @@
       const target=new URL(url); const fail=()=>reject(Error(`Keine HTTP-Antwort von ${target.hostname}. Netzwerk und Userscripts-Berechtigungen prüfen.`));
       const receive=r=>{const status=Number(r?.status)||0;if(!status)return fail();if(status<200||status>=300){let detail='HTTP '+r.status;if(r.status===429)detail+=' – API-Limit erreicht';if(r.status===401||r.status===403)detail+=' – API-Key oder Kontoberechtigung prüfen';if(target.hostname==='nzbfinder.ws'&&r.status===401&&/<error\b[^>]*\bcode=["']102["']/i.test(String(r.responseText||'').slice(0,65536)))detail+=' – Premium-Mitgliedschaft erforderlich';reject(Error(target.hostname+': '+detail));return;} const final=r.finalUrl||r.responseURL; if(final){try{const dest=new URL(final,target);if(dest.origin!==target.origin || dest.username || dest.password){reject(Error('Unerwartete Weiterleitung'));return;}if(options.allowSlugDownload && dest.pathname!==target.pathname){if(dest.pathname!=='/getnzb'||dest.hash||!['i','r'].every(k=>dest.searchParams.getAll(k).length===1&&dest.searchParams.get(k))){reject(Error('Ungültige DrunkenSlug-Weiterleitung'));return;}}}catch{return fail();}} resolve(String(r.responseText??r.response??''));};
       const headers={...options.headers};
-      if(target.origin==='https://videothek.io' && target.pathname==='/api' && (options.method||'GET')==='GET') headers['User-Agent']='NZBPort/nzb-load/0.1.1 (NZB link search; iOS Userscripts)';
-      if(target.origin==='https://nzbfinder.ws' && target.pathname==='/api' && (options.method||'GET')==='GET') headers['User-Agent']='NZBPort/0.1.1 (NZB link search; iOS Userscripts)';
+      if(target.origin==='https://videothek.io' && target.pathname==='/api' && (options.method||'GET')==='GET') headers['User-Agent']='NZBPort/nzb-load/0.1.2 (NZB link search; iOS Userscripts)';
+      if(target.origin==='https://nzbfinder.ws' && target.pathname==='/api' && (options.method||'GET')==='GET') headers['User-Agent']='NZBPort/0.1.2 (NZB link search; iOS Userscripts)';
       const handleError=r=>Number(r?.status)>=400?receive(r):fail();
       const args={method:options.method||'GET',url:target.href,headers,data:options.body,timeout:30000,responseType:'text',onload:receive,onerror:handleError,ontimeout:()=>reject(Error(`Zeitüberschreitung bei ${target.hostname}`)),onabort:()=>reject(Error(`Anfrage an ${target.hostname} abgebrochen`))};
       try {const fn=typeof GM_xmlhttpRequest==='function'?GM_xmlhttpRequest:GM.xmlHttpRequest?.bind(GM)||GM.xmlhttpRequest?.bind(GM); if(!fn)throw Error();const result=fn(args); if(result?.then)result.then(receive,handleError);} catch {reject(Error(`Userscripts konnte die Anfrage an ${target.hostname} nicht starten.`));}
@@ -136,7 +136,7 @@
     const pattern=host==='nzbfinder.ws'||host==='videothek.io'?/^(?:[a-f0-9]{32}|[a-f0-9]{40}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i:host==='drunkenslug.com'?/^(?:[a-f0-9]{32}|[a-f0-9]{40})$/i:/^[a-f0-9]{32}$/i;
     for(const raw of candidates){if(!raw)continue;let id=raw.trim();if(!pattern.test(id)){const u=safeURL(id,origin);if(!u)continue;id=u.pathname==='/api'?u.searchParams.get('id'):u.pathname.match(/^\/details\/([^/]+)\/?$/)?.[1];}if(id&&pattern.test(id))return address(origin+'/api',{t:'get',id,apikey:key,...(host==='videothek.io'?{o:'xml'}:{})});}return null;
   }
-  async function privateSearch(provider,link){const [name,field,host]=provider;const key=config[field];if(!key||!link.title)return null;const url=address('https://'+host+'/api',{t:'search',q:link.title,apikey:key,o:'xml'});const doc=xml(await request(url,{headers:{Accept:'application/rss+xml, application/xml, text/xml','User-Agent':'NZBPort/0.1.1'}}));if(doc.documentElement.localName==='error'){const code=doc.documentElement.getAttribute('code')||'unbekannt';throw Error(name+': API-Fehler '+code+(host==='videothek.io'?' – Premium und Tool-Freigabe prüfen':host==='nzbfinder.ws'&&code==='102'?' – Premium-Mitgliedschaft erforderlich':' – API-Key und Kontoberechtigung prüfen'));}const matches=[...doc.querySelectorAll('channel > item')].filter(i=>normalize(i.querySelector('title')?.textContent||'')===normalize(link.title));if(matches.length>1)throw Error('Mehrdeutiger Releasetitel');return matches.length?releaseURL(matches[0],host,key):null;}
+  async function privateSearch(provider,link){const [name,field,host]=provider;const key=config[field];if(!key||!link.title)return null;const url=address('https://'+host+'/api',{t:'search',q:link.title,apikey:key,o:'xml'});const doc=xml(await request(url,{headers:{Accept:'application/rss+xml, application/xml, text/xml','User-Agent':'NZBPort/0.1.2'}}));if(doc.documentElement.localName==='error'){const code=doc.documentElement.getAttribute('code')||'unbekannt';throw Error(name+': API-Fehler '+code+(host==='videothek.io'?' – Premium und Tool-Freigabe prüfen':host==='nzbfinder.ws'&&code==='102'?' – Premium-Mitgliedschaft erforderlich':' – API-Key und Kontoberechtigung prüfen'));}const matches=[...doc.querySelectorAll('channel > item')].filter(i=>normalize(i.querySelector('title')?.textContent||'')===normalize(link.title));if(matches.length>1)throw Error('Mehrdeutiger Releasetitel');return matches.length?releaseURL(matches[0],host,key):null;}
   function endpoint(settings=config){const u=new URL(settings.sab_url);if(!['http:','https:'].includes(u.protocol)||u.username||u.password||u.hash||!settings.sab_api_key)throw Error('SABnzbd-Adresse oder API-Key fehlt');return u;}
   async function categories(settings){const data=JSON.parse(await request(address(endpoint(settings),{mode:'get_cats',output:'json',apikey:settings.sab_api_key})));if(!Array.isArray(data.categories))throw Error('Keine Kategorien erhalten');const old=new Map(settings.sab_categories.map(c=>[c.value.toLowerCase(),c.fav]));const hidden=new Set(settings.sab_hidden_categories.map(c=>c.toLowerCase()));return [...new Set(data.categories.filter(x=>typeof x==='string'))].filter(x=>!hidden.has(x.toLowerCase())).map(value=>({value,fav:old.get(value.toLowerCase())===true}));}
   const filename=link=>((link.title||link.header).replace(/\.nzb$/i,'')+(link.password?'{{'+link.password+'}}':'')).replace(/[\\/\x00-\x1f\x7f"]/g,'_').replace(/\.nzb$/i,'')+'.nzb';
@@ -354,7 +354,7 @@
   async function obtainNZB(found){
     if(found.read) return found.read();
     const headers={Accept:'application/x-nzb, application/xml, text/xml'};
-    if(found.url.hostname==='nzbfinder.ws') headers['User-Agent']='NZBPort/0.1.1 (NZB link search; iOS Userscripts)';
+    if(found.url.hostname==='nzbfinder.ws') headers['User-Agent']='NZBPort/0.1.2 (NZB link search; iOS Userscripts)';
     return nzb(await request(found.url,{headers,allowSlugDownload:found.private&&found.url.hostname==='drunkenslug.com'}));
   }
   async function download(found,link){saveFile(await obtainNZB(found),filename(link),'application/x-nzb');}
@@ -426,6 +426,7 @@
         const control=element('button',navigator.language.toLowerCase().startsWith('de')?'An SABnzbd senden':'Send to SABnzbd',{type:'button'});
         control.style.cssText='display:block;width:100%;padding:8px 12px;margin:4px 0;border:1px solid #d2ad39;border-radius:8px;background:#f4ce51;color:#302400;font:inherit;cursor:pointer;text-align:center';
         control.addEventListener('click',async event=>{
+          if(!event.isTrusted)return;
           event.preventDefault();event.stopPropagation();
           const entry=pageNZB(anchor,location.origin);
           if(!entry||active)return;
@@ -448,7 +449,16 @@
     observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['href']});
   }
   if(window.top===window&&newzBayOrigins.has(location.origin))installNewzBayActions();
-  document.addEventListener('click',e=>{const anchor=e.target instanceof Element?e.target.closest('a[href]'):null;const href=anchor?.getAttribute('href');if(href&&/^nzblnk:/i.test(href)){e.preventDefault();e.stopPropagation();void process(href);}},true);
+  document.addEventListener('click',event=>{
+    if(!event.isTrusted)return;
+    const anchor=event.target instanceof Element?event.target.closest('a[href]'):null;
+    const href=anchor?.getAttribute('href');
+    if(href&&/^nzblnk:/i.test(href)){
+      event.preventDefault();
+      event.stopPropagation();
+      void process(href);
+    }
+  },true);
   if(typeof GM.registerMenuCommand==='function')GM.registerMenuCommand('NZBPort – Einstellungen',()=>settings().catch(e=>alert(e.message)));
   document.addEventListener('open-nzbport-settings',()=>settings().catch(e=>alert(e.message)));
 })();
