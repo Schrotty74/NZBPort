@@ -99,16 +99,95 @@
   const persist = async value => {const next=clean(value); await GM.setValue(storage,next); const check=await GM.getValue(storage); if(JSON.stringify(clean(check))!==JSON.stringify(next)) throw Error('Speichern nicht bestätigt'); config=next;};
   function address(base, params={}) {const u=new URL(base); for(const [k,v] of Object.entries(params)) u.searchParams.set(k,String(v)); return u;}
   function safeURL(raw, origin) {try {const u=new URL(raw); return u.protocol==='https:'&&!u.username&&!u.password&&!u.hash&&(!origin||u.origin===origin)?u:null;}catch{return null;}}
-  function request(url, options={}) {
-    return new Promise((resolve,reject)=>{
-      const target=new URL(url); const fail=()=>reject(Error(`Keine HTTP-Antwort von ${target.hostname}. Netzwerk und Userscripts-Berechtigungen prüfen.`));
-      const receive=r=>{const status=Number(r?.status)||0;if(!status)return fail();if(status<200||status>=300){let detail='HTTP '+r.status;if(r.status===429)detail+=' – API-Limit erreicht';if(r.status===401||r.status===403)detail+=' – API-Key oder Kontoberechtigung prüfen';if(target.hostname==='nzbfinder.ws'&&r.status===401&&/<error\b[^>]*\bcode=["']102["']/i.test(String(r.responseText||'').slice(0,65536)))detail+=' – Premium-Mitgliedschaft erforderlich';reject(Error(target.hostname+': '+detail));return;} const final=r.finalUrl||r.responseURL; if(final){try{const dest=new URL(final,target);if(dest.origin!==target.origin || dest.username || dest.password){reject(Error('Unerwartete Weiterleitung'));return;}if(options.allowSlugDownload && dest.pathname!==target.pathname){if(dest.pathname!=='/getnzb'||dest.hash||!['i','r'].every(k=>dest.searchParams.getAll(k).length===1&&dest.searchParams.get(k))){reject(Error('Ungültige DrunkenSlug-Weiterleitung'));return;}}}catch{return fail();}} resolve(String(r.responseText??r.response??''));};
-      const headers={...options.headers};
-      if(target.origin==='https://videothek.io' && target.pathname==='/api' && (options.method||'GET')==='GET') headers['User-Agent']='NZBPort/nzb-load/0.1.2 (NZB link search; iOS Userscripts)';
-      if(target.origin==='https://nzbfinder.ws' && target.pathname==='/api' && (options.method||'GET')==='GET') headers['User-Agent']='NZBPort/0.1.2 (NZB link search; iOS Userscripts)';
-      const handleError=r=>Number(r?.status)>=400?receive(r):fail();
-      const args={method:options.method||'GET',url:target.href,headers,data:options.body,timeout:30000,responseType:'text',onload:receive,onerror:handleError,ontimeout:()=>reject(Error(`Zeitüberschreitung bei ${target.hostname}`)),onabort:()=>reject(Error(`Anfrage an ${target.hostname} abgebrochen`))};
-      try {const fn=typeof GM_xmlhttpRequest==='function'?GM_xmlhttpRequest:GM.xmlHttpRequest?.bind(GM)||GM.xmlhttpRequest?.bind(GM); if(!fn)throw Error();const result=fn(args); if(result?.then)result.then(receive,handleError);} catch {reject(Error(`Userscripts konnte die Anfrage an ${target.hostname} nicht starten.`));}
+  function request(url, options = {}) {
+    return new Promise((resolve, reject) => {
+      const target = new URL(url);
+      const fail = () =>
+        reject(
+          Error(
+            `Keine HTTP-Antwort von ${target.hostname}. Netzwerk und Userscripts-Berechtigungen prüfen.`,
+          ),
+        );
+      const receive = (r) => {
+        const status = Number(r?.status) || 0;
+        if (!status) return fail();
+        if (status < 200 || status >= 300) {
+          let detail = 'HTTP ' + r.status;
+          if (r.status === 429) detail += ' – API-Limit erreicht';
+          if (r.status === 401 || r.status === 403)
+            detail += ' – API-Key oder Kontoberechtigung prüfen';
+          if (
+            target.hostname === 'nzbfinder.ws' &&
+            r.status === 401 &&
+            /<error\b[^>]*\bcode=["']102["']/i.test(String(r.responseText || '').slice(0, 65536))
+          )
+            detail += ' – Premium-Mitgliedschaft erforderlich';
+          reject(Error(target.hostname + ': ' + detail));
+          return;
+        }
+        const final = r.finalUrl || r.responseURL;
+        if (final) {
+          try {
+            const dest = new URL(final, target);
+            if (dest.origin !== target.origin || dest.username || dest.password) {
+              reject(Error('Unerwartete Weiterleitung'));
+              return;
+            }
+            if (options.allowSlugDownload && dest.pathname !== target.pathname) {
+              if (
+                dest.pathname !== '/getnzb' ||
+                dest.hash ||
+                !['i', 'r'].every(
+                  (k) => dest.searchParams.getAll(k).length === 1 && dest.searchParams.get(k),
+                )
+              ) {
+                reject(Error('Ungültige DrunkenSlug-Weiterleitung'));
+                return;
+              }
+            }
+          } catch {
+            return fail();
+          }
+        }
+        resolve(String(r.responseText ?? r.response ?? ''));
+      };
+      const headers = { ...options.headers };
+      if (
+        target.origin === 'https://videothek.io' &&
+        target.pathname === '/api' &&
+        (options.method || 'GET') === 'GET'
+      )
+        headers['User-Agent'] = 'NZBPort/nzb-load/0.1.2 (NZB link search; iOS Userscripts)';
+      if (
+        target.origin === 'https://nzbfinder.ws' &&
+        target.pathname === '/api' &&
+        (options.method || 'GET') === 'GET'
+      )
+        headers['User-Agent'] = 'NZBPort/0.1.2 (NZB link search; iOS Userscripts)';
+      const handleError = (r) => (Number(r?.status) >= 400 ? receive(r) : fail());
+      const args = {
+        method: options.method || 'GET',
+        url: target.href,
+        headers,
+        data: options.body,
+        timeout: 30000,
+        responseType: 'text',
+        onload: receive,
+        onerror: handleError,
+        ontimeout: () => reject(Error(`Zeitüberschreitung bei ${target.hostname}`)),
+        onabort: () => reject(Error(`Anfrage an ${target.hostname} abgebrochen`)),
+      };
+      try {
+        const fn =
+          typeof GM_xmlhttpRequest === 'function'
+            ? GM_xmlhttpRequest
+            : GM.xmlHttpRequest?.bind(GM) || GM.xmlhttpRequest?.bind(GM);
+        if (!fn) throw Error();
+        const result = fn(args);
+        if (result?.then) result.then(receive, handleError);
+      } catch {
+        reject(Error(`Userscripts konnte die Anfrage an ${target.hostname} nicht starten.`));
+      }
     });
   }
   function xml(text, limit=2097152){if(text.length>limit||/<!ENTITY\b/i.test(text))throw Error('Ungültige XML-Antwort');const doc=new DOMParser().parseFromString(text,'application/xml');if(doc.querySelector('parsererror'))throw Error('Ungültiges XML');return doc;}
@@ -136,15 +215,86 @@
     const pattern=host==='nzbfinder.ws'||host==='videothek.io'?/^(?:[a-f0-9]{32}|[a-f0-9]{40}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i:host==='drunkenslug.com'?/^(?:[a-f0-9]{32}|[a-f0-9]{40})$/i:/^[a-f0-9]{32}$/i;
     for(const raw of candidates){if(!raw)continue;let id=raw.trim();if(!pattern.test(id)){const u=safeURL(id,origin);if(!u)continue;id=u.pathname==='/api'?u.searchParams.get('id'):u.pathname.match(/^\/details\/([^/]+)\/?$/)?.[1];}if(id&&pattern.test(id))return address(origin+'/api',{t:'get',id,apikey:key,...(host==='videothek.io'?{o:'xml'}:{})});}return null;
   }
-  async function privateSearch(provider,link){const [name,field,host]=provider;const key=config[field];if(!key||!link.title)return null;const url=address('https://'+host+'/api',{t:'search',q:link.title,apikey:key,o:'xml'});const doc=xml(await request(url,{headers:{Accept:'application/rss+xml, application/xml, text/xml','User-Agent':'NZBPort/0.1.2'}}));if(doc.documentElement.localName==='error'){const code=doc.documentElement.getAttribute('code')||'unbekannt';throw Error(name+': API-Fehler '+code+(host==='videothek.io'?' – Premium und Tool-Freigabe prüfen':host==='nzbfinder.ws'&&code==='102'?' – Premium-Mitgliedschaft erforderlich':' – API-Key und Kontoberechtigung prüfen'));}const matches=[...doc.querySelectorAll('channel > item')].filter(i=>normalize(i.querySelector('title')?.textContent||'')===normalize(link.title));if(matches.length>1)throw Error('Mehrdeutiger Releasetitel');return matches.length?releaseURL(matches[0],host,key):null;}
+  async function privateSearch(provider, link) {
+    const [name, field, host] = provider;
+    const key = config[field];
+    if (!key || !link.title) return null;
+    const url = address('https://' + host + '/api', {
+      t: 'search',
+      q: link.title,
+      apikey: key,
+      o: 'xml',
+    });
+    const doc = xml(
+      await request(url, {
+        headers: {
+          Accept: 'application/rss+xml, application/xml, text/xml',
+          'User-Agent': 'NZBPort/0.1.2',
+        },
+      }),
+    );
+    if (doc.documentElement.localName === 'error') {
+      const code = doc.documentElement.getAttribute('code') || 'unbekannt';
+      throw Error(
+        name +
+          ': API-Fehler ' +
+          code +
+          (host === 'videothek.io'
+            ? ' – Premium und Tool-Freigabe prüfen'
+            : host === 'nzbfinder.ws' && code === '102'
+              ? ' – Premium-Mitgliedschaft erforderlich'
+              : ' – API-Key und Kontoberechtigung prüfen'),
+      );
+    }
+    const matches = [...doc.querySelectorAll('channel > item')].filter(
+      (i) => normalize(i.querySelector('title')?.textContent || '') === normalize(link.title),
+    );
+    if (matches.length > 1) throw Error('Mehrdeutiger Releasetitel');
+    return matches.length ? releaseURL(matches[0], host, key) : null;
+  }
   function endpoint(settings=config){const u=new URL(settings.sab_url);if(!['http:','https:'].includes(u.protocol)||u.username||u.password||u.hash||!settings.sab_api_key)throw Error('SABnzbd-Adresse oder API-Key fehlt');return u;}
   async function categories(settings){const data=JSON.parse(await request(address(endpoint(settings),{mode:'get_cats',output:'json',apikey:settings.sab_api_key})));if(!Array.isArray(data.categories))throw Error('Keine Kategorien erhalten');const old=new Map(settings.sab_categories.map(c=>[c.value.toLowerCase(),c.fav]));const hidden=new Set(settings.sab_hidden_categories.map(c=>c.toLowerCase()));return [...new Set(data.categories.filter(x=>typeof x==='string'))].filter(x=>!hidden.has(x.toLowerCase())).map(value=>({value,fav:old.get(value.toLowerCase())===true}));}
   const filename=link=>((link.title||link.header).replace(/\.nzb$/i,'')+(link.password?'{{'+link.password+'}}':'')).replace(/[\\/\x00-\x1f\x7f"]/g,'_').replace(/\.nzb$/i,'')+'.nzb';
   function saveFile(content,name,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
-  async function submit(found,link,cat){const fields={mode:found.private?'addfile':'addurl',output:'json',apikey:config.sab_api_key,cat,nzbname:link.title||link.header};if(link.password)fields.password=link.password;let body,contentType;
-    if(found.private){const payload=await obtainNZB(found);const boundary='NZBPort'+Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join('');const parts=[];for(const [key,value] of Object.entries(fields))parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="${key}"\r\n\r\n${value}\r\n`);parts.push(`--${boundary}\r\nContent-Disposition: form-data; name="name"; filename="${filename(link)}"\r\nContent-Type: application/x-nzb\r\n\r\n${payload}\r\n--${boundary}--\r\n`);body=parts.join('');contentType='multipart/form-data; boundary='+boundary;}
-    else{body=new URLSearchParams({...fields,name:found.url.href}).toString();contentType='application/x-www-form-urlencoded';}
-    const result=JSON.parse(await request(endpoint(),{method:'POST',body,headers:{'Content-Type':contentType,Accept:'application/json'}}));if(result.status!==true)throw Error('SABnzbd hat den Auftrag nicht bestätigt');
+  async function submit(found, link, cat) {
+    const fields = {
+      mode: found.private ? 'addfile' : 'addurl',
+      output: 'json',
+      apikey: config.sab_api_key,
+      cat,
+      nzbname: link.title || link.header,
+    };
+    if (link.password) fields.password = link.password;
+    let body, contentType;
+    if (found.private) {
+      const payload = await obtainNZB(found);
+      const boundary =
+        'NZBPort' +
+        Array.from(crypto.getRandomValues(new Uint8Array(16)), (x) =>
+          x.toString(16).padStart(2, '0'),
+        ).join('');
+      const parts = [];
+      for (const [key, value] of Object.entries(fields))
+        parts.push(
+          `--${boundary}\r\nContent-Disposition: form-data; name="${key}"\r\n\r\n${value}\r\n`,
+        );
+      parts.push(
+        `--${boundary}\r\nContent-Disposition: form-data; name="name"; filename="${filename(link)}"\r\nContent-Type: application/x-nzb\r\n\r\n${payload}\r\n--${boundary}--\r\n`,
+      );
+      body = parts.join('');
+      contentType = 'multipart/form-data; boundary=' + boundary;
+    } else {
+      body = new URLSearchParams({ ...fields, name: found.url.href }).toString();
+      contentType = 'application/x-www-form-urlencoded';
+    }
+    const result = JSON.parse(
+      await request(endpoint(), {
+        method: 'POST',
+        body,
+        headers: { 'Content-Type': contentType, Accept: 'application/json' },
+      }),
+    );
+    if (result.status !== true) throw Error('SABnzbd hat den Auftrag nicht bestätigt');
   }
   let panel;
   function element(tag,text,attrs={}){
@@ -388,7 +538,72 @@
       status.textContent='SABnzbd antwortet nicht – gespeicherte Kategorien werden angezeigt.';
     }).finally(()=>clearTimeout(timer));
   }
-  async function process(raw){if(active)return;active=true;try{await ready;const link=parseLink(raw);const progress=dialog('NZBPort – Suche');say(progress,link.title||link.header);let found;const jobs=[...['NZBIndex','NZBKing','BinSearch'].map(name=>({name,run:()=>publicSearch(name,link),private:false})),...providers.filter(p=>config[p[1]]).map(p=>({name:p[0],run:()=>privateSearch(p,link),private:true}))];for(const job of jobs){if(!panel)return;say(progress,'Suche bei '+job.name+' …');try{const url=await job.run();if(url){found={url,private:job.private};break;}}catch(e){say(progress,e.message);}}if(!panel)return;if(!found){say(progress,'Keine passende NZB gefunden.');return;}if(config.ausgabe==='download'){await download(found,link);close();}else if(config.ausgabe==='sabnzbd'&&config.sab_api_key&&config.sab_url){try{await submit(found,link,config.sab_default_category||'*');close();}catch(e){const err=dialog('Übergabe fehlgeschlagen');say(err,e.message+'. Vor erneutem Senden die Warteschlange prüfen.');err.append(button('NZB-Datei speichern',async()=>{await download(found,link);close();},'btn-save'),button('SABnzbd-Einstellungen',()=>settings('sab'),'btn-settings'));}}else await choose(found,link);}catch(e){say(dialog('NZBPort – Fehler'),e.message);}finally{active=false;}}
+  async function process(raw) {
+    if (active) return;
+    active = true;
+    try {
+      await ready;
+      const link = parseLink(raw);
+      const progress = dialog('NZBPort – Suche');
+      say(progress, link.title || link.header);
+      let found;
+      const jobs = [
+        ...['NZBIndex', 'NZBKing', 'BinSearch'].map((name) => ({
+          name,
+          run: () => publicSearch(name, link),
+          private: false,
+        })),
+        ...providers
+          .filter((p) => config[p[1]])
+          .map((p) => ({ name: p[0], run: () => privateSearch(p, link), private: true })),
+      ];
+      for (const job of jobs) {
+        if (!panel) return;
+        say(progress, 'Suche bei ' + job.name + ' …');
+        try {
+          const url = await job.run();
+          if (url) {
+            found = { url, private: job.private };
+            break;
+          }
+        } catch (e) {
+          say(progress, e.message);
+        }
+      }
+      if (!panel) return;
+      if (!found) {
+        say(progress, 'Keine passende NZB gefunden.');
+        return;
+      }
+      if (config.ausgabe === 'download') {
+        await download(found, link);
+        close();
+      } else if (config.ausgabe === 'sabnzbd' && config.sab_api_key && config.sab_url) {
+        try {
+          await submit(found, link, config.sab_default_category || '*');
+          close();
+        } catch (e) {
+          const err = dialog('Übergabe fehlgeschlagen');
+          say(err, e.message + '. Vor erneutem Senden die Warteschlange prüfen.');
+          err.append(
+            button(
+              'NZB-Datei speichern',
+              async () => {
+                await download(found, link);
+                close();
+              },
+              'btn-save',
+            ),
+            button('SABnzbd-Einstellungen', () => settings('sab'), 'btn-settings'),
+          );
+        }
+      } else await choose(found, link);
+    } catch (e) {
+      say(dialog('NZBPort – Fehler'), e.message);
+    } finally {
+      active = false;
+    }
+  }
   // NewzBay website integration. The original download link is left intact.
   const newzBayOrigins = new Set(['https://newzbay.cc','https://www.newzbay.cc']);
   function pageNZB(anchor, pageOrigin){
