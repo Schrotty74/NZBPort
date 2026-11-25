@@ -296,3 +296,7 @@ Für den Release-Stand bestanden 127 automatisierte Swift-Tests. Build, Signatur
 ## Aktuelles iPhone-Userscript
 
 Seit 25. November 2026 liegt die neue Fassung unter `Userscripts/NZBPort.user.js`. Sie übernimmt kompatible Einstellungen aus einer JSON-Sicherung der früheren Fassung. In Version 0.1.2 reagieren NZBlnk und „An SABnzbd senden“ auf NewzBay nur auf Benutzertipps. Der Nutzer hat die Version am iPhone getestet und bestätigt. Die Freigabe bei Videothek bleibt an denselben technischen Präfix gebunden.
+
+## DrunkenSlug unter iOS: iCloud Privat-Relay
+
+Beim iPhone-Test am 24. November 2026 erschien mit aktiviertem iCloud Privat-Relay eine Cloudflare-Sperrseite auch beim direkten API-Link in Safari; das Userscript meldete einen Netzwerkfehler. Nach Deaktivierung von Privat-Relay war der API-Link sofort erreichbar. Die Suchanfragen des Indexer-Testskripts wurden wieder gezählt und lieferten eine Meldung ohne passenden Release-Treffer, auch nach Rückkehr zu User-Agent und Domainfreigabe des Hauptskripts. Ein erfolgreicher NZB-Abruf über DrunkenSlug im iOS-Skript ist noch nicht bestätigt. Die konkrete Cloudflare-Regel ist unbekannt. Experimentelle User-Agent- und Domainänderungen sind nicht erforderlich; das Hauptskript bleibt unverändert. Privat-Relay nicht dauerhaft allein für Tests deaktivieren.
