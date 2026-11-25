@@ -43,13 +43,14 @@ final class AppModel {
     let appearanceSettings: AppearanceSettings
     let languageSettings: LanguageSettings
     let loginItemSettings = LoginItemSettings()
+    let downloadFolder: DownloadFolderMonitor
     let updateSettings: UpdateSettings
     let monitor: DownloadMonitor
     var selectedPriority = SABPriority.normal
     var addPaused = false
     var duplicateCategory: String?
     private var submissionLedger = SubmissionLedger()
-    var address = "http://localhost:8080/api"
+    var address = SettingsBackup.defaultServerAddress
     var key = ""
     var treasureMapsKey = ""
     var newzBayKey = ""
@@ -75,6 +76,7 @@ final class AppModel {
     private(set) var configured = false
     private(set) var handlerRegistered = false
     private(set) var registeringHandler = false
+    private(set) var applyingSettings = false
     private let client: SABClient
     private let exportResolver: NZBResolver?
     @ObservationIgnored private let defaults: UserDefaults
@@ -94,6 +96,7 @@ final class AppModel {
         self.defaults = defaults
         self.client = client
         self.exportResolver = exportResolver
+        downloadFolder = DownloadFolderMonitor(defaults: defaults)
         updateSettings = UpdateSettings(defaults: defaults)
         monitor = DownloadMonitor(client: client, defaults: defaults)
         appearanceSettings = AppearanceSettings(defaults: defaults)
@@ -139,13 +142,30 @@ final class AppModel {
             do {
                 guard pending.count < 50 else { throw RelayError.message("Too many pending downloads.") }
                 let submission: DownloadSubmission = url.isFileURL ? .file(try NZBFile(url: url)) : .link(try NZBLink(url.absoluteString))
-                guard pending.reduce(current?.byteCount ?? 0, { $0 + $1.byteCount }) + submission.byteCount <= 64 * 1024 * 1024 else {
-                    throw RelayError.message("Pending NZB files exceed 64 MiB.")
-                }
-                pending.append(submission)
+                try enqueue(submission)
             } catch { notice = Notice(error: error) }
         }
-        if current == nil, !sending, !categoryMutationInProgress, !pending.isEmpty { advance() }
+        advanceIfReady()
+    }
+
+    private func enqueue(_ submission: DownloadSubmission) throws {
+        guard pending.count < 50 else { throw RelayError.message("Too many pending downloads.") }
+        guard pending.reduce(current?.byteCount ?? 0, { $0 + $1.byteCount }) + submission.byteCount <= 64 * 1024 * 1024 else {
+            throw RelayError.message("Pending NZB files exceed 64 MiB.")
+        }
+        pending.append(submission)
+    }
+
+    private func advanceIfReady() {
+        if current == nil, !sending, !categoryMutationInProgress, !applyingSettings, !pending.isEmpty { advance() }
+    }
+
+    func receiveDownloadedFiles(_ files: [WatchedNZBFile]) {
+        for file in files {
+            do { try enqueue(.file(file.file, source: file.source)) }
+            catch { notice = Notice(error: error); break }
+        }
+        advanceIfReady()
     }
 
     func chooseFiles() {
@@ -253,38 +273,104 @@ final class AppModel {
     }
 
     func save() {
-        guard !busy else { return }
+        guard !busy, !applyingSettings else { return }
         do {
             let connection = try ServerConnection(address: address, apiKey: key)
-            address = connection.endpoint.absoluteString
-            key = connection.apiKey
-            savedAddress = address
-            savedKey = key
-            treasureMapsKey = treasureMapsKey.trimmingCharacters(in: .whitespacesAndNewlines)
-            savedTreasureMapsKey = treasureMapsKey
-            ninjaCentralKey = ninjaCentralKey.trimmingCharacters(in: .whitespacesAndNewlines)
-            drunkenSlugKey = drunkenSlugKey.trimmingCharacters(in: .whitespacesAndNewlines)
-            nzbFinderKey = nzbFinderKey.trimmingCharacters(in: .whitespacesAndNewlines)
-            videothekKey = videothekKey.trimmingCharacters(in: .whitespacesAndNewlines)
-            newzBayKey = newzBayKey.trimmingCharacters(in: .whitespacesAndNewlines)
-            savedNewzBayKey = newzBayKey
-            savedNinjaCentralKey = ninjaCentralKey
-            savedDrunkenSlugKey = drunkenSlugKey
-            savedNZBFinderKey = nzbFinderKey
-            savedVideothekKey = videothekKey
-            monitor.configure(connection)
-            defaults.set(address, forKey: "serverAddress")
-            defaults.set(key, forKey: "sabAPIKey")
-            defaults.set(treasureMapsKey.isEmpty ? nil : treasureMapsKey, forKey: Self.treasureMapsPreference)
-            defaults.set(newzBayKey.isEmpty ? nil : newzBayKey, forKey: Self.newzBayPreference)
-            defaults.set(ninjaCentralKey.isEmpty ? nil : ninjaCentralKey, forKey: Self.ninjaCentralPreference)
-            defaults.set(drunkenSlugKey.isEmpty ? nil : drunkenSlugKey, forKey: Self.drunkenSlugPreference)
-            defaults.set(nzbFinderKey.isEmpty ? nil : nzbFinderKey, forKey: Self.nzbFinderPreference)
-            defaults.set(videothekKey.isEmpty ? nil : videothekKey, forKey: Self.videothekPreference)
-            configured = true
+            persistConnectionSettings(
+                .init(address: address, apiKey: key, treasureMaps: treasureMapsKey, newzBay: newzBayKey,
+                      ninjaCentral: ninjaCentralKey, drunkenSlug: drunkenSlugKey,
+                      nzbFinder: nzbFinderKey, videothek: videothekKey),
+                server: connection
+            )
             screen = .downloads
             loadCategories()
         } catch { notice = Notice(error: error) }
+    }
+
+    private func persistConnectionSettings(_ settings: SettingsBackup.Connection, server: ServerConnection?) {
+        address = server?.endpoint.absoluteString ?? settings.address.trimmingCharacters(in: .whitespacesAndNewlines)
+        key = server?.apiKey ?? ""
+        treasureMapsKey = settings.treasureMaps.trimmingCharacters(in: .whitespacesAndNewlines)
+        newzBayKey = settings.newzBay.trimmingCharacters(in: .whitespacesAndNewlines)
+        ninjaCentralKey = settings.ninjaCentral.trimmingCharacters(in: .whitespacesAndNewlines)
+        drunkenSlugKey = settings.drunkenSlug.trimmingCharacters(in: .whitespacesAndNewlines)
+        nzbFinderKey = settings.nzbFinder.trimmingCharacters(in: .whitespacesAndNewlines)
+        videothekKey = settings.videothek.trimmingCharacters(in: .whitespacesAndNewlines)
+        savedAddress = address
+        savedKey = key
+        savedTreasureMapsKey = treasureMapsKey
+        savedNewzBayKey = newzBayKey
+        savedNinjaCentralKey = ninjaCentralKey
+        savedDrunkenSlugKey = drunkenSlugKey
+        savedNZBFinderKey = nzbFinderKey
+        savedVideothekKey = videothekKey
+        defaults.set(address, forKey: "serverAddress")
+        defaults.set(key, forKey: "sabAPIKey")
+        for (name, value) in [
+            (Self.treasureMapsPreference, treasureMapsKey), (Self.newzBayPreference, newzBayKey),
+            (Self.ninjaCentralPreference, ninjaCentralKey), (Self.drunkenSlugPreference, drunkenSlugKey),
+            (Self.nzbFinderPreference, nzbFinderKey), (Self.videothekPreference, videothekKey)
+        ] {
+            defaults.set(value.isEmpty ? nil : value, forKey: name)
+        }
+        configured = server != nil
+        monitor.configure(server)
+    }
+
+    var canManageSettings: Bool { !busy && !sending && !exportPresented && !applyingSettings }
+
+    func settingsBackup() -> SettingsBackup {
+        SettingsBackup(
+            connection: .init(address: savedAddress, apiKey: savedKey, treasureMaps: savedTreasureMapsKey,
+                              newzBay: savedNewzBayKey, ninjaCentral: savedNinjaCentralKey,
+                              drunkenSlug: savedDrunkenSlugKey, nzbFinder: savedNZBFinderKey,
+                              videothek: savedVideothekKey),
+            categories: preferences, language: languageSettings.selection, appearance: appearanceSettings.mode,
+            colorTheme: appearanceSettings.theme, backgroundStyle: appearanceSettings.background,
+            includeTestUpdates: updateSettings.includePrereleases, downloadNotifications: monitor.notificationsEnabled,
+            launchAtLogin: loginItemSettings.requested, watchedDownloadFolder: downloadFolder.backupPath
+        )
+    }
+
+    func applySettingsBackup(_ backup: SettingsBackup) async throws -> [String] {
+        guard canManageSettings else {
+            throw RelayError.message("Wait until the current operation finishes before changing settings.")
+        }
+        let server = try backup.connection.validatedServer()
+        applyingSettings = true
+        defer {
+            applyingSettings = false
+            if current == nil, !pending.isEmpty { advanceIfReady() }
+            else if configured { loadCategories() }
+        }
+        persistConnectionSettings(backup.connection, server: server)
+        preferences = backup.categories
+        persistCategoryPreferences()
+        categories = []
+        query = ""
+        duplicateCategory = nil
+        categoryToDelete = nil
+        screen = configured ? .downloads : .settings
+        appearanceSettings.mode = backup.appearance
+        appearanceSettings.theme = backup.colorTheme
+        appearanceSettings.background = backup.backgroundStyle
+        languageSettings.selection = backup.language
+        updateSettings.includePrereleases = backup.includeTestUpdates
+        var followUp: [String] = []
+        if downloadFolder.restoreBackupPath(backup.watchedDownloadFolder) {
+            followUp.append(L("Wähle den Downloadordner erneut aus, um die Überwachung zu starten."))
+        }
+        loginItemSettings.setEnabled(backup.launchAtLogin)
+        if loginItemSettings.requested != backup.launchAtLogin || loginItemSettings.needsApproval {
+            followUp.append(L("Prüfe den Autostart in den macOS-Anmeldeobjekten."))
+        }
+        if monitor.notificationsEnabled != backup.downloadNotifications {
+            await monitor.setNotifications(backup.downloadNotifications)
+        }
+        if monitor.notificationsEnabled != backup.downloadNotifications {
+            followUp.append(L("Prüfe die Mitteilungen für NZBPort in den macOS-Einstellungen."))
+        }
+        return followUp
     }
 
     func openCategories() {
@@ -409,7 +495,7 @@ final class AppModel {
     }
 
     private func performSend(category: String, allowDuplicate: Bool) {
-        guard !busy, !exportPresented, let submission = current else { return }
+        guard !busy, !exportPresented, !applyingSettings, let submission = current else { return }
         let connection: ServerConnection
         do { connection = try ServerConnection(address: savedAddress, apiKey: savedKey) }
         catch { notice = Notice(error: error); return }
@@ -426,6 +512,7 @@ final class AppModel {
         task = Task {
             do {
                 let ids: [String]
+                var cleanupFailed = false
                 switch submission {
                 case .link(let link):
                     let resolver = NZBResolver(newznabClients: searchClients())
@@ -442,17 +529,27 @@ final class AppModel {
                     } else {
                         ids = try await client.send(link, download: download, category: category, connection: connection, options: options)
                     }
-                case .file(let file):
+                case .file(let file, let source):
                     progress = "An SABnzbd senden …"
                     submissionLedger.record(fingerprint)
                     ids = try await client.send(file, category: category, connection: connection, options: options)
+                    if let source {
+                        do {
+                            _ = try await Task.detached(priority: .utility) {
+                                try source.moveToTrash(ifUnchanged: file.data)
+                            }.value
+                        } catch { cleanupFailed = true }
+                    }
                 }
                 monitor.trackSubmitted(ids)
                 busy = false
                 sending = false
                 current = nil
-                if pending.isEmpty { closeAfterSuccess?() }
-                else { advance() }
+                if !pending.isEmpty { advance() }
+                else if !cleanupFailed { closeAfterSuccess?() }
+                if cleanupFailed {
+                    notice = Notice(text: "An SABnzbd gesendet. Die NZB-Datei konnte nicht in den Papierkorb gelegt werden.", isError: true)
+                }
             } catch {
                 busy = false
                 sending = false
@@ -488,7 +585,7 @@ final class AppModel {
             do {
                 let file: NZBFile
                 switch submission {
-                case .file(let imported): file = imported
+                case .file(let imported, _): file = imported
                 case .link(let link):
                     let resolver = exportResolver ?? NZBResolver(newznabClients: searchClients())
                     file = try await resolver.fileForExport(link) { [self] provider in

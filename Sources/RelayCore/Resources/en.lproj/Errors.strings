@@ -60,3 +60,5 @@
 "The connection to SABnzbd was interrupted while deleting the category. Its status is unknown; refresh the category list before trying again." = "The connection to SABnzbd was interrupted while deleting the category. Its status is unknown; refresh the category list before trying again.";
 "SABnzbd did not remove the category. Refresh the category list and try again." = "SABnzbd did not remove the category. Refresh the category list and try again.";
 "NZBFinder requires a premium membership for API access." = "NZBFinder requires a premium membership for API access.";
+"Choose a valid NZBPort settings backup for macOS." = "Choose a valid NZBPort settings backup for macOS.";
+"Wait until the current operation finishes before changing settings." = "Wait until the current operation finishes before changing settings.";

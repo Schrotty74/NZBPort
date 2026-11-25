@@ -1,6 +1,6 @@
 # Nächste Schritte – NZBPort
 
-Stand: 23. November 2026. Testversion 0.2.6, Build 10, ergänzt Videothek und die Unterstützung längerer Indexer-IDs. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
+Stand: 25. November 2026. Testversion 0.2.7, Build 11, ergänzt die Downloadordner-Überwachung und die Sicherung der App-Einstellungen. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
 
 ## Noch nicht gesondert bestätigte Bedienungsfälle
 
@@ -18,7 +18,6 @@ Stand: 23. November 2026. Testversion 0.2.6, Build 10, ergänzt Videothek und di
 
 - NinjaCentral im aktuellen iPhone-Skript mit gespeichertem API-Key prüfen. Ein früherer direkter API-Test lieferte einen passenden Treffer und eine gültige NZB-Datei.
 
-- NewzBay mit eigenem API-Key in den Verbindungseinstellungen prüfen. Der direkte Suchtest lieferte HTTP 429 und keine Trefferliste. Der Nutzer hat die drei ursprünglich fehlenden Releases bereits mit der integrierten Treasure-Maps-Suche gefunden.
 - Neue Gruppierung der Verbindungseinstellungen in SABnzbd und optionale Suchdienste im normalen Betrieb bestätigen. Der Nutzer hat die vorherige Korrektur der Fensterhöhe als funktionierend bestätigt.
 - Liste wartender Eingänge, Kategorieanzeige und Kurzstatus im geöffneten Menü im normalen Betrieb prüfen.
 - Die Zwei-Sekunden-Aktualisierung im normalen Betrieb bestätigen. Der bisherige Kategorien-Klappbereich in den Verbindungen ist durch die eigene Kategorienansicht ersetzt.

@@ -300,3 +300,11 @@ Seit 25. November 2026 liegt die neue Fassung unter `Userscripts/NZBPort.user.js
 ## DrunkenSlug unter iOS: iCloud Privat-Relay
 
 Beim iPhone-Test am 24. November 2026 erschien mit aktiviertem iCloud Privat-Relay eine Cloudflare-Sperrseite auch beim direkten API-Link in Safari; das Userscript meldete einen Netzwerkfehler. Nach Deaktivierung von Privat-Relay war der API-Link sofort erreichbar. Die Suchanfragen des Indexer-Testskripts wurden wieder gezählt und lieferten eine Meldung ohne passenden Release-Treffer, auch nach Rückkehr zu User-Agent und Domainfreigabe des Hauptskripts. Ein erfolgreicher NZB-Abruf über DrunkenSlug im iOS-Skript ist noch nicht bestätigt. Die konkrete Cloudflare-Regel ist unbekannt. Experimentelle User-Agent- und Domainänderungen sind nicht erforderlich; das Hauptskript bleibt unverändert. Privat-Relay nicht dauerhaft allein für Tests deaktivieren.
+
+## Testversion 0.2.7, Build 11
+
+25. November 2026. NZBPort bietet für neue, vollständige NZB-Dateien im gewählten Downloadordner die Kategorieauswahl an. Nach der Bestätigung durch SABnzbd verschiebt die App die Originaldatei in den Papierkorb. Der Nutzer hat diesen Ablauf bestätigt.
+
+Das Zahnradmenü bündelt die Einstellungen. Unter **Einstellungen → Sicherung** lassen sich Einstellungen einschließlich API-Keys als JSON exportieren, importieren und zurücksetzen. Export, Zurücksetzen und Import wurden lokal ausprobiert. Die tatsächliche Wiederherstellung des macOS-Anmeldeobjekts wurde dabei nicht gesondert bestätigt.
+
+Die lokale App-Kopie liegt auf MacSoftware unter `Download/NZBPort/NZBPort.app`. Die separate Sicherungsdatei im selben Ordner gehört nicht zum App-Bundle.

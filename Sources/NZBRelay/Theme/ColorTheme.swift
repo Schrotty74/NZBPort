@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 /// The palettes are independent of the system/light/dark appearance setting.
-enum ColorTheme: String, CaseIterable, Identifiable {
+enum ColorTheme: String, CaseIterable, Identifiable, Codable, Sendable {
     case standard, coffee, ivory, mint
 
     var id: String { rawValue }

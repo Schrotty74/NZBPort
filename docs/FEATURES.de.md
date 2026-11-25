@@ -41,7 +41,12 @@
 
 - **Anfragen an Anbieter:** Ein eingerichteter Anbieter erhält den Releasetitel und nur seinen eigenen API-Key. Die Keys werden erst nach dem ausdrücklichen Speichern lokal und unverschlüsselt abgelegt. Zum Deaktivieren leerst du das jeweilige Feld und speicherst erneut.
 - **NZB-Abruf:** NZBPort lädt Treffer der Indexer selbst und übergibt die NZB-Datei an SABnzbd. Der Indexer-Key wird nicht an SABnzbd gesendet.
-- **Grenzen der Anbieter:** Ein direkter angemeldeter Test bei NinjaCentral lieferte einen passenden Treffer und eine gültige NZB-Datei. Ein angemeldeter NewzBay-Test endete mit HTTP 429; ein Live-Download ist daher nicht bestätigt. Bei DrunkenSlug waren eine Live-Suche und der NZB-Abruf mit einer 40-stelligen Hex-ID erfolgreich. Für API-Zugriff auf NZBFinder ist eine Premium-Mitgliedschaft erforderlich; ein kostenloses Konto kann HTTP 401 mit API-Fehler 102 liefern. Verfügbarkeit und Bedingungen der Anbieter können sich ändern. HTML-Ausweichsuchen können ausfallen, wenn ein Anbieter Seiten ändert oder automatisierte Zugriffe sperrt. NZBPort umgeht keine Zugangssperren oder CAPTCHAs.
+- **Grenzen der Anbieter:** Ein direkter angemeldeter Test bei NinjaCentral lieferte einen passenden Treffer und eine gültige NZB-Datei. Bei NewzBay folgt die App für den NZB-Abruf einer HTTPS-Weiterleitung zum Download-Endpunkt desselben Anbieters. Bei DrunkenSlug waren eine Live-Suche und der NZB-Abruf mit einer 40-stelligen Hex-ID erfolgreich. Für API-Zugriff auf NZBFinder ist eine Premium-Mitgliedschaft erforderlich; ein kostenloses Konto kann HTTP 401 mit API-Fehler 102 liefern. Verfügbarkeit und Bedingungen der Anbieter können sich ändern. HTML-Ausweichsuchen können ausfallen, wenn ein Anbieter Seiten ändert oder automatisierte Zugriffe sperrt. NZBPort umgeht keine Zugangssperren oder CAPTCHAs.
+
+## Downloadordner und Sicherung
+
+- Unter **Einstellungen → Downloadordner** wählst du einen Ordner aus. NZBPort bietet für neu eingetroffene, fertige NZB-Dateien die Kategorieauswahl an. Nach erfolgreicher Übergabe an SABnzbd wandert die Originaldatei in den Papierkorb. Bei Fehlern oder Abbruch bleibt sie im Ordner.
+- Unter **Einstellungen → Sicherung** kannst du Einstellungen einschließlich API-Keys, Kategorienfavoriten und Darstellung als JSON exportieren und importieren. Die Datei enthält die Schlüssel im Klartext. Dort kannst du NZBPort auch auf die Standardwerte zurücksetzen. Bei fehlender macOS-Ordnerfreigabe wählst du den überwachten Ordner nach dem Import erneut aus.
 
 ## Downloads, Menüleiste und Mitteilungen
 

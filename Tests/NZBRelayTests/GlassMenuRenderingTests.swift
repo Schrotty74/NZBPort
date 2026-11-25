@@ -46,6 +46,22 @@ func glassMenuHasVisiblyDifferentHoverAndPressStates(symbol: String) throws {
     defer { defaults.removePersistentDomain(forName: name) }
     let menu = AppOptionsMenu(model: AppModel(defaults: defaults)).makeOptionsMenu()
     menu.update()
-    #expect(menu.items.filter { !$0.isSeparatorItem }.count >= 10)
-    #expect(menu.items.filter { $0.submenu != nil }.count >= 4)
+    let entries = menu.items.filter { !$0.isSeparatorItem }
+    #expect(entries.map(\.title) == [
+        L("NZB-Dateien öffnen …"), L("Downloads"), L("Kategorien …"), L("SABnzbd öffnen"),
+        L("Einstellungen"), L("Über NZBPort")
+    ])
+    let settings = try #require(entries.first { $0.title == L("Einstellungen") }?.submenu)
+    settings.update()
+    #expect(Set(settings.items.filter { !$0.isSeparatorItem }.map(\.title)) == Set([
+        L("Verbindung …"), L("Downloadordner"), L("Sprache"), L("Autostart"), L("Erscheinungsbild"), L("Sicherung")
+    ]))
+    let backup = try #require(settings.items.first { $0.title == L("Sicherung") }?.submenu)
+    backup.update()
+    #expect(backup.items.filter { !$0.isSeparatorItem }.map(\.title) == [
+        L("Einstellungen exportieren …"), L("Einstellungen importieren …"), L("Einstellungen zurücksetzen …")
+    ])
+    let about = try #require(entries.first { $0.title == L("Über NZBPort") }?.submenu)
+    about.update()
+    #expect(about.items.contains { $0.title == L("Nach Updates suchen …") })
 }

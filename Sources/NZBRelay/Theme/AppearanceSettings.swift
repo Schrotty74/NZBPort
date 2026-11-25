@@ -3,7 +3,7 @@ import AppKit
 import SwiftUI
 import Observation
 
-enum AppAppearance: String, CaseIterable, Identifiable {
+enum AppAppearance: String, CaseIterable, Identifiable, Codable, Sendable {
     case system, light, dark
     var id: String { rawValue }
     var title: String {
@@ -21,7 +21,7 @@ enum AppAppearance: String, CaseIterable, Identifiable {
     }
 }
 
-enum BackgroundStyle: String, CaseIterable, Identifiable {
+enum BackgroundStyle: String, CaseIterable, Identifiable, Codable, Sendable {
     case system, translucent, opaque
     var id: String { rawValue }
     var title: String {

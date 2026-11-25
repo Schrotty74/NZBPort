@@ -28,6 +28,17 @@ private func rss(_ items: String) -> String {
     "<rss xmlns:newznab='http://www.newznab.com/DTD/2010/feeds/attributes/'><channel><newznab:response offset='0' total='1'/>\(items)</channel></rss>"
 }
 
+@Test func newzBayAllowsOnlyItsOwnNZBDownloadRedirect() throws {
+    let id = "0123456789abcdef0123456789abcdef"
+    let original = try #require(URL(string: "https://newzbay.cc/api?t=get&id=\(id)&apikey=synthetic"))
+    let websiteDownload = try #require(URL(string: "https://newzbay.cc/getnzb?id=\(id)&r=synthetic"))
+    #expect(NewznabClient.allowsNewzBayRedirect(from: original, to: websiteDownload))
+    #expect(NewznabClient.allowsNewzBayRedirect(from: original, to: URL(string: "https://newzbay.cc/getnzb/\(id)/Test.Release")))
+    #expect(!NewznabClient.allowsNewzBayRedirect(from: original, to: URL(string: "https://newzbay.cc/getnzb?id=\(id)")))
+    #expect(!NewznabClient.allowsNewzBayRedirect(from: original, to: URL(string: "https://newzbay.cc.example/getnzb?id=\(id)&r=synthetic")))
+    #expect(!NewznabClient.allowsNewzBayRedirect(from: URL(string: "https://newzbay.cc/api?t=search"), to: websiteDownload))
+}
+
 @Test func searchEncodesFullTitleAndReturnsSignedDownloadURL() async throws {
     let title = "S.W.A.T.Exiles.S01E07.GERMAN.DL.1080P.WEB.H264-WAYNE + WEB+DL"
     let transport = NewznabTestTransport(rss(rssItem(title)))

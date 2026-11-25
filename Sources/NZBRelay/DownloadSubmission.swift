@@ -4,12 +4,12 @@ import RelayCore
 
 enum DownloadSubmission: Identifiable {
     case link(NZBLink)
-    case file(NZBFile)
+    case file(NZBFile, source: WatchedNZBSource? = nil)
 
-    var id: UUID { switch self { case .link(let value): value.id; case .file(let value): value.id } }
-    var title: String { switch self { case .link(let value): value.title; case .file(let value): value.title } }
+    var id: UUID { switch self { case .link(let value): value.id; case .file(let value, _): value.id } }
+    var title: String { switch self { case .link(let value): value.title; case .file(let value, _): value.title } }
     var password: String? { switch self { case .link(let value): value.password; case .file: nil } }
-    var byteCount: Int { switch self { case .link: 0; case .file(let file): file.data.count } }
+    var byteCount: Int { switch self { case .link: 0; case .file(let file, _): file.data.count } }
 
     func fingerprint(server: URL) -> String {
         var bytes = Data(server.absoluteString.utf8)
@@ -19,7 +19,7 @@ enum DownloadSubmission: Identifiable {
             bytes.append(contentsOf: "link\0".utf8)
             bytes.append(contentsOf: link.header.utf8)
             for group in link.groups.sorted() { bytes.append(0); bytes.append(contentsOf: group.utf8) }
-        case .file(let file):
+        case .file(let file, _):
             bytes.append(contentsOf: "file\0".utf8)
             bytes.append(file.data)
         }

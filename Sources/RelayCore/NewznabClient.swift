@@ -2,7 +2,7 @@ import Foundation
 
 /// Searches Newznab-compatible RSS APIs and resolves downloads without forwarding API credentials.
 public actor NewznabClient: NZBSearchProvider {
-    public static let userAgent = "NZBPort/0.2.6 (+https://github.com/Schrotty74/NZBPort)"
+    public static let userAgent = "NZBPort/0.2.7 (+https://github.com/Schrotty74/NZBPort)"
     public enum Service: Sendable, Equatable { case treasureMaps, newzBay, ninjaCentral, drunkenSlug, nzbFinder, videothek }
 
     nonisolated public var name: String {
@@ -167,6 +167,27 @@ public actor NewznabClient: NZBSearchProvider {
         }
     }
 
+    static func allowsNewzBayRedirect(from original: URL?, to destination: URL?) -> Bool {
+        guard let original, let destination,
+              let source = URLComponents(url: original, resolvingAgainstBaseURL: false),
+              let target = URLComponents(url: destination, resolvingAgainstBaseURL: false),
+              source.scheme == "https", source.host == "newzbay.cc", source.path == "/api",
+              source.queryItems?.contains(URLQueryItem(name: "t", value: "get")) == true,
+              target.scheme == "https", target.host == source.host,
+              target.user == nil, target.password == nil, target.port == nil, target.fragment == nil
+        else { return false }
+        if target.path == "/getnzb", let items = target.queryItems {
+            return ["id", "r"].allSatisfy { name in
+                let values = items.filter { $0.name == name }
+                return values.count == 1 && values[0].value?.isEmpty == false
+            }
+        }
+        let path = target.path.split(separator: "/")
+        let sourceID = source.queryItems?.first(where: { $0.name == "id" })?.value
+        return (2...3).contains(path.count) && path[0] == "getnzb" &&
+            sourceID.map { path[1].caseInsensitiveCompare($0) == .orderedSame } == true
+    }
+
     private func perform(_ request: URLRequest, failure: String.LocalizationValue) async throws -> HTTPResult {
         let result: HTTPResult
         do { result = try await transport.perform(request) }
@@ -243,6 +264,7 @@ private final class NewznabRedirectDelegate: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         let allowed = switch service {
+        case .newzBay: NewznabClient.allowsNewzBayRedirect(from: task.originalRequest?.url, to: request.url)
         case .ninjaCentral: NewznabClient.allowsNinjaRedirect(from: task.originalRequest?.url, to: request.url)
         case .drunkenSlug: NewznabClient.allowsDrunkenSlugRedirect(from: task.originalRequest?.url, to: request.url)
         default: false

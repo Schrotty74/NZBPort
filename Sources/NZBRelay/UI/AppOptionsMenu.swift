@@ -45,23 +45,41 @@ struct AppOptionsMenu: View {
 
     @ViewBuilder
     private var menuContent: some View {
+        Button(L("NZB-Dateien öffnen …"), systemImage: "doc.badge.plus") { model.chooseFiles() }
+        Button(L("Downloads"), systemImage: "arrow.down.circle") { model.screen = .overview }
+        Button(L("Kategorien …"), systemImage: "folder") { model.openCategories() }
+            .disabled(model.busy || model.screen == .categories)
+        Button(L("SABnzbd öffnen"), systemImage: "safari") { model.openSABnzbd() }
+            .disabled(!model.configured)
+        Divider()
+        Menu(L("Einstellungen"), systemImage: "gearshape") { settingsMenuContent }
+        Menu(L("Über NZBPort"), systemImage: "info.circle") {
+            Button(L("Nach Updates suchen …"), systemImage: "arrow.triangle.2.circlepath") {
+                model.screen = .updates
+                Task { await model.updateSettings.check() }
+            }
+            Divider()
+            Link("GitHub", destination: AppLinks.github)
+            Link(L("Homepage"), destination: AppLinks.homepage)
+        }
+    }
+
+    @ViewBuilder
+    private var settingsMenuContent: some View {
         @Bindable var appearance = model.appearanceSettings
         @Bindable var language = model.languageSettings
         let login = model.loginItemSettings
-        Button(L("Verbindungseinstellungen …"), systemImage: "network") {
+        Button(L("Verbindung …"), systemImage: "network") {
             model.openSettings()
         }
         .disabled(model.sending || model.categoryMutationInProgress || model.screen == .settings)
-        Button(L("Kategorien …"), systemImage: "folder") { model.openCategories() }
-            .disabled(model.busy || model.screen == .categories)
-        Button(L("NZB-Dateien öffnen …"), systemImage: "doc.badge.plus") { model.chooseFiles() }
-        Button(L("SABnzbd im Browser öffnen"), systemImage: "safari") { model.openSABnzbd() }.disabled(!model.configured)
-        Button(L("Downloads"), systemImage: "arrow.down.circle") { model.screen = .overview }
-        Button(L("Nach Updates suchen …"), systemImage: "arrow.triangle.2.circlepath") {
-            model.screen = .updates
-            Task { await model.updateSettings.check() }
+        Menu(L("Downloadordner"), systemImage: "folder.badge.plus") {
+            if let folder = model.downloadFolder.folder {
+                Text(folder.lastPathComponent)
+                Button(L("Überwachung beenden")) { model.downloadFolder.stop() }
+            }
+            Button(L("Downloadordner wählen …")) { model.downloadFolder.chooseFolder() }
         }
-        Divider()
         Picker(L("Sprache"), selection: $language.selection) {
             ForEach(AppLanguage.allCases) { choice in
                 Text(choice.title).tag(choice)
@@ -76,7 +94,6 @@ struct AppOptionsMenu: View {
                 Button(L("In macOS erlauben …")) { login.openSystemSettings() }
             }
         }
-        Divider()
         Menu(L("Erscheinungsbild"), systemImage: "circle.lefthalf.filled") {
             Picker(L("Farbthema"), selection: $appearance.theme) {
                 ForEach(ColorTheme.allCases) { theme in
@@ -100,10 +117,13 @@ struct AppOptionsMenu: View {
             .pickerStyle(.inline)
         }
         Divider()
-        Menu(L("Über NZBPort"), systemImage: "info.circle") {
-            Link("GitHub", destination: AppLinks.github)
-            Link(L("Homepage"), destination: AppLinks.homepage)
+        Menu(L("Sicherung"), systemImage: "externaldrive") {
+            Button(L("Einstellungen exportieren …")) { model.exportSettings() }
+            Button(L("Einstellungen importieren …")) { model.importSettings() }
+            Divider()
+            Button(L("Einstellungen zurücksetzen …"), role: .destructive) { model.resetSettings() }
         }
+        .disabled(!model.canManageSettings)
     }
 }
 

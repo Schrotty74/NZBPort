@@ -2,7 +2,7 @@
 
 [Deutsch](README.de.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
-> Current test version: **0.2.6**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.6).
+> Current test version: **0.2.7**. [Download DMG or ZIP](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.7).
 
 The separate [iOS userscript](Userscripts/NZBPort.user.js) has its own [documentation](Userscripts/README.md).
 
@@ -10,14 +10,14 @@ NZBPort is a small macOS menu bar app that opens `nzblnk:` links and NZB files, 
 
 ## Features
 
-- **Open NZBlnk links and NZB files** from Safari, the clipboard, Finder’s Open With menu, the file chooser or drag and drop.
-- **Save NZB files** locally, preserving the exact link password as NZB metadata when one is present.
+- **Open NZBlnk links and NZB files**. Save NZBs locally with the original link password when included.
+- **Watch a download folder**. Choose a category for each new NZB and move the file to the Trash after SABnzbd accepts it.
 - **Find NZBs** through up to nine providers in order: NZBIndex, NZBKing and BinSearch, then Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder and Videothek when each has a saved API key.
 - **Choose and manage SABnzbd categories** before sending. Add or delete categories in SABnzbd, and pin favorites or hide categories locally in NZBPort.
 - **Set a priority, add jobs paused and manage waiting links and files** before sending. Remove individual waiting entries if needed.
 - **Check downloads** with progress, categories and recent history. Pause or resume one job or the whole queue.
-- **See a quick SABnzbd status** in the menu bar, including the queue count and download speed when available.
-- **Get macOS notifications** when downloads finish or fail.
+- **See SABnzbd status in the menu bar** and get macOS notifications when downloads finish or fail.
+- **Back up and restore settings**. Export or import a JSON backup, or reset the app to defaults.
 - **Start at login** with NZBPort in the menu bar.
 - **Connection settings** keep SABnzbd and optional search providers in separate groups. The window adjusts to its content and available screen space. A manually chosen size lasts until you reopen it.
 
@@ -62,7 +62,7 @@ See [Apple’s instructions for opening apps safely](https://support.apple.com/e
 
 The SABnzbd URL and API key are stored locally, unencrypted, in app preferences. The app does not use Keychain. The API key is sent in a POST body to the configured SABnzbd endpoint. HTTP is supported; use HTTPS or a trusted VPN for untrusted networks.
 
-NZBIndex, NZBKing and BinSearch receive the link's search identifier. NZBIndex also receives its groups. When these services find nothing, NZBPort searches configured providers in this order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder and Videothek. Each provider receives the release title and only its own API key. Provider keys are optional and are stored locally without encryption only after you save them. To disable a provider, clear its key and save. A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. An authenticated NewzBay test returned HTTP 429, so a live download from it remains unverified. A live search and NZB retrieval succeeded for DrunkenSlug with a 40-character hexadecimal ID. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102.
+NZBIndex, NZBKing and BinSearch receive the link's search identifier. NZBIndex also receives its groups. When these services find nothing, NZBPort searches configured providers in this order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder and Videothek. Each provider receives the release title and only its own API key. Provider keys are optional and are stored locally without encryption only after you save them. To disable a provider, clear its key and save. A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. NZBPort follows HTTPS redirects to NewzBay’s own NZB download endpoint. A live search and NZB retrieval succeeded for DrunkenSlug with a 40-character hexadecimal ID. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102.
 
 NZBPort downloads configured indexer results locally and sends the NZB file to SABnzbd. SABnzbd also receives the title, selected category and optional archive password. When saving an NZB file, NZBPort adds the exact link password as NZB metadata. The SABnzbd key is sent only to your configured SABnzbd server. Search availability depends on the providers and their terms. HTML fallbacks can stop working when a provider changes its pages or blocks automated access. No access-control or CAPTCHA bypass is included.
 

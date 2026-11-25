@@ -60,3 +60,5 @@
 "The connection to SABnzbd was interrupted while deleting the category. Its status is unknown; refresh the category list before trying again." = "Die Verbindung zu SABnzbd wurde beim Löschen der Kategorie unterbrochen. Ob sie gelöscht wurde, ist unklar. Lade vor einem erneuten Versuch die Kategorienliste neu.";
 "SABnzbd did not remove the category. Refresh the category list and try again." = "SABnzbd hat die Kategorie nicht entfernt. Lade die Kategorienliste neu und versuche es erneut.";
 "NZBFinder requires a premium membership for API access." = "NZBFinder benötigt für den API-Zugriff eine Premium-Mitgliedschaft.";
+"Choose a valid NZBPort settings backup for macOS." = "Wähle eine gültige NZBPort-Einstellungssicherung für macOS.";
+"Wait until the current operation finishes before changing settings." = "Warte, bis der laufende Vorgang abgeschlossen ist, bevor du die Einstellungen änderst.";

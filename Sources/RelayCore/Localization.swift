@@ -1,6 +1,6 @@
 import Foundation
 
-public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
+public enum AppLanguage: String, CaseIterable, Identifiable, Sendable, Codable {
     case system
     case german
     case english

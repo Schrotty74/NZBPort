@@ -10,85 +10,104 @@ struct RelayRootView: View {
     @State private var measuredBodyHeight: CGFloat?
     @State private var measuredFooterHeight: CGFloat?
 
-    private var scrollEdgeStyle: ScrollEdgeEffectStyle? {
-        if #available(macOS 27.0, *) { .hard } else { nil }
-    }
-
     private func reportMeasuredHeight() {
         guard let measuredHeaderHeight, let measuredBodyHeight, let measuredFooterHeight else { return }
         fitContent(measuredHeaderHeight + measuredBodyHeight + measuredFooterHeight)
     }
 
-    var body: some View {
+    private var header: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    Image(nsImage: NSImage(named: "BrandMark") ?? NSImage(size: .zero))
-                        .resizable().renderingMode(.template).scaledToFit()
-                        .frame(width: 29, height: 29)
-                        .foregroundStyle(model.appearanceSettings.theme.accent)
-                        .accessibilityHidden(true)
-                    Text("NZBPort").font(RelayTheme.brandFont)
-                    Spacer()
-                    if model.screen != .downloads && (model.configured || model.screen != .settings) {
-                        Button { model.screen = model.configured ? .downloads : .settings; model.notice = nil } label: {
-                            Label(L("Zurück"), systemImage: "arrow.left")
-                        }
-                        .disabled(model.busy)
+            HStack(spacing: 12) {
+                Image(nsImage: NSImage(named: "BrandMark") ?? NSImage(size: .zero))
+                    .resizable().renderingMode(.template).scaledToFit()
+                    .frame(width: 29, height: 29)
+                    .foregroundStyle(model.appearanceSettings.theme.accent)
+                    .accessibilityHidden(true)
+                Text("NZBPort").font(RelayTheme.brandFont)
+                Spacer()
+                if model.screen != .downloads && (model.configured || model.screen != .settings) {
+                    Button { model.screen = model.configured ? .downloads : .settings; model.notice = nil } label: {
+                        Label(L("Zurück"), systemImage: "arrow.left")
                     }
-                    AppOptionsMenu(model: model)
+                    .disabled(model.busy)
                 }
-                .padding(.horizontal, RelayTheme.pagePadding).padding(.vertical, 12)
-                Divider()
+                AppOptionsMenu(model: model)
             }
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
-                measuredHeaderHeight = height
-                reportMeasuredHeight()
-            }
-            ScrollViewReader { reader in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: RelayTheme.sectionSpacing) {
-                        if let notice = model.notice { NoticeView(notice: notice).id("relayNotice") }
-                        if model.screen == .settings { ConnectionSettingsView(model: model) }
-                        else if model.screen == .categories { CategoriesView(model: model) }
-                        else if model.screen == .overview { DownloadOverview(model: model) }
-                        else if model.screen == .updates { UpdateView(settings: model.updateSettings) }
-                        else { DownloadView(model: model) }
-                        if (model.screen == .downloads || model.screen == .settings), !model.pending.isEmpty {
-                            Divider()
-                            PendingSubmissionsView(submissions: model.pending, remove: model.removePending)
-                        }
-                    }
-                    .padding(RelayTheme.pagePadding)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
-                        measuredBodyHeight = height
-                        reportMeasuredHeight()
+            .padding(.horizontal, RelayTheme.pagePadding).padding(.vertical, 12)
+            Divider()
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
+            measuredHeaderHeight = height
+            reportMeasuredHeight()
+        }
+    }
+
+    private var scrollContent: some View {
+        ScrollViewReader { reader in
+            ScrollView {
+                VStack(alignment: .leading, spacing: RelayTheme.sectionSpacing) {
+                    if let notice = model.notice { NoticeView(notice: notice).id("relayNotice") }
+                    if model.screen == .settings { ConnectionSettingsView(model: model) }
+                    else if model.screen == .categories { CategoriesView(model: model) }
+                    else if model.screen == .overview { DownloadOverview(model: model) }
+                    else if model.screen == .updates { UpdateView(settings: model.updateSettings) }
+                    else { DownloadView(model: model) }
+                    if (model.screen == .downloads || model.screen == .settings), !model.pending.isEmpty {
+                        Divider()
+                        PendingSubmissionsView(submissions: model.pending, remove: model.removePending)
                     }
                 }
-                .scrollEdgeEffectStyle(scrollEdgeStyle, for: [.top, .bottom])
-                .onChange(of: model.notice) { _, notice in
-                    if notice != nil { reader.scrollTo("relayNotice", anchor: .top) }
+                .padding(RelayTheme.pagePadding)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
+                    measuredBodyHeight = height
+                    reportMeasuredHeight()
                 }
             }
-            VStack(spacing: 0) {
-                Divider()
-                HStack(spacing: 7) {
-                    Circle().fill(model.configured ? Color.green : Color.secondary).frame(width: 6, height: 6)
-                    Text(model.configured ? model.serverHost : L("Verbindung einrichten"))
-                        .lineLimit(1).truncationMode(.middle)
-                    Spacer()
-                    if !model.pending.isEmpty { Text(L("Wartend: \(model.pending.count)")) }
-                    else { Text(L("Für deinen Mac")) }
-                }
-                .font(.system(size: 11)).foregroundStyle(.secondary)
-                .padding(.horizontal, RelayTheme.pagePadding).padding(.vertical, 9)
-            }
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
-                measuredFooterHeight = height
-                reportMeasuredHeight()
+            .onChange(of: model.notice) { _, notice in
+                if notice != nil { reader.scrollTo("relayNotice", anchor: .top) }
             }
         }
+    }
+
+    private var footer: some View {
+        VStack(spacing: 0) {
+            Divider()
+            HStack(spacing: 7) {
+                Circle().fill(model.configured ? Color.green : Color.secondary).frame(width: 6, height: 6)
+                Text(model.configured ? model.serverHost : L("Verbindung einrichten"))
+                    .lineLimit(1).truncationMode(.middle)
+                Spacer()
+                if !model.pending.isEmpty { Text(L("Wartend: \(model.pending.count)")) }
+                else { Text(L("Für deinen Mac")) }
+            }
+            .font(.system(size: 11)).foregroundStyle(.secondary)
+            .padding(.horizontal, RelayTheme.pagePadding).padding(.vertical, 9)
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { _, height in
+            measuredFooterHeight = height
+            reportMeasuredHeight()
+        }
+    }
+
+    @ViewBuilder
+    private var windowContent: some View {
+        if #available(macOS 27.0, *) {
+            scrollContent
+                .safeAreaBar(edge: .top, spacing: 0) { header }
+                .safeAreaBar(edge: .bottom, spacing: 0) { footer }
+                .scrollEdgeEffectStyle(.hard, for: [.top, .bottom])
+        } else {
+            VStack(spacing: 0) {
+                header
+                scrollContent
+                footer
+            }
+        }
+    }
+
+    var body: some View {
+        windowContent
         .overlay { if dropTargeted { RoundedRectangle(cornerRadius: 12).stroke(model.appearanceSettings.theme.accent, lineWidth: 3).allowsHitTesting(false) } }
         .onDrop(of: [.fileURL, .url], delegate: RelayImportDropDelegate(
             isTargeted: $dropTargeted, receive: importProviders

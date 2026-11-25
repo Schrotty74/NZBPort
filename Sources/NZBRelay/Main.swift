@@ -37,6 +37,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             self?.showWindow()
         }
         model.monitor.installNotificationDelegate()
+        model.downloadFolder.onFiles = { [weak self] files in
+            self?.model.receiveDownloadedFiles(files)
+            self?.showWindow()
+        }
+        model.downloadFolder.onError = { [weak self] in
+            self?.model.notice = Notice(text: "Der ausgewählte Downloadordner konnte nicht gelesen werden.", isError: true)
+        }
+        model.downloadFolder.restore()
         model.refreshHandlerRegistration()
         Task { await model.refreshCategoriesAtStartup(launchedAtLogin: launchedAtLogin) }
         if !launchedAtLogin { showWindow() }

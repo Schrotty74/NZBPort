@@ -41,7 +41,12 @@
 
 - **Provider requests:** A configured provider receives the release title and its own API key. Keys are stored locally without encryption only after you explicitly save them. To disable a provider, clear its key and save.
 - **NZB retrieval:** NZBPort downloads indexer results itself and passes the NZB file to SABnzbd. The indexer key is not sent to SABnzbd.
-- **Provider limits:** A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. An authenticated NewzBay test returned HTTP 429, so a live download from it remains unverified. A live search and NZB retrieval succeeded for DrunkenSlug with a 40-character hexadecimal ID. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102. Provider availability and terms can change. HTML fallbacks may stop working if a provider changes its pages or blocks automated access. NZBPort does not bypass access controls or CAPTCHAs.
+- **Provider limits:** A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. NZBPort follows HTTPS redirects to NewzBay’s own NZB download endpoint. A live search and NZB retrieval succeeded for DrunkenSlug with a 40-character hexadecimal ID. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102. Provider availability and terms can change. HTML fallbacks may stop working if a provider changes its pages or blocks automated access. NZBPort does not bypass access controls or CAPTCHAs.
+
+## Watched folder and settings backup
+
+- Choose a folder under **Settings → Download Folder**. When a new NZB file is ready, NZBPort asks for a category. After SABnzbd accepts the job, NZBPort moves the original file to the Trash. Failed or canceled submissions leave the file in place.
+- Use **Settings → Backup** to export or import settings as JSON, including API keys, category favorites and appearance. The export contains keys in plain text. You can also reset NZBPort to defaults here. After an import, select the watched folder again if macOS no longer grants access.
 
 ## Downloads, menu bar and notifications
 
