@@ -1,14 +1,12 @@
-# nzb-load for iOS Userscripts
+# NZBPort userscript for iPhone
 
 [Deutsch](README.de.md)
 
-LordBex wrote the original [nzb-load userscript](https://github.com/LordBex/nzb-load). [This version](nzb-load.user.js) is maintained alongside NZBPort. The userscript runs separately from the Mac app.
+Open [NZBPort.user.js](https://raw.githubusercontent.com/Schrotty74/NZBPort/main/Userscripts/NZBPort.user.js) in Safari and install it with the Userscripts extension. The script runs independently of the Mac app. If you have a JSON backup from the previous script, you can import it under **Import / Export** in the script settings and save it.
 
-Version: `v2.3.9`.
+## What it does
 
-## Changes in this version
-
-- Added six optional indexers after the existing public search providers. These are Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder and Videothek. Each has its own API key field, which is empty by default. Videothek requires API access and approval for the tool.
-- Made “Save NZB file” available from the category menu, when SABnzbd is unconfigured or unreachable, and after a failed submission. The script checks the NZB response before saving and preserves any archive password in the filename.
-- Restored the use of the configured default category when sending directly to SABnzbd.
-- Removed NZBGet support and the unused success notification setting. Settings saved by older versions are carried forward where supported.
+- Tap an NZBlnk to look up the release. With category selection enabled, the script opens the menu after a match and sends the NZB to SABnzbd when you choose a category.
+- On NewzBay, select **Download → Send to SABnzbd**. The script uses your NewzBay sign-in in Safari and opens the category menu.
+- Choose **Save NZB file** to keep a local copy. The script checks that the response is an NZB file before saving it.
+- Add API keys for Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder or Videothek in the settings. Videothek requires API access and approval for the tool. Exported settings include the API keys, so keep the backup private.

@@ -1,14 +1,12 @@
-# nzb-load für iOS-Userscripts
+# NZBPort-Userscript fürs iPhone
 
 [English](README.md)
 
-Das ursprüngliche [nzb-load-Skript](https://github.com/LordBex/nzb-load) stammt von LordBex. Wir pflegen [unsere Fassung](nzb-load.user.js) als Ergänzung zu NZBPort. Das Skript läuft unabhängig von der Mac-App.
+Öffne [NZBPort.user.js](https://raw.githubusercontent.com/Schrotty74/NZBPort/main/Userscripts/NZBPort.user.js) in Safari und installiere es mit der Userscripts-Erweiterung. Das Skript läuft unabhängig von der Mac-App. Eine JSON-Sicherung aus dem vorherigen Skript kannst du in den Skript-Einstellungen unter **Import / Export** öffnen und anschließend speichern.
 
-Version `v2.3.9`
+## Funktionen
 
-## Änderungen gegenüber dem Original
-
-- Nach den bisherigen öffentlichen Suchdiensten kann das Skript sechs weitere Indexer abfragen. Dazu gehören Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek. Jeder Dienst hat ein eigenes API-Key-Feld, das anfangs leer ist. Videothek setzt API-Zugang und die Freigabe des Tools voraus.
-- „NZB-Datei speichern“ steht im Kategorienmenü und nach einer fehlgeschlagenen Übergabe zur Verfügung. Das Speichern ist auch möglich, wenn SABnzbd noch nicht eingerichtet oder nicht erreichbar ist. Das Skript prüft die Antwort vor dem Speichern und übernimmt ein vorhandenes Archivpasswort in den Dateinamen.
-- Bei der direkten Übergabe an SABnzbd verwendet das Skript wieder die eingestellte Standardkategorie.
-- Die Unterstützung für NZBGet und die wirkungslose Einstellung für Erfolgsmeldungen wurden entfernt. Weiterhin unterstützte Einstellungen übernimmt das Skript aus älteren Versionen.
+- Tippe auf einen NZBlnk, um nach dem passenden Release zu suchen. Ist die Kategorieauswahl eingestellt, öffnet sich nach einem Treffer das Menü. Sobald du eine Kategorie auswählst, sendet das Skript die NZB an SABnzbd.
+- Wähle auf NewzBay **Download → An SABnzbd senden**. Das Skript nutzt deine NewzBay-Anmeldung in Safari und öffnet das Kategorienmenü.
+- Mit **NZB-Datei speichern** kannst du die geprüfte NZB lokal ablegen.
+- In den Einstellungen kannst du API-Keys für Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek hinterlegen. Videothek setzt API-Zugang und die Freigabe des Tools voraus. Die exportierte Einstellungsdatei enthält deine API-Keys. Bewahre sie privat auf.

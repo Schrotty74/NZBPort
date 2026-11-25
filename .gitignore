@@ -12,7 +12,7 @@
 !/Resources/
 !/Userscripts/
 /Userscripts/*
-!/Userscripts/nzb-load.user.js
+!/Userscripts/NZBPort.user.js
 !/Userscripts/README.md
 !/Userscripts/README.de.md
 /Resources/*

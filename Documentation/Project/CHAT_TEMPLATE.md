@@ -8,7 +8,7 @@ Verwende den aktuellen Repository-Root; keinen festen lokalen Benutzerpfad vorau
 2. `Documentation/Project/PROJECT_CONTEXT.md`
 3. `Documentation/Project/NEXT_STEPS.md`
 
-Prüfe den tatsächlichen Branch und Quellstand. Öffne danach nur die auftragsrelevanten Dateien. Testversion 0.2.6, Build 10, ergänzt Videothek und die Korrekturen für DrunkenSlug und NZBFinder. Das separate iOS-Userscript liegt in Version v2.3.9 vor. Die Planung für den eigenen Downloader mit Handy-Weboberfläche steht in NEXT_STEPS.md. Keine getrennten Dev-/Beta-/Final-Branches voraussetzen und keinen Branch ohne Auftrag wechseln.
+Prüfe den tatsächlichen Branch und Quellstand. Öffne danach nur die auftragsrelevanten Dateien. Testversion 0.2.6, Build 10, ergänzt Videothek und die Korrekturen für DrunkenSlug und NZBFinder. Das aktuelle iOS-Userscript liegt unter Userscripts/NZBPort.user.js vor. Die Planung für den eigenen Downloader mit Handy-Weboberfläche steht in NEXT_STEPS.md. Keine getrennten Dev-/Beta-/Final-Branches voraussetzen und keinen Branch ohne Auftrag wechseln.
 
 NZBPort ist eine native SwiftUI-/AppKit-Menüleisten-App für Apple Silicon ab macOS 26. Sie übergibt NZBlnk-Links und NZB-Dateien an SABnzbd. Nach NZBIndex, NZBKing und BinSearch folgen Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek, wenn ihre jeweiligen API-Keys eingerichtet sind. Kategorien haben einen eigenen Bereich; neue Kategorien lassen sich dort ausdrücklich in SABnzbd anlegen und vorhandene nach Bestätigung löschen. Die Standardkategorie ist geschützt. Ausblendungen und Favoriten bleiben lokal. Zwischen Statusabfragen liegen zwei Sekunden Wartezeit.
 
@@ -20,7 +20,7 @@ Ohne ausdrücklichen Auftrag keine Commits, Pushes, Tags oder Releases. Neue Tes
 
 Lokal ergänzte macOS-27-Oberfläche: eigener Glasstil für Zahnrad und die Aktualisieren-Buttons neben „Kategorie wählen“ sowie auf „Deine Kategorien“, Favoriten per Drag-and-drop, Berücksichtigung von „Ränder anzeigen“ und konzentrische Hinweiskarten. Unter macOS 26 bleiben die bisherigen Bedienelemente. 125 Tests und lokaler Build bestanden; Die korrigierte Favoriten-Ziehgeste und der Refresh-Button auf „Deine Kategorien“ wurden anschließend mit Nutzerzustimmung tatsächlich bedient; Details und Grenzen in PROJECT_CONTEXT.md. Details in PROJECT_CONTEXT.md.
 
-Videothek-Anbieterprüfung: aktueller Quellstand und iOS-Script unter Userscripts/ werden auf Nutzerauftrag veröffentlicht. Mac-Kennung steht zentral in NewznabClient.userAgent; Script-Kennung in Userscripts/README.md. Ein einmaliger direkter caps-Aufruf mit eigenem Key und Mac-Kennung lieferte HTTP 200/XML caps; Such-/Downloadfreigabe und tatsächliche iPhone-Kennung sind nicht bestätigt. Keine Keys dokumentieren.
+Videothek hat die festen Präfixe für die Mac-App und das iOS-Skript freigegeben. Die Kennungen stehen in NewznabClient.userAgent und in Userscripts/NZBPort.user.js. Keine Keys dokumentieren.
 
 Aktueller Auftrag:
 

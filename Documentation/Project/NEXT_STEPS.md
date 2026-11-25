@@ -8,7 +8,7 @@ Stand: 23. November 2026. Testversion 0.2.6, Build 10, ergänzt Videothek und di
 
 - Videothek nach der lokalen Ergänzung mit einem berechtigten Konto prüfen. Der Nutzer hat derzeit kein Premium und möchte den Anbieter zunächst in der Liste haben. Die öffentliche API bestätigt die Titelsuche; eine angemeldete Suche und ein NZB-Abruf sind nicht geprüft. Laut Anbieter werden Premium und die Freigabe des verwendeten Tools benötigt.
 
-- Die NZBFinder-Suche aus 0.2.5 in der Mac-App und im iOS-Userscript v2.3.6 im normalen Betrieb bestätigen, sobald der Nutzer API-Berechtigung hat. Der Live-Test lieferte HTTP 401 mit API-Fehler 102 wegen fehlender Premium-Mitgliedschaft. Öffentliche API-Erreichbarkeit, automatisierte Mac-Tests und simulierte Script-Abläufe wurden geprüft.
+- Die Live-Suche bei NZBFinder mit einem Konto prüfen, das API-Zugriff hat. Der frühere Live-Test lieferte HTTP 401 und API-Fehler 102. Der simulierte Such- und Abrufweg war erfolgreich.
 
 - Direkte Live-Suche und NZB-Abruf bei DrunkenSlug funktionierten mit einer 40-stelligen ID und einer Weiterleitung beim selben Anbieter. Die Bedienung im iOS-Userscript wurde nicht live geprüft.
 
@@ -16,7 +16,7 @@ Stand: 23. November 2026. Testversion 0.2.6, Build 10, ergänzt Videothek und di
 
 - In der Mac-App „NZB-Datei speichern …“ mit dem nativen Speicherdialog prüfen und die gespeicherte Datei bei Bedarf manuell in SABnzbd öffnen. Automatisierte Tests decken Dateiabruf, unveränderte Passwortmetadaten, fehlende SABnzbd-Konfiguration, Abbrechen und Fehler ab.
 
-- Die NinjaCentral-Suche aus 0.2.5 in der Mac-App und im iOS-Userscript v2.3.6 mit gespeichertem API-Key im normalen Betrieb bestätigen. Direkte API-Abfragen, automatisierte Mac-Tests und simulierte Script-Anfragen waren erfolgreich. Die Erweiterung gehört zum Release-Stand 0.2.5. Das Speichern auf dem iPhone ist vom Nutzer bestätigt; der Fall mit nicht erreichbarem SABnzbd wurde noch nicht gesondert bestätigt.
+- NinjaCentral im aktuellen iPhone-Skript mit gespeichertem API-Key prüfen. Ein früherer direkter API-Test lieferte einen passenden Treffer und eine gültige NZB-Datei.
 
 - NewzBay mit eigenem API-Key in den Verbindungseinstellungen prüfen. Der direkte Suchtest lieferte HTTP 429 und keine Trefferliste. Der Nutzer hat die drei ursprünglich fehlenden Releases bereits mit der integrierten Treasure-Maps-Suche gefunden.
 - Neue Gruppierung der Verbindungseinstellungen in SABnzbd und optionale Suchdienste im normalen Betrieb bestätigen. Der Nutzer hat die vorherige Korrektur der Fensterhöhe als funktionierend bestätigt.

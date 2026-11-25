@@ -273,7 +273,7 @@ Der lokale Build und seine Signatur sowie die identische Kopie auf MacSoftware u
 
 ## Videothek-Prüfung und Veröffentlichung des Quellstands
 
-24. November 2026: Auf Nutzerauftrag werden der aktuelle Quellstand nach Release 0.2.5 und das separate iOS-Userscript für die Anbieterprüfung zugänglich gemacht. Das Script v2.3.7 liegt unter Userscripts/nzb-load.user.js; die Autorenangabe LordBex bleibt erhalten. Die Mac-App bettet das Script weiterhin nicht ein. Der Newznab-Client verwendet bei allen seinen Such- und Dateiabrufen die feste Kennung `NZBPort/0.2.5 (+https://github.com/Schrotty74/NZBPort)`. Die Script-Kennung bleibt `NZBPort/nzb-load/2.3.7 (NZB link search; iOS Userscripts)`.
+24. November 2026: Auf Nutzerauftrag werden der aktuelle Quellstand nach Release 0.2.5 und das separate iOS-Userscript für die Anbieterprüfung zugänglich gemacht. Die damalige Skriptfassung wurde für die Anbieterprüfung veröffentlicht. Die Mac-App bettet das Script weiterhin nicht ein. Der Newznab-Client verwendet bei allen seinen Such- und Dateiabrufen die feste Kennung `NZBPort/0.2.5 (+https://github.com/Schrotty74/NZBPort)`. Die Script-Kennung bleibt `NZBPort/nzb-load/2.3.7 (NZB link search; iOS Userscripts)`.
 
 Eine einmalige direkte HTTPS-Anfrage an Videothek mit dem vom Nutzer bereitgestellten Key, t=caps und der aus dem Quellcode gelesenen Mac-Kennung lieferte HTTP 200 und eine XML-Capabilities-Antwort. Diese Anfrage lief als separates lokales Prüfprogramm, nicht als Bedienung der Mac-App. Sie bestätigt keine Such- oder Downloadberechtigung. Es wurde kein zweiter Live-Aufruf und kein iPhone-Netzwerkmitschnitt ausgeführt. Der Key wurde nur im Arbeitsspeicher verwendet, nicht in Dateien oder App-Einstellungen gespeichert und nicht ausgegeben. Der bereinigte Nachweis enthält nur Zeitpunkt, Kennung, Status und XML-Wurzelelement.
 
@@ -292,3 +292,7 @@ Dieses Vorabrelease ergänzt Videothek und die lokalen Änderungen unter macOS 2
 DrunkenSlug lieferte 40-stellige Hex-IDs. Der direkte Live-Abruf folgte einer Weiterleitung zum eigenen NZB-Endpunkt und lieferte eine gültige NZB. NZBFinder akzeptiert zusätzlich 40 Hex-Zeichen, was mit simulierten Antworten geprüft wurde. Die Live-Suche war mit dem vorhandenen Konto nicht möglich. Videothek lieferte beim letzten Suchtest API-Fehler 500. NewzBay wurde mangels Zugang ausgelassen.
 
 Für den Release-Stand bestanden 127 automatisierte Swift-Tests. Build, Signaturen, Apple-Silicon-Architektur, ZIP, DMG und Prüfsummen wurden geprüft. Das separate iOS-Skript wurde auf v2.3.9 erhöht. Eine neue Bedienungsprüfung fand für diesen Build nicht statt.
+
+## Aktuelles iPhone-Userscript
+
+Seit 25. November 2026 liegt die neue Fassung unter `Userscripts/NZBPort.user.js`. Sie übernimmt kompatible Einstellungen aus einer JSON-Sicherung der früheren Fassung. In Version 0.1.2 reagieren NZBlnk und „An SABnzbd senden“ auf NewzBay nur auf Benutzertipps. Der Nutzer hat die Version am iPhone getestet und bestätigt. Die Freigabe bei Videothek bleibt an denselben technischen Präfix gebunden.
