@@ -10,7 +10,7 @@ Stand: 23. November 2026. Testversion 0.2.6, Build 10, ergänzt Videothek und di
 
 - Die Live-Suche bei NZBFinder mit einem Konto prüfen, das API-Zugriff hat. Der frühere Live-Test lieferte HTTP 401 und API-Fehler 102. Der simulierte Such- und Abrufweg war erfolgreich.
 
-- Direkte Live-Suche und NZB-Abruf bei DrunkenSlug funktionierten mit einer 40-stelligen ID und einer Weiterleitung beim selben Anbieter. Die Bedienung im iOS-Userscript wurde nicht live geprüft.
+- Direkte Live-Suche und NZB-Abruf bei DrunkenSlug funktionierten mit einer 40-stelligen ID und einer Weiterleitung beim selben Anbieter. Unter iOS verursachte iCloud Privat-Relay beim Nutzertest eine Cloudflare-Sperre auch beim direkten API-Link in Safari. Nach Deaktivierung war der API-Link erreichbar; Suchanfragen wurden wieder gezählt, auch mit User-Agent und Domainfreigabe des Hauptskripts. Ein erfolgreicher NZB-Abruf im iOS-Skript steht noch aus. Keine experimentellen User-Agent- oder Domainänderungen übernehmen; bei erneuter Sperre Privat-Relay als mögliche Ursache prüfen. Details in PROJECT_CONTEXT.md.
 
 - Das Anlegen und Löschen im eigenen Kategorienbereich ist vom Nutzer als funktionierend bestätigt. Keine zusätzlichen Kategorien oder Löschungen nur für Tests ausführen. Die automatisierten Prüfungen verwenden ausschließlich synthetische Daten.
 
