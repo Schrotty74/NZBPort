@@ -85,7 +85,13 @@ struct RelayRootView: View {
                     .lineLimit(1).truncationMode(.middle)
                 Spacer()
                 if !model.pending.isEmpty { Text(L("Wartend: \(model.pending.count)")) }
-                else { Text(L("Für deinen Mac")) }
+                else if model.screen != .settings { Text(L("Für deinen Mac")) }
+                if model.screen == .settings {
+                    Button(L("Speichern")) { model.save() }
+                        .relayPrimaryAction()
+                        .disabled(model.busy || model.sending)
+                        .keyboardShortcut("s", modifiers: .command)
+                }
             }
             .font(.system(size: 11)).foregroundStyle(.secondary)
             .padding(.horizontal, RelayTheme.pagePadding).padding(.vertical, 9)

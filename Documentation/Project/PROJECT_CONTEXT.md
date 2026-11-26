@@ -7,7 +7,7 @@ Stand: 26. November 2026.
 - Repository: https://github.com/Schrotty74/NZBPort
 - Projektpfade beziehen sich auf den Repository-Root; der lokale Ordner trägt historisch den Namen `NZBRelay`.
 - `main` ist der einzige Entwicklungs- und Veröffentlichungsbranch. Lokale Dev-Builds und GitHub-Releases werden über den Build- und Veröffentlichungsablauf getrennt.
-- [GitHub-Vorabrelease](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.8): 0.2.8, Build 12. Der Release-Tag verweist auf den gebauten Quellstand. Die Downloadpakete verwenden die öffentliche Bundle-ID.
+- Release-Stand: 0.2.9, Build 13. Die Downloadpakete verwenden die öffentliche Bundle-ID.
 - Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`; alle fünf sind auf GitHub enthalten.
 
 ## Produkt
@@ -357,3 +357,37 @@ Auf MacSoftware liegt das iPhone-Userscript 0.1.3 unter `Download/NZBPort/NZBPor
 26. November 2026. Die Testversion enthält den automatischen Versand mit Kategorieerkennung und eigenen Titelregeln, die einstellbare Suchreihenfolge, den Verbindungsstatus, die Versandbestätigung, die Wiederherstellungsvorschau und die gemeinsamen Untermenüs. Die Funktionslisten sind auf Deutsch und Englisch aktualisiert. Der Release-Quellstand enthält das separate iPhone-Userscript 0.1.3.
 
 Alle 149 automatisierten Swift-Tests bestanden. Die Sprachdateien und die JavaScript-Syntax wurden geprüft. DMG und ZIP enthalten die ad hoc signierte App mit öffentlicher Bundle-ID für Apple Silicon ab macOS 26. Signaturen, Paketinhalt, Applications-Verknüpfung und SHA-256-Prüfsummen wurden geprüft. Die lokalen App-Kopien behalten ihre bisherige Bundle-ID. Der Release-Build wurde für die Paketprüfung nicht geöffnet. Ein Test des Userscripts 0.1.3 auf dem iPhone steht weiterhin aus.
+
+
+## Easynews im lokalen Mac-Build
+
+26. November 2026. Easynews steht in der Suchdienstliste und verwendet dieselben Schalter und Sortierpfeile wie die bisherigen Anbieter. Die App ergänzt den neuen Eintrag am Ende einer bestehenden Reihenfolge. Sie speichert Benutzername und Passwort erst beim Speichern. Eigene Mac-Sicherungen enthalten die Zugangsdaten wie die API-Keys im Klartext.
+
+NZBPort sucht mit dem NZBlnk-Header und ruft die NZB für die erste passende Dateigruppe über HTTPS ab. SABnzbd erhält die NZB-Datei mit Releasetitel und gegebenenfalls Archivpasswort. Als technische Referenz für das inoffizielle Anfrageformat dient der [Easynews-Abruf von NZB Monkey Go](https://github.com/Tensai75/nzb-monkey-go/blob/main/easynews.go). Die Einbindung ist in Swift implementiert.
+
+155 Swift-Tests bestanden. Die neuen Tests prüfen die gespeicherte Reihenfolge, das Überspringen deaktivierter Anbieter, Anmeldung, NZB-Abruf, Ausweichsuche, Export und Übergabe mit simulierten Antworten. Die Indexerliste wurde in Hell und Dunkel im Hintergrund gerendert und geprüft. Der lokale Build und die identische App-Kopie auf MacSoftware wurden signaturgeprüft. Die echte Suche und der NZB-Abruf mit einem Easynews-Konto stehen aus.
+
+Beim ersten Nutzertest meldete NZBPort eine Zugriffsverweigerung. Die damalige Meldung unterschied weder HTTP 401 von HTTP 403 noch Suche von NZB-Abruf. Unangemeldet fordern beide Easynews-Endpunkte HTTP Basic an. Der lokale Build verwendet dafür die URLSession-Anmeldeabfrage und meldet Phase und HTTP-Status getrennt. Er unterstützt die Gruppen-ID aus `setid` und Feld `19`. Alle 157 Tests bestanden. Der Build und die Kopie auf MacSoftware wurden signaturgeprüft. Ein erneuter Test mit dem Nutzerkonto steht aus.
+
+Der anschließende Live-Test mit dem gebauten Easynews-Client lieferte eine gültige Test-NZB. Die frühere HTTP-401-Antwort ließ sich auf abweichend gespeicherte Zugangsdaten eingrenzen. Es wurde kein Auftrag an SABnzbd gesendet. Die laufende Oberfläche war nicht Teil dieses Tests.
+
+
+## Suchdienste einzeln testen
+
+26. November 2026. Unter „Verbindung → Suchdienste“ lässt sich jeder Anbieter mit den aktuell eingetragenen Zugangsdaten testen. Der Test sucht und prüft die geladene NZB. Easynews hat eine eingebaute Testsuche. Für die anderen Dienste wird ein passender NZBlnk eingegeben. Bei Tests werden Zugangsdaten weder gespeichert noch an SABnzbd gesendet.
+
+Alle 161 automatisierten Swift-Tests bestanden. Mit dem gebauten Testablauf wurde bei Easynews eine gültige NZB abgerufen. Die anderen neuen Prüfungen liefen mit simulierten Antworten. Suchdienstliste und Testdialog wurden in Hell und Dunkel im Hintergrund gerendert und geprüft. Der lokale Build und die identische MacSoftware-Kopie wurden signaturgeprüft. Die laufende App wurde für diese Ergänzung nicht neu gestartet.
+
+
+## Kompakte Verbindungseinstellungen
+
+26. November 2026. „Deine Verbindung“ hat die Ansichten „SABnzbd“ und „Suchdienste“. Die Suchdienstliste zeigt pro Anbieter eine kompakte Zeile. Das Schlüsselsymbol öffnet die jeweiligen Anmeldefelder in der Liste. „Speichern“ ist in der Fußleiste erreichbar, auch wenn gescrollt wird.
+
+Alle 162 Swift-Tests bestanden. Ein Layouttest prüfte die Größe beider Abschnitte bei der kleinsten unterstützten Fensterbreite. Der lokale Build und seine identische Kopie auf MacSoftware wurden signaturgeprüft. Für diese Prüfung wurde kein Fenster geöffnet und es wurden keine Bilder erzeugt.
+
+
+## Testversion 0.2.9, Build 13
+
+26. November 2026. Easynews ergänzt die Suchdienstliste. NZBPort verwendet für die Anmeldung Benutzername und Passwort. Die private Mac-Sicherung enthält auch diese Daten. Die Verbindungseinstellungen haben getrennte Ansichten für SABnzbd und Suchdienste. Suchdienste lassen sich einzeln testen. Der Test lädt die NZB zur Prüfung, ohne einen Auftrag an SABnzbd zu senden.
+
+Alle 162 Swift-Tests bestanden. Der Release-Suchcode hat nach Anmeldung bei Easynews eine gültige Test-NZB geladen. Der Nutzer hatte die Easynews-Übergabe, den Suchdienst-Test und die kompaktere Ansicht zuvor in der laufenden lokalen App bestätigt. DMG und ZIP wurden auf Signaturen, Paketinhalt, öffentliche Bundle-ID und Apple-Silicon-Architektur geprüft. Das separate iPhone-Userscript steht weiterhin auf 0.1.3 und hat die Syntaxprüfung bestanden. Die Release-App wurde für die Paketprüfung nicht gestartet.

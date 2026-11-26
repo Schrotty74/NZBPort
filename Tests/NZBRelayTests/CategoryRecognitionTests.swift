@@ -260,6 +260,12 @@ func recognizedNZBIsSentOnceAndFallsBackToSelectionAfterError(uploadSucceeds: Bo
             .background(scheme == .light ? Color(white: 0.95) : Color(white: 0.12))
             .environment(\.colorScheme, scheme)
         try writeSnapshot(of: view, scheme: scheme, to: directory)
+        let testDirectory = directory.appendingPathComponent("dialog", isDirectory: true)
+        try FileManager.default.createDirectory(at: testDirectory, withIntermediateDirectories: true)
+        let testView = IndexerTestView(indexer: .easynews, apiKey: "", username: "", password: "")
+            .background(scheme == .light ? Color(white: 0.95) : Color(white: 0.12))
+            .environment(\.colorScheme, scheme)
+        try writeSnapshot(of: testView, scheme: scheme, to: testDirectory)
     }
 }
 
@@ -275,4 +281,24 @@ func recognizedNZBIsSentOnceAndFallsBackToSelectionAfterError(uploadSucceeds: Bo
     host.cacheDisplay(in: host.bounds, to: bitmap)
     let png = try #require(bitmap.representation(using: .png, properties: [:]))
     try png.write(to: directory.appendingPathComponent(scheme == .light ? "light.png" : "dark.png"))
+}
+
+@MainActor @Test func connectionSettingsSectionsFitCompactlyAtMinimumWidth() throws {
+    let name = "NZBPort.CompactSettings.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: name))
+    defer { defaults.removePersistentDomain(forName: name) }
+    let model = AppModel(defaults: defaults)
+    model.easynewsUsername = "test-user"
+    model.easynewsPassword = "test-password"
+    let width = RelayTheme.minimumWindowSize.width - 2 * RelayTheme.pagePadding
+    let sections = [
+        NSHostingView(rootView: AnyView(SABConnectionSection(model: model).frame(width: width))),
+        NSHostingView(rootView: AnyView(IndexerSettingsSection(model: model).frame(width: width)))
+    ]
+    let heightLimits: [CGFloat] = [240, 530]
+    for (section, maxHeight) in zip(sections, heightLimits) {
+        let size = section.fittingSize
+        #expect(size.width == width)
+        #expect(size.height > 0 && size.height <= maxHeight)
+    }
 }

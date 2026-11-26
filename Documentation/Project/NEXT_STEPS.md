@@ -1,8 +1,10 @@
 # Nächste Schritte – NZBPort
 
-Stand: 26. November 2026. Testversion 0.2.8, Build 12, ergänzt die automatische Kategoriezuordnung, die einstellbare Suchreihenfolge und die gemeinsamen Untermenüs. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
+Stand: 26. November 2026. Testversion 0.2.9, Build 13, ergänzt Easynews, einzelne Suchdienst-Tests und die kompakteren Verbindungseinstellungen. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
 
 ## Noch nicht gesondert bestätigte Bedienungsfälle
+
+- Der Nutzer bestätigte Easynews einschließlich automatischer Übergabe sowie die Bedienung von „Suchdienst testen“. Live-Tests der übrigen Suchdienste stehen aus. Die kompakteren Verbindungseinstellungen wurden bei Mindestbreite im Hintergrund gemessen. Der Nutzer bestätigte die kompaktere Suchdienstliste in der laufenden lokalen App.
 
 - Die automatische Kategoriezuordnung mit eigenen SABnzbd-Kategorien im normalen Betrieb bestätigen. Der automatische Versand und die manuelle Auswahl wurden mit simulierten Antworten geprüft. Beim separaten iPhone-Userscript 0.1.3 steht die Prüfung auf dem Gerät aus.
 
@@ -18,7 +20,6 @@ Stand: 26. November 2026. Testversion 0.2.8, Build 12, ergänzt die automatische
 
 - NinjaCentral im aktuellen iPhone-Skript mit gespeichertem API-Key prüfen. Ein früherer direkter API-Test lieferte einen passenden Treffer und eine gültige NZB-Datei.
 
-- Neue Gruppierung der Verbindungseinstellungen in SABnzbd und optionale Suchdienste im normalen Betrieb bestätigen. Der Nutzer hat die vorherige Korrektur der Fensterhöhe als funktionierend bestätigt.
 - Liste wartender Eingänge, Kategorieanzeige und Kurzstatus im geöffneten Menü im normalen Betrieb prüfen.
 - Die Zwei-Sekunden-Aktualisierung im normalen Betrieb bestätigen. Der bisherige Kategorien-Klappbereich in den Verbindungen ist durch die eigene Kategorienansicht ersetzt.
 - Echte Abschluss-/Fehlermeldungen mit erteilter macOS-Benachrichtigungsfreigabe beobachten, einschließlich geschlossenem Fenster bei weiterlaufender Menüleisten-App. Keine zusätzlichen Downloads oder künstlichen Fehler allein dafür auslösen.

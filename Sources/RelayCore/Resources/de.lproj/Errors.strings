@@ -63,3 +63,15 @@
 "NZBFinder requires a premium membership for API access." = "NZBFinder benötigt für den API-Zugriff eine Premium-Mitgliedschaft.";
 "Choose a valid NZBPort settings backup for macOS." = "Wähle eine gültige NZBPort-Einstellungssicherung für macOS.";
 "Wait until the current operation finishes before changing settings." = "Warte, bis der laufende Vorgang abgeschlossen ist, bevor du die Einstellungen änderst.";
+
+"Easynews returned an invalid search response." = "Easynews hat eine ungültige Suchantwort geliefert.";
+"Easynews found no matching NZB." = "Easynews hat keine passende NZB gefunden.";
+"Easynews could not be reached." = "Easynews ist nicht erreichbar.";
+"Easynews rejected the sign-in during search (HTTP 401)." = "Easynews hat die Anmeldung bei der Suche abgelehnt (HTTP 401).";
+"Easynews rejected the sign-in during NZB download (HTTP 401)." = "Easynews hat die Anmeldung beim NZB-Abruf abgelehnt (HTTP 401).";
+"Easynews denied the search request (HTTP 403)." = "Easynews hat die Suchanfrage verweigert (HTTP 403).";
+"Easynews denied the NZB download (HTTP 403)." = "Easynews hat den NZB-Abruf verweigert (HTTP 403).";
+"Easynews could not complete the search (HTTP %lld)." = "Die Suche bei Easynews ist fehlgeschlagen (HTTP %lld).";
+"Easynews could not download the NZB file (HTTP %lld)." = "Die NZB-Datei konnte bei Easynews nicht abgerufen werden (HTTP %lld).";
+"Enter an NZBlnk that this search service can find." = "Gib einen NZBlnk ein, den dieser Suchdienst finden kann.";
+"Enter a valid Easynews username and password." = "Gib einen gültigen Easynews-Benutzernamen und ein gültiges Passwort ein.";

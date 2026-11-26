@@ -8,7 +8,7 @@ extension AppModel {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = "NZBPort-Einstellungen.json"
-        panel.message = L("Die Sicherung enthält alle NZBPort-Einstellungen und deine API-Keys im Klartext.")
+        panel.message = L("Die Sicherung enthält alle NZBPort-Einstellungen und deine Zugangsdaten im Klartext.")
         panel.begin { [weak self] result in
             guard result == .OK, let self, let url = panel.url else { return }
             let scoped = url.startAccessingSecurityScopedResource()
@@ -33,7 +33,7 @@ extension AppModel {
                 let server = try backup.connection.validatedServer()
                 let alert = NSAlert()
                 alert.messageText = L("Einstellungen importieren?")
-                alert.informativeText = L("Die Sicherung ersetzt Verbindungen, API-Keys, Kategorien, Erkennungsregeln und die weiteren NZBPort-Einstellungen.")
+                alert.informativeText = L("Die Sicherung ersetzt Verbindungen, Zugangsdaten, Kategorien, Erkennungsregeln und die weiteren NZBPort-Einstellungen.")
                 if let endpoint = server?.endpoint {
                     alert.informativeText += "\n\n" + L("SABnzbd-Adresse: \(endpoint.absoluteString)")
                 }
@@ -56,7 +56,7 @@ extension AppModel {
         let alert = NSAlert()
         alert.alertStyle = .warning
         alert.messageText = L("Einstellungen zurücksetzen?")
-        alert.informativeText = L("NZBPort setzt seine Einstellungen auf Standard und entfernt die gespeicherten Verbindungen und API-Keys. Aufträge in SABnzbd bleiben erhalten.")
+        alert.informativeText = L("NZBPort setzt seine Einstellungen auf Standard und entfernt die gespeicherten Verbindungen und Zugangsdaten. Aufträge in SABnzbd bleiben erhalten.")
         let reset = alert.addButton(withTitle: L("Zurücksetzen"))
         reset.hasDestructiveAction = true
         reset.keyEquivalent = ""

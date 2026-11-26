@@ -48,7 +48,7 @@ func videothekUsesNewznabSearchAndAuthenticatedGet(_ id: String) async throws {
     let requests = await transport.captured()
     #expect(requests.count == 2)
     #expect(requests.allSatisfy { $0.url?.host == "videothek.io" })
-    #expect(requests.allSatisfy { $0.value(forHTTPHeaderField: "User-Agent") == "NZBPort/0.2.8 (+https://github.com/Schrotty74/NZBPort)" })
+    #expect(requests.allSatisfy { $0.value(forHTTPHeaderField: "User-Agent") == "NZBPort/0.2.9 (+https://github.com/Schrotty74/NZBPort)" })
     let searchURL = try #require(requests.first?.url)
     let search = try #require(URLComponents(url: searchURL, resolvingAgainstBaseURL: false))
     #expect(search.queryItems?.first(where: { $0.name == "t" })?.value == "search")

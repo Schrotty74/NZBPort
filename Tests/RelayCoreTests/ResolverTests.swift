@@ -23,7 +23,7 @@ private actor SearchTransport: HTTPTransport {
     let newzBay = NewznabClient(apiKey: "test-newzbay-key", service: .newzBay, transport: transport)
     let result = try await NZBResolver(transport: transport, newznabClients: [treasureMaps, newzBay])
         .resolve(NZBLink("nzblnk:?h=fixture&t=Fixture+Episode"))
-    #expect(result.host == "nzbindex.com")
+    #expect(try url(from: result).host == "nzbindex.com")
     #expect(await transport.requests().count == 1)
 }
 
@@ -63,7 +63,7 @@ private actor SearchTransport: HTTPTransport {
         #"<script>const bad='<a href="/nzb:fake">';</script><a href="https://evil.example/nzb:fake">x</a><a HREF='/nzb:fixture/?x=1&amp;y=2'>NZB</a>"#
     ])
     let result = try await NZBResolver(transport: transport).resolve(NZBLink("nzblnk:?h=fixture"))
-    #expect(result.absoluteString == "https://www.nzbking.com/nzb:fixture/?x=1&y=2")
+    #expect(try url(from: result).absoluteString == "https://www.nzbking.com/nzb:fixture/?x=1&y=2")
     #expect(await transport.requests().map { $0.url?.host } == ["nzbindex.com", "www.nzbking.com"])
 }
 
@@ -73,7 +73,7 @@ private actor SearchTransport: HTTPTransport {
         #"<input type=checkbox name=outside><form action='https://evil.example/nzb'><input type=checkbox name=bad></form><form action='/nzb' method='GET'><input type=hidden name=q value='fixture &amp; more'><input disabled type=checkbox name=disabled><input type=checkbox name=first><input type=checkbox name=second></form>"#
     ])
     let result = try await NZBResolver(transport: transport).resolve(NZBLink("nzblnk:?h=fixture"))
-    let components = try #require(URLComponents(url: result, resolvingAgainstBaseURL: false))
+    let components = try #require(URLComponents(url: try url(from: result), resolvingAgainstBaseURL: false))
     #expect(components.host == "www.binsearch.info")
     #expect(components.path == "/nzb")
     #expect(components.queryItems == [URLQueryItem(name: "q", value: "fixture & more"), URLQueryItem(name: "first", value: "on")])
@@ -127,8 +127,7 @@ private actor SearchTransport: HTTPTransport {
     let treasureMaps = NewznabClient(apiKey: apiKey, service: .treasureMaps, transport: transport)
     let newzBay = NewznabClient(apiKey: "test-newzbay-key", service: .newzBay, transport: transport)
     let resolver = NZBResolver(transport: transport, newznabClients: [treasureMaps, newzBay])
-    let download = try await resolver.resolve(link)
-    let file = try #require(await resolver.fetchFile(download))
+    let file = try file(from: await resolver.resolve(link))
     try await SABClient(transport: transport).send(file, category: "test-category",
         connection: ServerConnection(address: "https://sab.example/api", apiKey: "test-only-key"),
         options: SendOptions(addPaused: true), title: link.title, password: link.password)
@@ -176,8 +175,7 @@ private actor SearchTransport: HTTPTransport {
     let treasureMaps = NewznabClient(apiKey: "test-treasure-key", service: .treasureMaps, transport: transport)
     let newzBay = NewznabClient(apiKey: "test-newzbay-key", service: .newzBay, transport: transport)
     let resolver = NZBResolver(transport: transport, newznabClients: [treasureMaps, newzBay])
-    let download = try await resolver.resolve(link)
-    let file = try #require(await resolver.fetchFile(download))
+    let file = try file(from: await resolver.resolve(link))
     try await SABClient(transport: transport).send(file, category: "test-category",
         connection: ServerConnection(address: "https://sab.example/api", apiKey: "test-only-key"),
         title: link.title, password: link.password)
@@ -190,11 +188,21 @@ private actor SearchTransport: HTTPTransport {
         let components = try #require(request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) })
         #expect(components.queryItems?.first { $0.name == "apikey" }?.value == expected)
     }
-    let components = try #require(URLComponents(url: download, resolvingAgainstBaseURL: false))
+    let components = try #require(requests[5].url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) })
     #expect(components.queryItems?.first { $0.name == "t" }?.value == "get")
     #expect(components.queryItems?.first { $0.name == "id" }?.value == id)
     let upload = String(decoding: try #require(requests.last?.httpBody), as: UTF8.self)
     #expect(upload.contains(nzb))
     #expect(!upload.contains("test-newzbay-key"))
     #expect(!upload.contains("test-treasure-key"))
+}
+
+private func url(from result: NZBResolver.Result) throws -> URL {
+    guard case .url(let url) = result else { throw URLError(.badServerResponse) }
+    return url
+}
+
+private func file(from result: NZBResolver.Result) throws -> NZBFile {
+    guard case .file(let file) = result else { throw URLError(.badServerResponse) }
+    return file
 }

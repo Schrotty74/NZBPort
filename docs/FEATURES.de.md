@@ -26,10 +26,11 @@
 
 ## Suchdienste
 
-- **Suchreihenfolge:** Unter **Einstellungen → Verbindung → Suchdienste** änderst du die Reihenfolge mit Pfeilen und schaltest Dienste einzeln ein oder aus. Die Reihenfolge gilt beim Senden von Links und beim Speichern ihrer NZB-Dateien. NZBPort überspringt deaktivierte Dienste und Dienste ohne erforderlichen API-Key.
+- **Suchreihenfolge:** Unter **Einstellungen → Verbindung → Suchdienste** änderst du die Reihenfolge mit Pfeilen und schaltest Dienste einzeln ein oder aus. Die Reihenfolge gilt beim Senden von Links und beim Speichern ihrer NZB-Dateien. NZBPort überspringt deaktivierte Dienste und Dienste ohne die benötigten Zugangsdaten.
+- **Suchdienst testen.** Klicke in der Zeile des Anbieters auf **Testen**. Easynews hat eine eingebaute Testsuche. Für die anderen Anbieter fügst du einen Link ein, den der Dienst finden kann. NZBPort lädt und prüft die NZB. Der Test speichert die Eingaben nicht und sendet keinen Auftrag an SABnzbd.
 - **Suchergebnisse:** Der erste gültige Treffer beendet die Suche. Bei Fehlern, unpassenden Titeln oder mehrdeutigen API-Treffern sucht NZBPort beim nächsten Dienst weiter.
 
-| Standardposition | Anbieter | Such-API-Key |
+| Standardposition | Anbieter | Zugangsdaten |
 | --- | --- | --- |
 | 1 | NZBIndex | Nein, öffentliche API |
 | 2 | NZBKing | Nein |
@@ -40,15 +41,16 @@
 | 7 | DrunkenSlug | Optional, separat gespeichert |
 | 8 | NZBFinder | Optional, separat gespeichert; API-Zugriff erfordert Premium-Mitgliedschaft |
 | 9 | Videothek | Optional, separat gespeichert; API-Berechtigung und zugelassenes Tool erforderlich |
+| 10 | Easynews | Easynews-Benutzername und Passwort |
 
-- **Anfragen an Anbieter:** Ein eingerichteter Indexer erhält den Releasetitel und seinen eigenen API-Key. Beim Speichern legt NZBPort die Keys lokal und unverschlüsselt ab. Wenn du einen Anbieter deaktivierst, bleibt sein Key gespeichert.
+- **Anfragen an Anbieter:** Newznab-Anbieter erhalten den Releasetitel und ihren jeweiligen API-Key. Easynews erhält die Suchkennung aus dem Link und deine Easynews-Zugangsdaten per HTTPS. NZBPort speichert die Zugangsdaten lokal und unverschlüsselt. Sie bleiben gespeichert, wenn du einen Anbieter deaktivierst.
 - **NZB-Abruf:** NZBPort lädt Treffer der Indexer selbst und übergibt die NZB-Datei an SABnzbd. Der Indexer-Key wird nicht an SABnzbd gesendet.
 - **Grenzen der Anbieter:** Ein direkter angemeldeter Test bei NinjaCentral lieferte einen passenden Treffer und eine gültige NZB-Datei. Bei NewzBay folgt die App für den NZB-Abruf einer HTTPS-Weiterleitung zum Download-Endpunkt desselben Anbieters. Bei DrunkenSlug waren eine Live-Suche und der NZB-Abruf mit einer 40-stelligen Hex-ID erfolgreich. Für API-Zugriff auf NZBFinder ist eine Premium-Mitgliedschaft erforderlich; ein kostenloses Konto kann HTTP 401 mit API-Fehler 102 liefern. Verfügbarkeit und Bedingungen der Anbieter können sich ändern. HTML-Ausweichsuchen können ausfallen, wenn ein Anbieter Seiten ändert oder automatisierte Zugriffe sperrt. NZBPort umgeht keine Zugangssperren oder CAPTCHAs.
 
 ## Downloadordner und Sicherung
 
 - Unter **Einstellungen → Downloadordner** wählst du einen Ordner aus. Für neu eingetroffene, fertige NZB-Dateien gelten dieselben Kategorieeinstellungen wie für manuell geöffnete Dateien. Nach erfolgreicher Übergabe an SABnzbd wandert die Originaldatei in den Papierkorb. Bei Fehlern oder Abbruch bleibt sie im Ordner.
-- Unter **Einstellungen → Sicherung** kannst du Mac-Einstellungen als JSON exportieren und wiederherstellen. Die Datei enthält auch API-Keys, Favoriten, Titelregeln und die Indexer-Auswahl. Vor dem Wiederherstellen siehst du die gespeicherte SABnzbd-Adresse, den Downloadordner und gegebenenfalls einen Hinweis zum automatischen Versand. Die Datei enthält API-Keys im Klartext. Bei fehlender macOS-Ordnerfreigabe wählst du den überwachten Ordner erneut aus. An derselben Stelle kannst du NZBPort auf die Standardwerte zurücksetzen.
+- Unter **Einstellungen → Sicherung** kannst du Mac-Einstellungen als JSON exportieren und wiederherstellen. Die Datei enthält auch API-Keys, die Easynews-Anmeldung, Favoriten, Titelregeln und die Indexer-Auswahl. Vor dem Wiederherstellen siehst du die gespeicherte SABnzbd-Adresse, den Downloadordner und gegebenenfalls einen Hinweis zum automatischen Versand. Die Datei enthält Zugangsdaten im Klartext. Bei fehlender macOS-Ordnerfreigabe wählst du den überwachten Ordner erneut aus. An derselben Stelle kannst du NZBPort auf die Standardwerte zurücksetzen.
 
 ## Downloads, Menüleiste und Mitteilungen
 
@@ -68,7 +70,7 @@
 - **Darstellung und Hintergrund:** Wähle unabhängig vom Farbthema zwischen System, Hell und Dunkel. Der Fensterhintergrund kann systemgesteuert, transparent oder deckend sein.
 - **Native macOS-Darstellung:** NZBPort verwendet Liquid-Glass-Bedienelemente. Das mit Icon Composer erstellte App-Symbol unterstützt die Systemdarstellungen.
 - **Verbindungsstatus:** **Verbindung prüfen** testet die eingetragene SABnzbd-Adresse mit dem aktuellen API-Key. Änderst du eines der Felder, wird das Prüfergebnis zurückgesetzt. Der Test speichert die Eingaben nicht.
-- **Verbindungseinstellungen und Fensterhöhe:** Getrennte Gruppen ordnen die SABnzbd-Verbindung und die optionalen Suchdienst-Keys. Das Fenster wächst oder schrumpft passend zum Inhalt, soweit es die verfügbare Bildschirmhöhe zulässt. Reicht der Platz nicht aus, kannst du scrollen. Eine von Hand eingestellte Größe bleibt bis zum nächsten Öffnen erhalten.
+- **Verbindungseinstellungen und Fensterhöhe:** Wechsle zwischen **SABnzbd** und **Suchdienste**. Jeder Anbieter belegt eine Zeile. Das Schlüsselsymbol öffnet seine Zugangsdaten. **Speichern** bleibt unten erreichbar. Das Fenster wächst oder schrumpft passend zum Inhalt, soweit es die verfügbare Bildschirmhöhe zulässt. Reicht der Platz nicht aus, kannst du scrollen. Eine von Hand eingestellte Größe bleibt bis zum nächsten Öffnen erhalten.
 - **Autostart:** Aktiviere oder deaktiviere den Start bei der Anmeldung im App-Menü, im Menüleistensymbol oder im Zahnradmenü. Wenn macOS eine Freigabe verlangt, wähle **In macOS erlauben …**. Beim Anmeldestart bleibt NZBPort in der Menüleiste. Beim manuellen Start öffnet sich das Fenster. Wenn SABnzbd noch startet, wiederholt NZBPort den Kategorienabruf bis zu dreimal mit 2, 5 und 10 Sekunden Wartezeit. Dauerhafte Fehler und abgelehnte Zugangsdaten werden weiterhin angezeigt. Der manuelle Start bleibt unverändert.
 
 ## Updates, Projektlinks und Quellcode
@@ -82,7 +84,7 @@
 1. Der Browser übergibt einen `nzblnk:`-Link an die registrierte macOS-App. Zuvor kann der Browser eine Bestätigung verlangen.
 2. NZBPort liest Suchkennung (`h`), Titel (`t`), optionales Passwort (`p`) und wiederholte Gruppenfelder (`g`). Prozentkodierter Text wird unterstützt; abgekürzte `a.b.`-Gruppen werden für NZBIndex ausgeschrieben.
 3. Die App ruft die aktuellen SABnzbd-Kategorien ab und berücksichtigt deine lokal ausgeblendeten Kategorien. Über das Suchfeld kannst du die Kategoriebuttons nach Namen filtern.
-4. Nach der manuellen oder automatischen Kategorieauswahl sucht NZBPort bei den aktivierten Anbietern in der eingestellten Reihenfolge. Öffentliche Suchdienste verwenden die Suchkennung, Indexer mit API-Key den Releasetitel.
+4. Nach der manuellen oder automatischen Kategorieauswahl sucht NZBPort bei den aktivierten Anbietern in der eingestellten Reihenfolge. Öffentliche Suchdienste und Easynews verwenden die Suchkennung. Newznab-Anbieter suchen nach dem Releasetitel.
 5. NZBPort übergibt die öffentliche Downloadadresse oder die von einem Indexer geladene NZB-Datei zusammen mit Titel, Kategorie und optionalem Archivpasswort an SABnzbd. SABnzbd lädt die Usenet-Artikel.
 6. Nach einer bestätigten Übergabe schließt sich das Fenster oder der nächste wartende Link erscheint. Bei einem Fehler bleibt die Meldung sichtbar. Läuft eine Übergabe in ein Timeout, prüfe vor einem neuen Versuch die SABnzbd-Warteschlange, um doppelte Aufträge zu vermeiden.
 

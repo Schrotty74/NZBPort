@@ -1,7 +1,7 @@
 import Foundation
 
 public struct IndexerPreferences: Codable, Equatable, Sendable {
-    public enum Indexer: String, CaseIterable, Sendable {
+    public enum Indexer: String, CaseIterable, Identifiable, Sendable {
         case nzbIndex = "NZBIndex"
         case nzbKing = "NZBKing"
         case binSearch = "BinSearch"
@@ -11,6 +11,9 @@ public struct IndexerPreferences: Codable, Equatable, Sendable {
         case drunkenSlug = "DrunkenSlug"
         case nzbFinder = "NZBFinder"
         case videothek = "Videothek.io"
+        case easynews = "Easynews"
+
+        public var id: Self { self }
     }
 
     public private(set) var order = Indexer.allCases

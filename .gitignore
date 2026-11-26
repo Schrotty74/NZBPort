@@ -45,3 +45,6 @@
 !/Documentation/Project/PROJECT_CONTEXT.md
 !/Documentation/Project/NEXT_STEPS.md
 !/Documentation/Project/CHAT_TEMPLATE.md
+
+# User-exported settings include credentials in plain text.
+NZBPort-Einstellungen*.json

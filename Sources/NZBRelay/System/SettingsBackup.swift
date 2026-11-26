@@ -20,6 +20,12 @@ struct SettingsBackup: Codable, Sendable {
         var drunkenSlug: String
         var nzbFinder: String
         var videothek: String
+        var easynews: EasynewsLogin? = nil
+
+        struct EasynewsLogin: Codable, Sendable {
+            var username: String
+            var password: String
+        }
 
         func validatedServer() throws -> ServerConnection? {
             let savedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)

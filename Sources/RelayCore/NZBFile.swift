@@ -16,11 +16,11 @@ public struct NZBFile: Sendable, Identifiable {
         try self.init(validating: bytes, filename: url.lastPathComponent)
     }
 
-    public init(data: Data, filename: String) throws {
-        try self.init(validating: data, filename: filename)
+    public init(data: Data, filename: String, requiresFiles: Bool = false) throws {
+        try self.init(validating: data, filename: filename, requiresFiles: requiresFiles)
     }
 
-    private init(validating data: Data, filename: String) throws {
+    private init(validating data: Data, filename: String, requiresFiles: Bool = false) throws {
         guard data.count <= 16 * 1024 * 1024 else { throw RelayError.message("Choose an NZB file smaller than 16 MiB.") }
         let safeName = URL(fileURLWithPath: filename).lastPathComponent
         guard !safeName.isEmpty, !safeName.contains("\r"), !safeName.contains("\n"), !safeName.contains("\""), !safeName.contains("\\"), safeName.lowercased().hasSuffix(".nzb") else {
@@ -31,7 +31,7 @@ public struct NZBFile: Sendable, Identifiable {
         let validator = NZBXMLValidator()
         parser.delegate = validator
         parser.shouldResolveExternalEntities = false
-        guard parser.parse(), validator.rootIsNZB else { throw RelayError.message("The NZB file is invalid.") }
+        guard parser.parse(), validator.rootIsNZB, !requiresFiles || validator.hasFile else { throw RelayError.message("The NZB file is invalid.") }
         self.id = UUID(); self.title = String(safeName.dropLast(4)); self.data = data
     }
 
@@ -55,10 +55,14 @@ public struct NZBFile: Sendable, Identifiable {
 
 private final class NZBXMLValidator: NSObject, XMLParserDelegate {
     private(set) var rootIsNZB = false
+    private(set) var hasFile = false
     private var sawRootElement = false
 
     func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
-        guard !sawRootElement else { return }
+        if sawRootElement {
+            if elementName == "file" || elementName.hasSuffix(":file") { hasFile = true }
+            return
+        }
         sawRootElement = true
         rootIsNZB = elementName == "nzb" || elementName.hasSuffix(":nzb")
         if !rootIsNZB { parser.abortParsing() }

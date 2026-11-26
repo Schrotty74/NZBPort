@@ -2,12 +2,23 @@ import Foundation
 
 /// Searches Newznab-compatible RSS APIs and resolves downloads without forwarding API credentials.
 public actor NewznabClient: NZBSearchProvider {
-    public static let userAgent = "NZBPort/0.2.8 (+https://github.com/Schrotty74/NZBPort)"
-    public enum Service: Sendable, Equatable { case treasureMaps, newzBay, ninjaCentral, drunkenSlug, nzbFinder, videothek }
+    public static let userAgent = "NZBPort/0.2.9 (+https://github.com/Schrotty74/NZBPort)"
+    public enum Service: Sendable, CaseIterable {
+        case treasureMaps, newzBay, ninjaCentral, drunkenSlug, nzbFinder, videothek
 
-    nonisolated public var name: String {
-        switch service { case .treasureMaps: "Treasure Maps"; case .newzBay: "NewzBay"; case .ninjaCentral: "NinjaCentral"; case .drunkenSlug: "DrunkenSlug"; case .nzbFinder: "NZBFinder"; case .videothek: "Videothek.io" }
+        public var indexer: IndexerPreferences.Indexer {
+            switch self {
+            case .treasureMaps: .treasureMaps
+            case .newzBay: .newzBay
+            case .ninjaCentral: .ninjaCentral
+            case .drunkenSlug: .drunkenSlug
+            case .nzbFinder: .nzbFinder
+            case .videothek: .videothek
+            }
+        }
     }
+
+    nonisolated public var name: String { service.indexer.rawValue }
 
     private let service: Service
     private let apiKey: String

@@ -19,7 +19,8 @@ private struct BackupTestTransport: HTTPTransport {
     backup.connection = .init(address: "https://sab.example.invalid", apiKey: "test-sab",
                               treasureMaps: "test-maps", newzBay: "test-bay",
                               ninjaCentral: "test-ninja", drunkenSlug: "test-slug",
-                              nzbFinder: "test-finder", videothek: "test-videothek")
+                              nzbFinder: "test-finder", videothek: "test-videothek",
+                              easynews: .init(username: "fixture-user", password: " fixture-password "))
     backup.categories = CategoryPreferences(hidden: ["Archive"], favorites: ["Movies"])
     backup.categories.recognition.automaticallySends = true
     backup.categories.recognition[.movies] = "Movies"
@@ -27,6 +28,8 @@ private struct BackupTestTransport: HTTPTransport {
     var indexers = IndexerPreferences()
     indexers.move(.newzBay, by: -4)
     indexers.setEnabled(false, for: .newzBay)
+    indexers.move(.easynews, by: -9)
+    indexers.setEnabled(false, for: .easynews)
     backup.indexers = indexers
     backup.language = .english
     backup.appearance = .dark
@@ -50,7 +53,12 @@ private struct BackupTestTransport: HTTPTransport {
     #expect(exported.connection.videothek == backup.connection.videothek)
     #expect(exported.categories == backup.categories)
     #expect(exported.indexers == indexers)
-    #expect(AppModel(defaults: defaults, client: SABClient(transport: BackupTestTransport())).indexerPreferences == indexers)
+    let reopened = AppModel(defaults: defaults, client: SABClient(transport: BackupTestTransport()))
+    #expect(reopened.indexerPreferences == indexers)
+    #expect(reopened.easynewsUsername == "fixture-user")
+    #expect(reopened.easynewsPassword == " fixture-password ")
+    model.easynewsPassword = "unsaved"
+    #expect(model.settingsBackup().connection.easynews?.password == " fixture-password ")
     #expect(exported.language == .english && exported.appearance == .dark)
     #expect(exported.colorTheme == .coffee && exported.backgroundStyle == .opaque)
     #expect(exported.includeTestUpdates)
@@ -63,6 +71,8 @@ private struct BackupTestTransport: HTTPTransport {
     #expect(!model.configured && model.screen == .settings)
     #expect(defaults.string(forKey: "sabAPIKey") == "")
     #expect(defaults.string(forKey: "videothekAPIKey") == nil)
+    #expect(defaults.data(forKey: "easynewsLogin") == nil)
+    #expect(model.easynewsUsername.isEmpty && model.easynewsPassword.isEmpty)
     #expect(model.preferences == CategoryPreferences())
     #expect(model.indexerPreferences == IndexerPreferences())
     #expect(model.settingsBackup().watchedDownloadFolder == nil)
@@ -86,4 +96,5 @@ private struct BackupTestTransport: HTTPTransport {
     #expect(restored.categories.favorites == ["TV"])
     #expect(restored.categories.recognition == CategoryRecognition())
     #expect(restored.indexers == nil)
+    #expect(restored.connection.easynews == nil)
 }

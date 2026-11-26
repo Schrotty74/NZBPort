@@ -8,9 +8,9 @@ Verwende den aktuellen Repository-Root; keinen festen lokalen Benutzerpfad vorau
 2. `Documentation/Project/PROJECT_CONTEXT.md`
 3. `Documentation/Project/NEXT_STEPS.md`
 
-Prüfe den tatsächlichen Branch und Quellstand. Öffne danach nur die auftragsrelevanten Dateien. Das GitHub-Vorabrelease 0.2.8, Build 12, enthält die automatische Kategoriezuordnung, die einstellbare Suchreihenfolge und die gemeinsamen Untermenüs. Das separate iPhone-Userscript steht auf 0.1.3 und liegt unter `Userscripts/NZBPort.user.js`. Die Planung für den eigenen Downloader mit Handy-Weboberfläche steht in NEXT_STEPS.md. Keine getrennten Dev-/Beta-/Final-Branches voraussetzen und keinen Branch ohne Auftrag wechseln.
+Prüfe den tatsächlichen Branch und Quellstand. Öffne danach nur die auftragsrelevanten Dateien. Die Testversion 0.2.9, Build 13, enthält Easynews, einzelne Suchdienst-Tests und die kompakteren Verbindungseinstellungen. Das separate iPhone-Userscript steht auf 0.1.3 und liegt unter `Userscripts/NZBPort.user.js`. Die Planung für den eigenen Downloader mit Handy-Weboberfläche steht in NEXT_STEPS.md. Keine getrennten Dev-/Beta-/Final-Branches voraussetzen und keinen Branch ohne Auftrag wechseln.
 
-NZBPort ist eine native SwiftUI-/AppKit-Menüleisten-App für Apple Silicon ab macOS 26. Sie übergibt NZBlnk-Links und NZB-Dateien an SABnzbd. Nach NZBIndex, NZBKing und BinSearch folgen Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek, wenn ihre jeweiligen API-Keys eingerichtet sind. Kategorien haben einen eigenen Bereich; neue Kategorien lassen sich dort ausdrücklich in SABnzbd anlegen und vorhandene nach Bestätigung löschen. Die Standardkategorie ist geschützt. Ausblendungen und Favoriten bleiben lokal. Zwischen Statusabfragen liegen zwei Sekunden Wartezeit.
+NZBPort ist eine native SwiftUI-/AppKit-Menüleisten-App für Apple Silicon ab macOS 26. Sie übergibt NZBlnk-Links und NZB-Dateien an SABnzbd. Nach NZBIndex, NZBKing und BinSearch folgen Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek, wenn ihre jeweiligen API-Keys eingerichtet sind. Easynews folgt standardmäßig am Ende und nutzt Benutzername und Passwort. Easynews wurde mit einem echten Konto in der laufenden App geprüft. Die Suchdienste lassen sich einzeln testen. Kategorien haben einen eigenen Bereich; neue Kategorien lassen sich dort ausdrücklich in SABnzbd anlegen und vorhandene nach Bestätigung löschen. Die Standardkategorie ist geschützt. Ausblendungen und Favoriten bleiben lokal. Zwischen Statusabfragen liegen zwei Sekunden Wartezeit.
 
 Unter „Kategorien …“ gibt es die automatische Zuordnung für Serien, Spiele, Filme und sonstige Titel. Eigene Titelregeln haben Vorrang. Ist der automatische Versand aktiviert, geht ein Auftrag mit passender, verfügbarer Kategorie direkt an SABnzbd. Sonst öffnet sich die Kategorieauswahl.
 
@@ -20,7 +20,7 @@ Prüfungen bündeln und nur bei konkretem Anlass wiederholen. Nach Builds die vi
 
 Ohne ausdrücklichen Auftrag keine Commits, Pushes, Tags oder Releases. Neue Test- und Finalversion erstellen umfasst auch die Veröffentlichung; lokale Dev-Builds bleiben lokal. Nach App-Änderungen den Link zur gebauten App liefern. Selbst geöffnete Apps und Computersteuerung nach Abschluss beenden.
 
-Für 0.2.8 bestanden 149 automatisierte Tests. Die Signatur der App in DMG und ZIP sowie die Paketprüfsummen wurden geprüft. App und Browser im Hintergrund bedienen. Die MacSoftware-Kopie liegt unter `Download/NZBPort/NZBPort.app`. Das separate iPhone-Userscript liegt im selben Ordner.
+Für 0.2.9 bestanden 162 automatisierte Tests. Die Signatur der App in DMG und ZIP sowie die Paketprüfsummen wurden geprüft. App und Browser im Hintergrund bedienen. Die MacSoftware-Kopie liegt unter `Download/NZBPort/NZBPort.app`. Das separate iPhone-Userscript liegt im selben Ordner.
 
 Videothek hat die festen Präfixe für die Mac-App und das iOS-Skript freigegeben. Die Kennungen stehen in NewznabClient.userAgent und in Userscripts/NZBPort.user.js. Keine Keys dokumentieren.
 

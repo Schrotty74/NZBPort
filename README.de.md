@@ -2,7 +2,7 @@
 
 [English](README.md) · [Downloads](https://github.com/Schrotty74/NZBPort/releases)
 
-> Aktuelle Testversion: **0.2.8**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.8).
+> Aktuelle Testversion: **0.2.9**. [DMG oder ZIP herunterladen](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.9).
 
 Zum separaten [iOS-Userscript](Userscripts/NZBPort.user.js) gibt es eine [deutsche Anleitung](Userscripts/README.de.md).
 
@@ -12,13 +12,13 @@ NZBPort ist eine macOS-Menüleisten-App, die `nzblnk:`-Links und NZB-Dateien öf
 
 - **NZBlnk-Links und NZB-Dateien öffnen**. NZB-Dateien lassen sich auch lokal speichern, einschließlich eines eventuell vorhandenen Link-Passworts.
 - **Downloadordner überwachen**. Neue NZB-Dateien verarbeiten und die Originale in den Papierkorb legen, sobald SABnzbd sie angenommen hat.
-- **Bis zu neun Suchdienste einrichten**. Suchreihenfolge ändern und einzelne Dienste deaktivieren. Ihre API-Keys bleiben gespeichert.
+- **Zehn Suchdienste zur Auswahl**, darunter Easynews. In den Verbindungseinstellungen kannst du sie einzeln testen, umsortieren und ein- oder ausschalten.
 - **Kategorie erkennen und automatisch senden**. Serien, Spielen, Filmen und sonstigen Titeln SABnzbd-Kategorien zuordnen oder eigene Titelregeln anlegen. Gibt es keine verfügbare Zuordnung, öffnet sich die manuelle Auswahl.
 - **SABnzbd-Kategorien verwalten**. Kategorien in SABnzbd anlegen oder löschen. Favoriten und ausgeblendete Kategorien verwaltest du lokal in NZBPort.
 - **Priorität festlegen, Aufträge pausiert übergeben und wartende Links und Dateien verwalten**: Einträge vor der Übergabe ansehen und einzeln entfernen.
 - **Downloads im Blick behalten**: Fortschritt, Kategorien und Verlauf sehen, einzelne Aufträge oder die ganze Warteschlange pausieren und fortsetzen.
 - **SABnzbd-Status in der Menüleiste sehen** und macOS-Mitteilungen bei fertigen oder fehlgeschlagenen Downloads erhalten. Beim automatischen Versand bestätigt NZBPort die Zielkategorie kurz im Fenster.
-- **Einstellungen sichern und wiederherstellen**. Die JSON-Sicherung enthält auch Titelregeln und Suchdiensteinstellungen. Vor dem Wiederherstellen zeigt NZBPort die wichtigsten Angaben zur Sicherung.
+- **Einstellungen sichern und wiederherstellen**. Die JSON-Sicherung enthält auch Titelregeln, die Suchreihenfolge und gespeicherte Zugangsdaten. Vor dem Wiederherstellen zeigt NZBPort die wichtigsten Angaben zur Sicherung.
 - **Bei der Anmeldung starten** und NZBPort direkt in der Menüleiste bereithalten.
 - **SABnzbd-Verbindung prüfen**. Änderst du Adresse oder API-Key, setzt NZBPort das Prüfergebnis zurück.
 - **Einstellungen in beiden Menüs finden**. Das Menüleistensymbol und das Zahnrad verwenden dieselben Untermenüs für Einstellungen und „Über NZBPort“.
@@ -36,7 +36,7 @@ Die Screenshots zeigen eine frühere NZBPort-Version. Die private Serveradresse 
 ## Voraussetzungen und Installation
 
 - Ein Mac mit Apple Silicon und macOS 26 oder neuer.
-- Ein laufender SABnzbd-Server und dessen vollständiger API-Key. API-Keys für Suchdienste sind optional.
+- Ein laufender SABnzbd-Server und dessen vollständiger API-Key. Für private Suchdienste kannst du deine Zugangsdaten hinterlegen.
 
 Lade die DMG oder ZIP unter [Releases](https://github.com/Schrotty74/NZBPort/releases) herunter. Öffne die DMG und ziehe NZBPort in „Applications“, oder entpacke die ZIP und verschiebe die App nach „Programme“. Die App ist ad hoc signiert und nicht von Apple notarisiert. Falls macOS den ersten Start blockiert, folge den Gatekeeper-Schritten unten.
 
@@ -64,7 +64,7 @@ Siehe auch [Apples Anleitung zum sicheren Öffnen von Apps](https://support.appl
 
 SABnzbd-Adresse und API-Key werden lokal und unverschlüsselt in den App-Einstellungen gespeichert. Die App verwendet keinen Schlüsselbund. Der API-Key wird im POST-Inhalt an den eingestellten SABnzbd-Endpunkt gesendet. HTTP wird unterstützt; nutze für fremde Netze HTTPS oder ein vertrauenswürdiges VPN.
 
-NZBIndex, NZBKing und BinSearch erhalten die Suchkennung des Links. NZBIndex erhält zusätzlich die Newsgroups. Standardmäßig sucht NZBPort zuerst bei diesen drei Diensten, danach bei Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek. Du kannst die Reihenfolge in den Verbindungseinstellungen ändern. NZBPort überspringt deaktivierte Dienste und Dienste ohne erforderlichen API-Key. Eingerichtete Indexer erhalten den Releasetitel und ihren eigenen Key. Beim Speichern legt NZBPort die Keys lokal und unverschlüsselt ab. Ein direkter angemeldeter Test bei NinjaCentral lieferte einen passenden Treffer und eine gültige NZB-Datei. Bei NewzBay folgt die App für den NZB-Abruf einer HTTPS-Weiterleitung zum Download-Endpunkt desselben Anbieters. Bei DrunkenSlug waren eine Live-Suche und der NZB-Abruf mit einer 40-stelligen Hex-ID erfolgreich. Für API-Zugriff auf NZBFinder ist eine Premium-Mitgliedschaft erforderlich; ein kostenloses Konto kann HTTP 401 mit API-Fehler 102 liefern.
+NZBIndex, NZBKing und BinSearch erhalten die Suchkennung des Links. NZBIndex erhält zusätzlich die Newsgroups. Standardmäßig sucht NZBPort zuerst bei diesen drei Diensten, danach bei Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder, Videothek und Easynews. Im Bereich „Suchdienste“ findest du die Suchreihenfolge, den Test pro Anbieter und das Schlüsselsymbol für die Zugangsdaten. NZBPort überspringt deaktivierte Dienste und Dienste ohne die benötigten Zugangsdaten. Newznab-Anbieter erhalten den Releasetitel und ihren jeweiligen API-Key. Bei Easynews sucht die App mit der Suchkennung aus dem Link und meldet sich per HTTPS mit Benutzername und Passwort an. Beim Speichern legt NZBPort die Zugangsdaten lokal und unverschlüsselt ab. Ein direkter angemeldeter Test bei NinjaCentral lieferte einen passenden Treffer und eine gültige NZB-Datei. Bei NewzBay folgt die App für den NZB-Abruf einer HTTPS-Weiterleitung zum Download-Endpunkt desselben Anbieters. Bei DrunkenSlug waren eine Live-Suche und der NZB-Abruf mit einer 40-stelligen Hex-ID erfolgreich. Für API-Zugriff auf NZBFinder ist eine Premium-Mitgliedschaft erforderlich; ein kostenloses Konto kann HTTP 401 mit API-Fehler 102 liefern.
 
 NZBPort lädt Treffer eingerichteter Indexer selbst und übergibt die NZB-Datei an SABnzbd. SABnzbd erhält außerdem den Titel, die gewählte Kategorie und das optionale Archivpasswort. Beim Speichern einer NZB-Datei trägt NZBPort das Link-Passwort unverändert als NZB-Metadatum ein. Den SABnzbd-Key erhält nur der von dir eingestellte SABnzbd-Server. Die Suche hängt von der Verfügbarkeit und den Bedingungen der Anbieter ab. Die HTML-Ausweichsuche kann ausfallen, wenn ein Anbieter seine Seiten ändert oder automatisierte Zugriffe sperrt. Zugangssperren und CAPTCHAs werden nicht umgangen.
 

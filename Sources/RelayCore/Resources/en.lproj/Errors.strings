@@ -63,3 +63,15 @@
 "NZBFinder requires a premium membership for API access." = "NZBFinder requires a premium membership for API access.";
 "Choose a valid NZBPort settings backup for macOS." = "Choose a valid NZBPort settings backup for macOS.";
 "Wait until the current operation finishes before changing settings." = "Wait until the current operation finishes before changing settings.";
+
+"Easynews returned an invalid search response." = "Easynews returned an invalid search response.";
+"Easynews found no matching NZB." = "Easynews found no matching NZB.";
+"Easynews could not be reached." = "Easynews could not be reached.";
+"Easynews rejected the sign-in during search (HTTP 401)." = "Easynews rejected the sign-in during search (HTTP 401).";
+"Easynews rejected the sign-in during NZB download (HTTP 401)." = "Easynews rejected the sign-in during NZB download (HTTP 401).";
+"Easynews denied the search request (HTTP 403)." = "Easynews denied the search request (HTTP 403).";
+"Easynews denied the NZB download (HTTP 403)." = "Easynews denied the NZB download (HTTP 403).";
+"Easynews could not complete the search (HTTP %lld)." = "Easynews could not complete the search (HTTP %lld).";
+"Easynews could not download the NZB file (HTTP %lld)." = "Easynews could not download the NZB file (HTTP %lld).";
+"Enter an NZBlnk that this search service can find." = "Enter an NZBlnk that this search service can find.";
+"Enter a valid Easynews username and password." = "Enter a valid Easynews username and password.";

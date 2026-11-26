@@ -41,6 +41,7 @@ final class AppModel {
     private static let drunkenSlugPreference = "drunkenSlugAPIKey"
     private static let nzbFinderPreference = "nzbFinderAPIKey"
     private static let videothekPreference = "videothekAPIKey"
+    private static let easynewsPreference = "easynewsLogin"
 
     var screen: Screen = .downloads
     let appearanceSettings: AppearanceSettings
@@ -69,6 +70,8 @@ final class AppModel {
     var drunkenSlugKey = ""
     var nzbFinderKey = ""
     var videothekKey = ""
+    var easynewsUsername = ""
+    var easynewsPassword = ""
     var newCategoryName = ""
     var categoryToDelete: String?
     private(set) var categoryMutationInProgress = false
@@ -109,6 +112,7 @@ final class AppModel {
     private var savedDrunkenSlugKey = ""
     private var savedNZBFinderKey = ""
     private var savedVideothekKey = ""
+    private var savedEasynewsLogin: SettingsBackup.Connection.EasynewsLogin?
     @ObservationIgnored private(set) var task: Task<Void, Never>?
     @ObservationIgnored var closeAfterSuccess: (() -> Void)?
 
@@ -137,6 +141,12 @@ final class AppModel {
         drunkenSlugKey = defaults.string(forKey: Self.drunkenSlugPreference) ?? ""
         nzbFinderKey = defaults.string(forKey: Self.nzbFinderPreference) ?? ""
         videothekKey = defaults.string(forKey: Self.videothekPreference) ?? ""
+        if let data = defaults.data(forKey: Self.easynewsPreference),
+           let login = try? JSONDecoder().decode(SettingsBackup.Connection.EasynewsLogin.self, from: data) {
+            savedEasynewsLogin = login
+            easynewsUsername = login.username
+            easynewsPassword = login.password
+        }
         configured = (try? ServerConnection(address: address, apiKey: key)) != nil
         savedAddress = address
         savedKey = key
@@ -349,7 +359,8 @@ final class AppModel {
             persistConnectionSettings(
                 .init(address: address, apiKey: key, treasureMaps: treasureMapsKey, newzBay: newzBayKey,
                       ninjaCentral: ninjaCentralKey, drunkenSlug: drunkenSlugKey,
-                      nzbFinder: nzbFinderKey, videothek: videothekKey),
+                      nzbFinder: nzbFinderKey, videothek: videothekKey,
+                      easynews: .init(username: easynewsUsername, password: easynewsPassword)),
                 server: connection
             )
             screen = .downloads
@@ -373,6 +384,11 @@ final class AppModel {
         savedNinjaCentralKey = ninjaCentralKey
         savedDrunkenSlugKey = drunkenSlugKey
         savedNZBFinderKey = nzbFinderKey
+        easynewsUsername = settings.easynews?.username.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        easynewsPassword = settings.easynews?.password ?? ""
+        savedEasynewsLogin = easynewsUsername.isEmpty && easynewsPassword.isEmpty
+            ? nil : .init(username: easynewsUsername, password: easynewsPassword)
+        defaults.set(savedEasynewsLogin.flatMap { try? JSONEncoder().encode($0) }, forKey: Self.easynewsPreference)
         savedVideothekKey = videothekKey
         defaults.set(address, forKey: "serverAddress")
         defaults.set(key, forKey: "sabAPIKey")
@@ -394,7 +410,7 @@ final class AppModel {
             connection: .init(address: savedAddress, apiKey: savedKey, treasureMaps: savedTreasureMapsKey,
                               newzBay: savedNewzBayKey, ninjaCentral: savedNinjaCentralKey,
                               drunkenSlug: savedDrunkenSlugKey, nzbFinder: savedNZBFinderKey,
-                              videothek: savedVideothekKey),
+                              videothek: savedVideothekKey, easynews: savedEasynewsLogin),
             categories: preferences, language: languageSettings.selection, appearance: appearanceSettings.mode,
             colorTheme: appearanceSettings.theme, backgroundStyle: appearanceSettings.background,
             includeTestUpdates: updateSettings.includePrereleases, downloadNotifications: monitor.notificationsEnabled,
@@ -589,17 +605,17 @@ final class AppModel {
                 switch submission {
                 case .link(let link):
                     let resolver = searchResolver()
-                    let download = try await resolver.resolve(link) { [self] provider in
+                    let result = try await resolver.resolve(link) { [self] provider in
                         await self.showSearchProvider(provider)
                     }
-                    let file = try await resolver.fetchFile(download)
                     try Task.checkCancellation()
                     progress = "An SABnzbd senden …"
                     submissionLedger.record(fingerprint)
-                    if let file {
+                    switch result {
+                    case .file(let file):
                         ids = try await client.send(file, category: category, connection: connection, options: options,
                                                     title: link.title, password: link.password)
-                    } else {
+                    case .url(let download):
                         ids = try await client.send(link, download: download, category: category, connection: connection, options: options)
                     }
                 case .file(let file, let source):
@@ -662,7 +678,11 @@ final class AppModel {
     }
 
     private func searchResolver() -> NZBResolver {
-        resolverOverride ?? NZBResolver(newznabClients: searchClients(), preferences: indexerPreferences)
+        let easynews = savedEasynewsLogin.flatMap {
+            EasynewsClient(username: $0.username, password: $0.password)
+        }
+        return resolverOverride ?? NZBResolver(newznabClients: searchClients(), preferences: indexerPreferences,
+                                               easynews: easynews)
     }
 
     func prepareExport() {
