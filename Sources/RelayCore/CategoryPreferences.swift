@@ -4,15 +4,17 @@ import Foundation
 public struct CategoryPreferences: Codable, Equatable, Sendable {
     public var hidden: Set<String>
     public var favorites: [String]
+    public var recognition = CategoryRecognition()
     public init(hidden: Set<String> = [], favorites: [String] = []) {
         self.hidden = hidden
         self.favorites = favorites
     }
-    private enum CodingKeys: String, CodingKey { case hidden, favorites }
+    private enum CodingKeys: String, CodingKey { case hidden, favorites, recognition }
     public init(from decoder: any Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         hidden = try values.decodeIfPresent(Set<String>.self, forKey: .hidden) ?? []
         favorites = try values.decodeIfPresent([String].self, forKey: .favorites) ?? []
+        recognition = try values.decodeIfPresent(CategoryRecognition.self, forKey: .recognition) ?? .init()
     }
     public func isFavorite(_ category: String) -> Bool {
         favorites.contains { $0.caseInsensitiveCompare(category) == .orderedSame }

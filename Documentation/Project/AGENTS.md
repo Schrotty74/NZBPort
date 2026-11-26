@@ -19,10 +19,10 @@
 
 ## Links, Kategorien und Downloads
 
-- Die Suche läuft nacheinander über NZBIndex, NZBKing und BinSearch. Danach folgen Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek in dieser Reihenfolge, sofern ihr jeweiliger API-Key gespeichert ist. Die öffentliche NZBIndex-Suche benötigt keinen separaten API-Key.
+- Die Suche läuft nacheinander in der eingestellten Reihenfolge und überspringt deaktivierte Dienste. Standardmäßig sucht NZBPort zuerst bei NZBIndex, NZBKing und BinSearch, dann bei Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek. Dienste mit erforderlichem API-Key werden erst verwendet, wenn ihr Key gespeichert ist. Die öffentliche NZBIndex-Suche benötigt keinen separaten API-Key.
 - Bei neuen oder geänderten Indexern mit berechtigtem Testzugang eine echte Suche ausführen. Gibt es einen passenden Treffer, auch die NZB-Datei abrufen und prüfen, ohne einen Auftrag an SABnzbd zu senden. Ein Capabilities-Aufruf belegt weder die Suche noch den Abruf. Fehlt der Testzugang oder ein passender Treffer, festhalten, welche Schritte offen sind und welche mit simulierten Antworten geprüft wurden.
 - Kategorien von SABnzbd laden. Neue Kategorien nur nach ausdrücklichem Hinzufügen durch den Nutzer in SABnzbd anlegen; vorhandene Kategorien nicht überschreiben. Kategorien nur nach ausdrücklicher Löschaktion mit Bestätigung auch in SABnzbd löschen; die Standardkategorie bleibt geschützt. Ausblenden, Wiederherstellen und Favoriten bleiben lokale Anzeigeentscheidungen.
-- Erst nach Kategorieauswahl senden. Erfolgreiche Übergabe nur nach SABnzbd-Bestätigung melden.
+- Erst nach Kategorieauswahl senden. Wenn der Nutzer „Automatisch erkennen und senden“ aktiviert hat, darf NZBPort eine passend zugeordnete, sichtbare SABnzbd-Kategorie automatisch auswählen. Ohne passende Zuordnung die manuelle Auswahl öffnen. Erfolgreiche Übergabe nur nach SABnzbd-Bestätigung melden.
 - Unklare Übertragungsfehler nicht automatisch erneut senden. Duplikatwarnung und manuelle Entscheidung erhalten.
 - Nach erfolgreicher Übergabe Fenster schließen oder nächsten Auftrag zeigen; die App bleibt in der Menüleiste.
 - Statusabfragen laufen mit zwei Sekunden Wartezeit nach einem Abruf, wenn die Downloadübersicht sichtbar oder Benachrichtigungen eingeschaltet sind. Keine überlappenden Abrufe starten.
@@ -48,6 +48,7 @@
 - Sobald die veröffentlichten Downloadpakete samt Prüfsummen auf GitHub geprüft sind, den jeweiligen lokalen Versionsordner unter `Build/Release` in den Papierkorb legen. `Build/NZBPort.app` und die App-Kopie auf MacSoftware unter Download bleiben verfügbar.
 - Öffentliche Beschreibung standardmäßig Englisch, zusätzlich Deutsch, gegenseitig verlinkt. Funktionen als Feature-Liste dokumentieren. Gatekeeper-Hinweis erhalten; Ad-hoc-Signierung nicht als Apple-Notarisierung darstellen.
 - Nach App-Änderungen die gebaute App auch in die vom Nutzer festgelegte Kopie auf MacSoftware unter Download übernehmen; das bestätigte Ziel steht in PROJECT_CONTEXT.md. Kopie und Signatur prüfen und einen Link zur gebauten App liefern. Selbst geöffnete Apps und Computersteuerung nach Abschluss beenden.
+- Nach Änderungen am iPhone-Userscript auf dem Mac die aktuelle Datei als `NZBPort.user.js` neben `NZBPort.app` auf MacSoftware kopieren. Quelle und Kopie byteweise vergleichen.
 
 - Ein Auftrag wie „neue Version erstellen“ oder „neue Testversion erstellen“ umfasst Vorbereitung, erforderliche Prüfungen, bereinigte Dokumentation, Commit, Push, passenden Tag und GitHub-Release mit DMG, ZIP und Prüfsummen. Testversionen als Vorabrelease veröffentlichen. Lokale Dev-Builds bleiben immer lokal. Ein reiner Dev-Build-Auftrag umfasst keinen Commit, Push, Tag oder Release; diese Veröffentlichungskonvention gilt für neue Test- und Finalversionen.
 

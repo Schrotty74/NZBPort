@@ -65,3 +65,36 @@ func glassMenuHasVisiblyDifferentHoverAndPressStates(symbol: String) throws {
     about.update()
     #expect(about.items.contains { $0.title == L("Nach Updates suchen …") })
 }
+
+@MainActor
+@Test func statusMenuSharesOptionsAndKeepsItsOwnActions() throws {
+    let name = "NZBPort.StatusMenuTests.\(UUID().uuidString)"
+    let defaults = try #require(UserDefaults(suiteName: name))
+    defer { defaults.removePersistentDomain(forName: name) }
+    let model = AppModel(defaults: defaults)
+    let delegate = AppDelegate(model: model)
+    let status = delegate.makeStatusMenu()
+    let gear = AppOptionsMenu(model: model).makeOptionsMenu()
+    let shared = titles(in: gear)
+    #expect(titles(in: status) == [
+        L("SABnzbd nicht eingerichtet"), L("NZBPort öffnen"), L("NZBlnk aus Zwischenablage")
+    ] + shared + [L("NZBPort beenden")])
+    let openSAB = try #require(status.items.first { $0.title == L("SABnzbd öffnen") })
+    #expect(!delegate.validateMenuItem(openSAB))
+
+    for title in [L("Einstellungen"), L("Über NZBPort")] {
+        let statusSubmenu = try #require(status.items.first { $0.title == title }?.submenu)
+        let gearSubmenu = try #require(gear.items.first { $0.title == title }?.submenu)
+        #expect(titles(in: statusSubmenu) == titles(in: gearSubmenu))
+    }
+    let settings = try #require(status.items.first { $0.title == L("Einstellungen") }?.submenu)
+    let backup = try #require(settings.items.first { $0.title == L("Sicherung") }?.submenu)
+    #expect(titles(in: backup) == [
+        L("Einstellungen exportieren …"), L("Einstellungen importieren …"), L("Einstellungen zurücksetzen …")
+    ])
+}
+
+@MainActor private func titles(in menu: NSMenu) -> [String] {
+    menu.update()
+    return menu.items.filter { !$0.isSeparatorItem }.map(\.title)
+}

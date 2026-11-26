@@ -4,6 +4,9 @@ import Observation
 import RelayCore
 
 enum Screen { case downloads, settings, categories, overview, updates }
+enum SABConnectionStatus: Equatable {
+    case unchecked, checking, connected(categoryCount: Int), failed(String)
+}
 struct Notice: Equatable {
     private let id = UUID()
     private let message: String.LocalizationValue?
@@ -50,8 +53,16 @@ final class AppModel {
     var addPaused = false
     var duplicateCategory: String?
     private var submissionLedger = SubmissionLedger()
-    var address = SettingsBackup.defaultServerAddress
-    var key = ""
+    var address = SettingsBackup.defaultServerAddress {
+        didSet { if address != oldValue { invalidateConnectionTest() } }
+    }
+    var key = "" {
+        didSet { if key != oldValue { invalidateConnectionTest() } }
+    }
+    private(set) var connectionStatus = SABConnectionStatus.unchecked
+    private(set) var automaticSubmissionNotice: Notice?
+    @ObservationIgnored private(set) var connectionTestTask: Task<Void, Never>?
+    @ObservationIgnored private var confirmationTask: Task<Void, Never>?
     var treasureMapsKey = ""
     var newzBayKey = ""
     var ninjaCentralKey = ""
@@ -63,10 +74,18 @@ final class AppModel {
     private(set) var categoryMutationInProgress = false
     private(set) var categories: [String] = []
     private(set) var preferences = CategoryPreferences()
+    var indexerPreferences = IndexerPreferences() {
+        didSet {
+            if let data = try? JSONEncoder().encode(indexerPreferences) {
+                defaults.set(data, forKey: "indexerPreferences")
+            }
+        }
+    }
     private(set) var current: DownloadSubmission?
     private(set) var pending: [DownloadSubmission] = []
     private(set) var busy = false
     private(set) var sending = false
+    private(set) var automaticallySending = false
     private(set) var exporting = false
     private(set) var exportFile: NZBFile?
     var exportPresented = false
@@ -78,9 +97,10 @@ final class AppModel {
     private(set) var registeringHandler = false
     private(set) var applyingSettings = false
     private let client: SABClient
-    private let exportResolver: NZBResolver?
+    private let resolverOverride: NZBResolver?
     @ObservationIgnored private let defaults: UserDefaults
     private var categoryLoadRevision = 0
+    private var automaticCategoryPending = false
     private var savedAddress = ""
     private var savedKey = ""
     private var savedTreasureMapsKey = ""
@@ -92,10 +112,10 @@ final class AppModel {
     @ObservationIgnored private(set) var task: Task<Void, Never>?
     @ObservationIgnored var closeAfterSuccess: (() -> Void)?
 
-    init(defaults: UserDefaults = .standard, client: SABClient = SABClient(), exportResolver: NZBResolver? = nil) {
+    init(defaults: UserDefaults = .standard, client: SABClient = SABClient(), resolverOverride: NZBResolver? = nil) {
         self.defaults = defaults
         self.client = client
-        self.exportResolver = exportResolver
+        self.resolverOverride = resolverOverride
         downloadFolder = DownloadFolderMonitor(defaults: defaults)
         updateSettings = UpdateSettings(defaults: defaults)
         monitor = DownloadMonitor(client: client, defaults: defaults)
@@ -105,6 +125,10 @@ final class AppModel {
         if let data = defaults.data(forKey: "categoryPreferences"),
            let decoded = try? JSONDecoder().decode(CategoryPreferences.self, from: data) {
             preferences = decoded
+        }
+        if let data = defaults.data(forKey: "indexerPreferences"),
+           let decoded = try? JSONDecoder().decode(IndexerPreferences.self, from: data) {
+            indexerPreferences = decoded
         }
         key = defaults.string(forKey: "sabAPIKey") ?? ""
         treasureMapsKey = defaults.string(forKey: Self.treasureMapsPreference) ?? ""
@@ -127,8 +151,23 @@ final class AppModel {
     }
 
     var visibleCategories: [String] {
-        preferences.visible(in: categories).filter {
+        var visible = preferences.visible(in: categories).filter {
             query.isEmpty || categoryName($0).localizedCaseInsensitiveContains(query)
+        }
+        if let suggestedCategory, let index = visible.firstIndex(of: suggestedCategory), index > 0 {
+            visible.insert(visible.remove(at: index), at: 0)
+        }
+        return visible
+    }
+    var suggestedCategory: String? {
+        guard let current else { return nil }
+        return categoryRecognition.suggestion(for: current.title, availableCategories: preferences.visible(in: categories))
+    }
+    var categoryRecognition: CategoryRecognition {
+        get { preferences.recognition }
+        set {
+            preferences.recognition = newValue
+            persistCategoryPreferences()
         }
     }
     var hiddenCategories: [String] {
@@ -207,9 +246,10 @@ final class AppModel {
         selectedPriority = .normal
         addPaused = false
         if !pending.isEmpty { current = pending.removeFirst() }
+        automaticCategoryPending = categoryRecognition.automaticallySends
         if configured {
             screen = .downloads
-            loadCategories()
+            loadCategories(forIncomingSubmission: true)
         } else {
             screen = .settings
             notice = Notice(text: "Bitte zuerst die Verbindung zu SABnzbd einrichten.", isError: false)
@@ -246,7 +286,32 @@ final class AppModel {
         }
     }
 
-    func loadCategories() {
+    func checkConnection() {
+        connectionTestTask?.cancel()
+        connectionStatus = .checking
+        let address = address
+        let key = key
+        connectionTestTask = Task {
+            do {
+                try Task.checkCancellation()
+                let connection = try ServerConnection(address: address, apiKey: key)
+                let categories = try await client.categories(connection)
+                try Task.checkCancellation()
+                connectionStatus = .connected(categoryCount: categories.count)
+            } catch {
+                guard !Task.isCancelled else { return }
+                connectionStatus = .failed(error.localizedDescription)
+            }
+        }
+    }
+
+    private func invalidateConnectionTest() {
+        connectionTestTask?.cancel()
+        connectionTestTask = nil
+        connectionStatus = .unchecked
+    }
+
+    func loadCategories(forIncomingSubmission: Bool = false) {
         guard !sending, !categoryMutationInProgress, !exporting, !exportPresented else { return }
         categoryLoadRevision += 1
         task?.cancel()
@@ -255,11 +320,11 @@ final class AppModel {
         notice = nil
         categories = []
         categoryToDelete = nil
-        let useDraft = screen == .settings
+        let shouldSend = forIncomingSubmission && automaticCategoryPending && screen == .downloads
+        if shouldSend { automaticCategoryPending = false }
         task = Task {
-            defer { if !Task.isCancelled { busy = false } }
             do {
-                let connection = try ServerConnection(address: useDraft ? address : savedAddress, apiKey: useDraft ? key : savedKey)
+                let connection = try ServerConnection(address: savedAddress, apiKey: savedKey)
                 let result = try await client.categories(connection)
                 try Task.checkCancellation()
                 categories = result
@@ -268,6 +333,11 @@ final class AppModel {
             catch {
                 guard !Task.isCancelled else { return }
                 notice = Notice(error: error)
+            }
+            guard !Task.isCancelled else { return }
+            busy = false
+            if shouldSend, screen == .downloads, categoryRecognition.automaticallySends, let suggestedCategory {
+                performSend(category: suggestedCategory, allowDuplicate: false, automatic: true)
             }
         }
     }
@@ -283,7 +353,7 @@ final class AppModel {
                 server: connection
             )
             screen = .downloads
-            loadCategories()
+            loadCategories(forIncomingSubmission: true)
         } catch { notice = Notice(error: error) }
     }
 
@@ -328,7 +398,8 @@ final class AppModel {
             categories: preferences, language: languageSettings.selection, appearance: appearanceSettings.mode,
             colorTheme: appearanceSettings.theme, backgroundStyle: appearanceSettings.background,
             includeTestUpdates: updateSettings.includePrereleases, downloadNotifications: monitor.notificationsEnabled,
-            launchAtLogin: loginItemSettings.requested, watchedDownloadFolder: downloadFolder.backupPath
+            launchAtLogin: loginItemSettings.requested, watchedDownloadFolder: downloadFolder.backupPath,
+            indexers: indexerPreferences
         )
     }
 
@@ -346,6 +417,7 @@ final class AppModel {
         persistConnectionSettings(backup.connection, server: server)
         preferences = backup.categories
         persistCategoryPreferences()
+        indexerPreferences = backup.indexers ?? .init()
         categories = []
         query = ""
         duplicateCategory = nil
@@ -494,7 +566,7 @@ final class AppModel {
         performSend(category: category, allowDuplicate: true)
     }
 
-    private func performSend(category: String, allowDuplicate: Bool) {
+    private func performSend(category: String, allowDuplicate: Bool, automatic: Bool = false) {
         guard !busy, !exportPresented, !applyingSettings, let submission = current else { return }
         let connection: ServerConnection
         do { connection = try ServerConnection(address: savedAddress, apiKey: savedKey) }
@@ -507,6 +579,7 @@ final class AppModel {
         let options = SendOptions(priority: selectedPriority, addPaused: addPaused)
         busy = true
         sending = true
+        automaticallySending = automatic
         progress = "NZB suchen …"
         notice = nil
         task = Task {
@@ -515,7 +588,7 @@ final class AppModel {
                 var cleanupFailed = false
                 switch submission {
                 case .link(let link):
-                    let resolver = NZBResolver(newznabClients: searchClients())
+                    let resolver = searchResolver()
                     let download = try await resolver.resolve(link) { [self] provider in
                         await self.showSearchProvider(provider)
                     }
@@ -544,16 +617,32 @@ final class AppModel {
                 monitor.trackSubmitted(ids)
                 busy = false
                 sending = false
+                automaticallySending = false
                 current = nil
+                if automatic { confirmAutomaticSubmission(to: category, closeWhenIdle: !cleanupFailed && pending.isEmpty) }
                 if !pending.isEmpty { advance() }
-                else if !cleanupFailed { closeAfterSuccess?() }
+                else if !automatic, !cleanupFailed { closeAfterSuccess?() }
                 if cleanupFailed {
                     notice = Notice(text: "An SABnzbd gesendet. Die NZB-Datei konnte nicht in den Papierkorb gelegt werden.", isError: true)
                 }
             } catch {
                 busy = false
                 sending = false
+                automaticallySending = false
                 notice = Notice(error: error)
+            }
+        }
+    }
+
+    private func confirmAutomaticSubmission(to category: String, closeWhenIdle: Bool) {
+        confirmationTask?.cancel()
+        automaticSubmissionNotice = Notice(text: "An SABnzbd gesendet · \(categoryName(category))", isError: false)
+        confirmationTask = Task {
+            do { try await Task.sleep(for: .seconds(3)) }
+            catch { return }
+            automaticSubmissionNotice = nil
+            if closeWhenIdle, current == nil, pending.isEmpty, screen == .downloads, !busy {
+                closeAfterSuccess?()
             }
         }
     }
@@ -572,6 +661,10 @@ final class AppModel {
         }
     }
 
+    private func searchResolver() -> NZBResolver {
+        resolverOverride ?? NZBResolver(newznabClients: searchClients(), preferences: indexerPreferences)
+    }
+
     func prepareExport() {
         guard !busy, !exportPresented, let submission = current else { return }
         busy = true
@@ -587,7 +680,7 @@ final class AppModel {
                 switch submission {
                 case .file(let imported, _): file = imported
                 case .link(let link):
-                    let resolver = exportResolver ?? NZBResolver(newznabClients: searchClients())
+                    let resolver = searchResolver()
                     file = try await resolver.fileForExport(link) { [self] provider in
                         await self.showSearchProvider(provider)
                     }
@@ -628,6 +721,7 @@ final class AppModel {
         exporting = false
         busy = false
         current = nil
+        automaticCategoryPending = false
         notice = nil
         if !pending.isEmpty { advance() }
     }
@@ -670,6 +764,7 @@ final class AppModel {
         videothekKey = savedVideothekKey
         screen = .settings
         notice = nil
+        if configured, connectionStatus == .unchecked { checkConnection() }
     }
 
     func categoryName(_ category: String) -> String { category == "*" || category.isEmpty ? L("Standard") : category }

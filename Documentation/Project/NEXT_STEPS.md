@@ -1,18 +1,18 @@
 # Nächste Schritte – NZBPort
 
-Stand: 25. November 2026. Testversion 0.2.7, Build 11, ergänzt die Downloadordner-Überwachung und die Sicherung der App-Einstellungen. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
+Stand: 26. November 2026. Testversion 0.2.8, Build 12, ergänzt die automatische Kategoriezuordnung, die einstellbare Suchreihenfolge und die gemeinsamen Untermenüs. Diese Liste ist keine automatische Beauftragung zusätzlicher Arbeit.
 
 ## Noch nicht gesondert bestätigte Bedienungsfälle
 
-- Die lokale macOS-27-Oberfläche im Alltag bestätigen: endgültige Federanimation des eigenen Zahnradbuttons und Darstellung mit aktivierter Systemeinstellung „Ränder anzeigen“. Knopfzustände wurden im Hintergrund gerendert, native Menüinhalte und lokale Favoritenreihenfolge automatisiert geprüft. Keine sichtbare Bedienung oder Änderung der Systemeinstellungen allein für weitere Prüfungen ausführen. Das Kategorie-Suchfeld wurde inzwischen tatsächlich aufgenommen: leichte Änderung der Glasreflexe, keine deutlich sichtbare Federbewegung. Der Aktualisieren-Button neben „Kategorie wählen“ verwendet lokal denselben Stil wie das Zahnrad; seine dargestellten Zustände wurden im Hintergrund geprüft. Der weitere Refresh-Button auf „Deine Kategorien“ wurde anschließend ebenfalls ergänzt und in der neu gestarteten App aufgenommen: Kreis, Vergrößerung sowie Druck- und Rückbewegung sind dort sichtbar. Das unveränderte Verhalten unter macOS 26 ist noch nicht gesondert bestätigt.
+- Die automatische Kategoriezuordnung mit eigenen SABnzbd-Kategorien im normalen Betrieb bestätigen. Der automatische Versand und die manuelle Auswahl wurden mit simulierten Antworten geprüft. Beim separaten iPhone-Userscript 0.1.3 steht die Prüfung auf dem Gerät aus.
 
-- Videothek nach der lokalen Ergänzung mit einem berechtigten Konto prüfen. Der Nutzer hat derzeit kein Premium und möchte den Anbieter zunächst in der Liste haben. Die öffentliche API bestätigt die Titelsuche; eine angemeldete Suche und ein NZB-Abruf sind nicht geprüft. Laut Anbieter werden Premium und die Freigabe des verwendeten Tools benötigt.
+- Die Scrollkante von Build 11 unter macOS 27 bei passendem Anlass im Hintergrund prüfen. Kopf- und Fußleiste verwenden `safeAreaBar`. Eine Sichtprüfung dieser Fassung steht aus. Die Darstellung mit „Ränder anzeigen“ ist ebenfalls noch separat zu bestätigen. Die bestätigte Ziehgeste und den geprüften Aktualisieren-Button auf „Deine Kategorien“ nur bei einem konkreten neuen Fehler erneut prüfen.
+- Beim Import der Einstellungen ist noch offen, ob macOS das Anmeldeobjekt wie vorgesehen wiederherstellt. Der Nutzer hat Export, Zurücksetzen und Import bereits ausprobiert.
+- Videothek hat die Mac-App und das iPhone-Userscript freigegeben. Eine erfolgreiche Live-Suche mit anschließendem NZB-Abruf steht noch aus. Dafür ist ein Konto mit API-Zugang nötig.
 
 - Die Live-Suche bei NZBFinder mit einem Konto prüfen, das API-Zugriff hat. Der frühere Live-Test lieferte HTTP 401 und API-Fehler 102. Der simulierte Such- und Abrufweg war erfolgreich.
 
 - Direkte Live-Suche und NZB-Abruf bei DrunkenSlug funktionierten mit einer 40-stelligen ID und einer Weiterleitung beim selben Anbieter. Unter iOS verursachte iCloud Privat-Relay beim Nutzertest eine Cloudflare-Sperre auch beim direkten API-Link in Safari. Nach Deaktivierung war der API-Link erreichbar; Suchanfragen wurden wieder gezählt, auch mit User-Agent und Domainfreigabe des Hauptskripts. Ein erfolgreicher NZB-Abruf im iOS-Skript steht noch aus. Keine experimentellen User-Agent- oder Domainänderungen übernehmen; bei erneuter Sperre Privat-Relay als mögliche Ursache prüfen. Details in PROJECT_CONTEXT.md.
-
-- Das Anlegen und Löschen im eigenen Kategorienbereich ist vom Nutzer als funktionierend bestätigt. Keine zusätzlichen Kategorien oder Löschungen nur für Tests ausführen. Die automatisierten Prüfungen verwenden ausschließlich synthetische Daten.
 
 - In der Mac-App „NZB-Datei speichern …“ mit dem nativen Speicherdialog prüfen und die gespeicherte Datei bei Bedarf manuell in SABnzbd öffnen. Automatisierte Tests decken Dateiabruf, unveränderte Passwortmetadaten, fehlende SABnzbd-Konfiguration, Abbrechen und Fehler ab.
 
@@ -47,7 +47,3 @@ Den Direktdownload zunächst zusätzlich zur SABnzbd-Übergabe anbieten. So lass
 NZBPort lädt ausschließlich auf dem Mac herunter und verarbeitet die Dateien dort. Ein separater Dienst auf einem NAS oder Server ist nicht vorgesehen. Bei geschlossenem Fenster kann der Download weiterlaufen, solange NZBPort in der Menüleiste aktiv und der Mac wach ist. Im Ruhezustand oder bei ausgeschaltetem Mac sind Download und Fernsteuerung nicht verfügbar.
 
 Für die Bedienung am Handy soll NZBPort eine Weboberfläche bereitstellen. Im selben Heimnetz öffnest du sie im Handy-Browser über die lokale IP-Adresse des Macs, ähnlich wie bisher die SABnzbd-Oberfläche. Dort sollst du die Warteschlange und den Fortschritt sehen sowie Downloads starten, pausieren und fortsetzen können. Die Weboberfläche steuert dieselbe Warteschlange wie die Mac-App. Das Handy lädt selbst keine Usenet-Daten herunter.
-
-- Favoriten-Ziehen ist im korrigierten lokalen Stand mit einem echten Maus-Drag und gespeicherter Reihenfolge bestätigt. Die Testfavoriten wurden entfernt. Keine erneuten Versuche ohne konkreten neuen Fehler; Details im letzten Nachtrag von PROJECT_CONTEXT.md.
-
-- Die native harte Scrollkante ist unter macOS 27 lokal konfiguriert und gebaut. Eine tatsächliche Scrollaufnahme liegt noch nicht vor. Keine Vordergrundaktivierung; nur eine störungsfreie Hintergrundprüfung verwenden.

@@ -27,6 +27,12 @@ struct CategoriesView: View {
             } else {
                 Text(L("Hinzufügen und Löschen ändern die Kategorien in SABnzbd. Favoriten und Ausblendungen gelten nur für NZBPort."))
                     .font(.system(size: 12)).foregroundStyle(.secondary)
+                CategoryRecognitionView(
+                    recognition: $model.categoryRecognition,
+                    categories: model.preferences.visible(in: model.categories),
+                    categoryName: model.categoryName
+                )
+                .disabled(model.busy)
                 GroupBox {
                     VStack(alignment: .leading, spacing: 12) {
                         TextField(L("Name der Kategorie"), text: $model.newCategoryName)

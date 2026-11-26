@@ -5,7 +5,7 @@ import SwiftUI
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuItemValidation, NSMenuDelegate {
-    let model = AppModel()
+    let model: AppModel
     private var window: NSWindow?
     private var desiredContentHeight: CGFloat = 0
     private var resizedByUser = false
@@ -16,6 +16,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     private lazy var loginItemMenu = LoginItemMenu(settings: model.loginItemSettings)
     private lazy var languageMenu = LanguageMenu(settings: model.languageSettings)
     private lazy var appearanceMenu = AppearanceMenu(settings: model.appearanceSettings)
+
+    init(model: AppModel = AppModel()) {
+        self.model = model
+        super.init()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let launchEvent = NSAppleEventManager.shared().currentAppleEvent
@@ -161,7 +166,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         if menuItem.action == #selector(settings) || menuItem.action == #selector(quitRelay) {
             return !model.sending && !model.categoryMutationInProgress
         }
-        if menuItem.action == #selector(manageCategories) { return !model.busy && !model.exportPresented }
+        let isStatusMenu = menuItem.menu === statusSummary?.menu
+        if menuItem.action == #selector(manageCategories) {
+            return !model.busy && !model.exportPresented && (!isStatusMenu || model.screen != .categories)
+        }
+        if isStatusMenu, menuItem.action == #selector(openSAB) { return model.configured }
         return true
     }
 
@@ -176,40 +185,57 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             button.setAccessibilityLabel("NZBPort")
         }
 
+        item.menu = makeStatusMenu()
+        statusItem = item
+    }
+
+    func makeStatusMenu() -> NSMenu {
         let menu = NSMenu()
         menu.delegate = self
-        let summary = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        let summary = NSMenuItem(title: downloadStatusTitle, action: nil, keyEquivalent: "")
         summary.isEnabled = false
         menu.addItem(summary)
         menu.addItem(.separator())
         statusSummary = summary
-        for (title, action) in [
-            (L("NZBPort öffnen"), #selector(openRelay)),
-            (L("NZBlnk aus Zwischenablage"), #selector(pasteLink)),
-            (L("Einstellungen …"), #selector(settings)),
-            (L("Kategorien …"), #selector(manageCategories)),
-            (L("NZB-Dateien öffnen …"), #selector(openFiles)),
-            (L("SABnzbd im Browser öffnen"), #selector(openSAB)),
-            (L("Downloads"), #selector(overview)),
-            (L("Nach Updates suchen …"), #selector(updates))
+        for (title, icon, action) in [
+            (L("NZBPort öffnen"), "macwindow", #selector(openRelay)),
+            (L("NZBlnk aus Zwischenablage"), "doc.on.clipboard", #selector(pasteLink))
         ] {
             let entry = NSMenuItem(title: title, action: action, keyEquivalent: "")
             entry.target = self
+            entry.image = NSImage(systemSymbolName: icon, accessibilityDescription: nil)
             menu.addItem(entry)
         }
-        menu.addItem(appearanceMenu.makeItem())
-        menu.addItem(languageMenu.makeItem())
-        menu.addItem(loginItemMenu.makeItem())
-        menu.addItem(aboutMenu.makeItem())
+        menu.addItem(.separator())
+        for (title, icon, action) in [
+            (L("NZB-Dateien öffnen …"), "doc.badge.plus", #selector(openFiles)),
+            (L("Downloads"), "arrow.down.circle", #selector(overview)),
+            (L("Kategorien …"), "folder", #selector(manageCategories)),
+            (L("SABnzbd öffnen"), "safari", #selector(openSAB))
+        ] {
+            let entry = NSMenuItem(title: title, action: action, keyEquivalent: "")
+            entry.target = self
+            entry.image = NSImage(systemSymbolName: icon, accessibilityDescription: nil)
+            menu.addItem(entry)
+        }
+        menu.addItem(.separator())
+        let settings = NSMenuItem(title: L("Einstellungen"), action: nil, keyEquivalent: "")
+        settings.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
+        settings.submenu = NSHostingMenu(rootView: SettingsMenuContent(model: model) { [weak self] in self?.showWindow() })
+        menu.addItem(settings)
+        let about = NSMenuItem(title: L("Über NZBPort"), action: nil, keyEquivalent: "")
+        about.image = NSImage(systemSymbolName: "info.circle", accessibilityDescription: nil)
+        about.submenu = NSHostingMenu(rootView: AboutMenuContent(model: model) { [weak self] in self?.showWindow() })
+        menu.addItem(about)
         menu.addItem(.separator())
         let quit = NSMenuItem(title: L("NZBPort beenden"), action: #selector(quitRelay), keyEquivalent: "")
         quit.target = self
         menu.addItem(quit)
-        item.menu = menu
-        statusItem = item
+        return menu
     }
 
     func menuWillOpen(_ menu: NSMenu) {
+        model.loginItemSettings.refresh()
         let session = UUID()
         statusMenuSession = session
         observeStatusSummary(session: session)

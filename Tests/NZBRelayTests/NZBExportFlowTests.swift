@@ -24,7 +24,7 @@ private struct FailingExportProvider: NZBSearchProvider {
     let defaults = UserDefaults(suiteName: domain)!
     defer { defaults.removePersistentDomain(forName: domain) }
     let search = ExportFlowTransport(), sab = ExportFlowTransport()
-    let model = AppModel(defaults: defaults, client: SABClient(transport: sab), exportResolver: NZBResolver(transport: search))
+    let model = AppModel(defaults: defaults, client: SABClient(transport: sab), resolverOverride: NZBResolver(transport: search))
     model.receive([URL(string: "nzblnk:?h=synthetic&t=Release")!])
     let id = model.current?.id
     #expect(!model.configured && model.screen == .settings)
@@ -43,7 +43,7 @@ private struct FailingExportProvider: NZBSearchProvider {
     let domain = "NZBPort.Tests." + UUID().uuidString
     let defaults = UserDefaults(suiteName: domain)!
     defer { defaults.removePersistentDomain(forName: domain) }
-    let model = AppModel(defaults: defaults, exportResolver: NZBResolver(transport: ExportFlowTransport()))
+    let model = AppModel(defaults: defaults, resolverOverride: NZBResolver(transport: ExportFlowTransport()))
     model.receive([URL(string: "nzblnk:?h=synthetic&t=Release")!])
     let id = model.current?.id
     model.prepareExport()
@@ -61,7 +61,7 @@ private struct FailingExportProvider: NZBSearchProvider {
     let domain = "NZBPort.Tests." + UUID().uuidString
     let defaults = UserDefaults(suiteName: domain)!
     defer { defaults.removePersistentDomain(forName: domain) }
-    let model = AppModel(defaults: defaults, exportResolver: NZBResolver(providers: [FailingExportProvider()]))
+    let model = AppModel(defaults: defaults, resolverOverride: NZBResolver(providers: [FailingExportProvider()]))
     model.receive([URL(string: "nzblnk:?h=synthetic&t=Release")!])
     let id = model.current?.id
     model.prepareExport()
@@ -79,7 +79,7 @@ private struct FailingExportProvider: NZBSearchProvider {
     try bytes.write(to: fixture)
     defer { try? FileManager.default.removeItem(at: fixture) }
     let sab = ExportFlowTransport()
-    let model = AppModel(defaults: defaults, client: SABClient(transport: sab), exportResolver: NZBResolver(providers: [FailingExportProvider()]))
+    let model = AppModel(defaults: defaults, client: SABClient(transport: sab), resolverOverride: NZBResolver(providers: [FailingExportProvider()]))
     model.receive([fixture])
     let id = model.current?.id
     model.prepareExport()

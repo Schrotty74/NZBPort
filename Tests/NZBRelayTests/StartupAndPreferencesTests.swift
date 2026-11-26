@@ -143,6 +143,33 @@ func loginRefreshReportsPermanentOrExhaustedFailure(status: Int) async {
     #expect(defaults.string(forKey: "sabAPIKey") == "synthetic-test-key")
 }
 
+@MainActor @Test func connectionTestOnlyConfirmsTheCurrentDraft() async {
+    let (defaults, domain) = isolatedDefaults()
+    defer { defaults.removePersistentDomain(forName: domain) }
+    let response = HTTPResult(data: Data(#"{"categories":[]}"#.utf8), status: 200)
+    let transport = StartupTransport(response: .success(response))
+    let model = AppModel(defaults: defaults, client: SABClient(transport: transport))
+    model.address = "https://sab.example.invalid/api"
+    model.key = "synthetic-test-key"
+    model.checkConnection()
+    await model.connectionTestTask?.value
+    #expect(model.connectionStatus == .connected(categoryCount: 0))
+    #expect(!model.configured && defaults.string(forKey: "sabAPIKey") == nil)
+
+    model.checkConnection()
+    let staleTest = model.connectionTestTask
+    model.key = ""
+    await staleTest?.value
+    #expect(model.connectionStatus == .unchecked)
+
+    model.checkConnection()
+    await model.connectionTestTask?.value
+    guard case .failed = model.connectionStatus else {
+        Issue.record("Draft credentials without an API key must fail verification.")
+        return
+    }
+}
+
 @MainActor @Test func newznabKeysCanBeSavedAndClearedIndependently() async throws {
     let (defaults, domain) = isolatedDefaults()
     defer { defaults.removePersistentDomain(forName: domain) }

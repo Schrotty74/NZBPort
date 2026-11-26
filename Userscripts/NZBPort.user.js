@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         NZBPort
 // @namespace    https://github.com/Schrotty74/NZBPort
-// @version      0.1.2
-// @description  Resolve NZBlnk links and NewzBay downloads; save NZBs or submit them to SABnzbd.
+// @version      0.1.3
+// @description  Resolve NZBlnk links and save NZBs or submit them to SABnzbd.
 // @author       Schrotty74
 // @match        http://*/*
 // @match        https://*/*
@@ -27,16 +27,24 @@
   ];
   const defaults = {ausgabe:'sab_menu',sab_url:'http://localhost:8080/api',sab_api_key:'',sab_default_category:'*',sab_sub_menu:true,sab_categories:[],sab_hidden_categories:[]};
   for (const [,key] of providers) defaults[key]='';
+  const indexerNames = ['NZBIndex','NZBKing','BinSearch',...providers.map(p=>p[0])];
+  defaults.indexer_order = [...indexerNames];
+  defaults.indexer_disabled = [];
+  defaults.category_rules = [];
+  for(const key of ['series','games','movies','misc']) defaults['auto_'+key]='';
   const storage = 'NZBPort.preferences';
   let config = structuredClone(defaults), active = false;
   const clean = input => {
     if (!input || typeof input !== 'object' || Array.isArray(input)) throw Error('Ungültige Einstellungsdatei');
     const out = structuredClone(defaults);
     for (const key of Object.keys(defaults)) if (typeof defaults[key]==='string' && typeof input[key]==='string') out[key]=input[key].trim();
-    if (!['sab_menu','sabnzbd','download'].includes(out.ausgabe)) out.ausgabe='sab_menu';
+    if (!['sab_menu','sabnzbd','sab_auto','download'].includes(out.ausgabe)) out.ausgabe='sab_menu';
     if (typeof input.sab_sub_menu==='boolean') out.sab_sub_menu=input.sab_sub_menu;
     if (Array.isArray(input.sab_hidden_categories)) out.sab_hidden_categories=input.sab_hidden_categories.filter(x=>typeof x==='string');
     if (Array.isArray(input.sab_categories)) out.sab_categories=input.sab_categories.flatMap(x=>typeof x==='string'?[{value:x,fav:false}]:typeof x?.value==='string'?[{value:x.value,fav:x.fav===true}]:[]);
+    if(Array.isArray(input.indexer_order)) out.indexer_order=[...new Set([...input.indexer_order.filter(x=>indexerNames.includes(x)),...indexerNames])];
+    if(Array.isArray(input.indexer_disabled)) out.indexer_disabled=[...new Set(input.indexer_disabled.filter(x=>indexerNames.includes(x)))];
+    if(Array.isArray(input.category_rules)) out.category_rules=input.category_rules.filter(x=>typeof x?.pattern==='string'&&typeof x?.category==='string'&&x.pattern.trim()&&x.category.trim()).map(x=>({pattern:x.pattern.trim(),category:x.category.trim()}));
     return out;
   };
   // Versioned backup format; local storage and legacy imports stay unchanged.
@@ -53,7 +61,7 @@
     return {
       format:'NZBPort',
       schemaVersion:1,
-      general:{outputMode:v.ausgabe},
+      general:{outputMode:v.ausgabe,indexerOrder:v.indexer_order,disabledIndexers:v.indexer_disabled},
       indexers:Object.fromEntries(Object.entries(backupIndexers).map(([name,key])=>[name,v[key]])),
       sabnzbd:{
         apiUrl:v.sab_url,
@@ -61,7 +69,9 @@
         defaultCategory:v.sab_default_category,
         categorySubmenu:v.sab_sub_menu,
         categories:v.sab_categories.map(c=>({name:c.value,favorite:c.fav})),
-        hiddenCategories:[...v.sab_hidden_categories]
+        hiddenCategories:[...v.sab_hidden_categories],
+        categoryRules:v.category_rules,
+        autoCategories:{series:v.auto_series,games:v.auto_games,movies:v.auto_movies,misc:v.auto_misc}
       }
     };
   }
@@ -76,7 +86,7 @@
     if(input.schemaVersion!==1)throw Error('Nicht unterstützte NZBPort-Formatversion');
     const {general,indexers,sabnzbd:sab}=input;
     if(!record(general)||!record(indexers)||!record(sab)||
-      !['sab_menu','sabnzbd','download'].includes(general.outputMode)||
+      !['sab_menu','sabnzbd','sab_auto','download'].includes(general.outputMode)||
       !Object.keys(backupIndexers).every(k=>typeof indexers[k]==='string')||
       !['apiUrl','apiKey','defaultCategory'].every(k=>typeof sab[k]==='string')||
       typeof sab.categorySubmenu!=='boolean'||
@@ -86,6 +96,10 @@
     }
     return clean({
       ausgabe:general.outputMode,
+      indexer_order:general.indexerOrder,
+      indexer_disabled:general.disabledIndexers,
+      category_rules:sab.categoryRules,
+      auto_series:sab.autoCategories?.series,auto_games:sab.autoCategories?.games,auto_movies:sab.autoCategories?.movies,auto_misc:sab.autoCategories?.misc,
       ...Object.fromEntries(Object.entries(backupIndexers).map(([name,key])=>[key,indexers[name]])),
       sab_url:sab.apiUrl,
       sab_api_key:sab.apiKey,
@@ -157,13 +171,13 @@
         target.pathname === '/api' &&
         (options.method || 'GET') === 'GET'
       )
-        headers['User-Agent'] = 'NZBPort/nzb-load/0.1.2 (NZB link search; iOS Userscripts)';
+        headers['User-Agent'] = 'NZBPort/nzb-load/0.1.3 (NZB link search; iOS Userscripts)';
       if (
         target.origin === 'https://nzbfinder.ws' &&
         target.pathname === '/api' &&
         (options.method || 'GET') === 'GET'
       )
-        headers['User-Agent'] = 'NZBPort/0.1.2 (NZB link search; iOS Userscripts)';
+        headers['User-Agent'] = 'NZBPort/0.1.3 (NZB link search; iOS Userscripts)';
       const handleError = (r) => (Number(r?.status) >= 400 ? receive(r) : fail());
       const args = {
         method: options.method || 'GET',
@@ -229,7 +243,7 @@
       await request(url, {
         headers: {
           Accept: 'application/rss+xml, application/xml, text/xml',
-          'User-Agent': 'NZBPort/0.1.2',
+          'User-Agent': 'NZBPort/0.1.3',
         },
       }),
     );
@@ -251,6 +265,21 @@
     );
     if (matches.length > 1) throw Error('Mehrdeutiger Releasetitel');
     return matches.length ? releaseURL(matches[0], host, key) : null;
+  }
+  function suggestedCategory(link,items=config.sab_categories,settings=config){
+    const available=new Set(['*',...items.map(c=>c.value)]);
+    const hidden=new Set(settings.sab_hidden_categories.map(x=>x.toLowerCase()));
+    const title=normalize(link.title||link.header);
+    const valid=c=>c&&available.has(c)&&!hidden.has(c.toLowerCase());
+    const custom=settings.category_rules.find(r=>valid(r.category)&&normalize(r.pattern)&&title.includes(normalize(r.pattern)))?.category;
+    if(custom)return custom;
+    const raw=link.title||link.header;
+    const game=/(?:^|[^a-z0-9])(?:ps[345]|psvita|xbox(?:[ ._-]+(?:360|one|series[ ._-]*[xs]))?|nintendo[ ._-]+switch|pc[ ._-]+game|fitgirl|dodi[ ._-]+repack|tenoke|skidrow|razor1911|flt|gog)(?=$|[^a-z0-9])/i.test(raw) || /(?:^|[^a-z0-9])early[ ._-]+access(?=$|[^a-z0-9])/i.test(raw) || /(?:^|[ ._-])(?:elamigos|tinyhell|rune|doge|voices38)\s*$/i.test(raw);
+    const series=/(?:^|[^a-z0-9])(?:s\d{1,3}(?:e\d{1,3})*|\d{1,2}x\d{2,3})(?=$|[^a-z0-9])/i.test(raw);
+    const movie=/(?:^|[^a-z0-9])(?:blu[ ._-]?ray|b[dr]rip|bdr|web(?:[ ._-]?(?:dl|rip))?|remux|hdtv|dvd[ ._-]?rip|uhd[ ._-]?blu[ ._-]?ray)(?=$|[^a-z0-9])/i.test(raw);
+    const complete=/(?:^|[^\p{L}\p{N}])complete(?=$|[^\p{L}\p{N}])/iu.test(raw);
+    const target=complete?settings.auto_series:game?settings.auto_games:series?settings.auto_series:movie?settings.auto_movies:settings.auto_misc;
+    return valid(target)?target:undefined;
   }
   function endpoint(settings=config){const u=new URL(settings.sab_url);if(!['http:','https:'].includes(u.protocol)||u.username||u.password||u.hash||!settings.sab_api_key)throw Error('SABnzbd-Adresse oder API-Key fehlt');return u;}
   async function categories(settings){const data=JSON.parse(await request(address(endpoint(settings),{mode:'get_cats',output:'json',apikey:settings.sab_api_key})));if(!Array.isArray(data.categories))throw Error('Keine Kategorien erhalten');const old=new Map(settings.sab_categories.map(c=>[c.value.toLowerCase(),c.fav]));const hidden=new Set(settings.sab_hidden_categories.map(c=>c.toLowerCase()));return [...new Set(data.categories.filter(x=>typeof x==='string'))].filter(x=>!hidden.has(x.toLowerCase())).map(value=>({value,fav:old.get(value.toLowerCase())===true}));}
@@ -414,7 +443,7 @@
 
     function input(labelText,key,type='text'){
       const field=element('input',null,{type,value:draft[key],autocomplete:'off',spellcheck:false});
-      field.addEventListener('input',()=>draft[key]=field.value);
+      field.addEventListener('input',()=>{draft[key]=field.value;if(key==='sab_url'||key==='sab_api_key'){++statusRun;status.textContent='Verbindung nicht geprüft.';}});
       const l=element('label',labelText);
       l.append(field);
       body.append(l);
@@ -428,9 +457,21 @@
       l.append(field);
       body.append(l);
     }
+    let statusRun=0;
+    async function checkConnection(){
+      const run=++statusRun;
+      status.textContent='SABnzbd-Verbindung wird geprüft …';
+      let timer;
+      try{
+        await Promise.race([categories(structuredClone(draft)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Keine rechtzeitige Antwort')),5000);})]);
+        if(run===statusRun&&tab==='sab')status.textContent='SABnzbd verbunden.';
+      }catch(e){if(run===statusRun&&tab==='sab')status.textContent='SABnzbd-Verbindung nicht bestätigt: '+e.message;}
+      finally{clearTimeout(timer);}
+    }
     function renderTabs(){
       tabs.replaceChildren(
         createTab('general','Allgemein'),
+        createTab('indexers','Indexer'),
         createTab('sab','SABnzbd'),
         createTab('transfer','Import / Export')
       );
@@ -441,15 +482,32 @@
     }
     function draw(next){
       tab=next;
+      ++statusRun;
       renderTabs();
       body.replaceChildren();
       status.textContent='';
       if(tab==='general'){
-        select('Ausgabe','ausgabe',[['sab_menu','SABnzbd – Kategorie auswählen'],['sabnzbd','Direkt an SABnzbd'],['download','NZB-Datei speichern']]);
-        for(const [name,key] of providers)input(name+' API-Key',key,'password');
+        select('Ausgabe','ausgabe',[['sab_menu','SABnzbd – Kategorie auswählen'],['sabnzbd','Direkt an SABnzbd'],['sab_auto','Automatisch erkennen und senden'],['download','NZB-Datei speichern']]);
+      } else if(tab==='indexers'){
+        say(body,'Die Suche erfolgt von oben nach unten. Deaktivierte Indexer werden übersprungen.','muted');
+        draft.indexer_order.forEach((name,i)=>{
+          const row=element('div',null,{className:'category-row'});
+          const check=element('input',null,{type:'checkbox',checked:!draft.indexer_disabled.includes(name)});
+          check.setAttribute('aria-label',name+' aktiv');
+          check.addEventListener('change',()=>{draft.indexer_disabled=draft.indexer_disabled.filter(x=>x!==name);if(!check.checked)draft.indexer_disabled.push(name);});
+          const move=delta=>{const a=draft.indexer_order;[a[i],a[i+delta]]=[a[i+delta],a[i]];draw('indexers');};
+          const up=button('↑',()=>move(-1),'btn-icon'),down=button('↓',()=>move(1),'btn-icon');
+          up.disabled=i===0;down.disabled=i===draft.indexer_order.length-1;
+          up.setAttribute('aria-label',name+' nach oben');down.setAttribute('aria-label',name+' nach unten');
+          row.append(check,element('span',name,{className:'name'}),up,down);body.append(row);
+          const provider=providers.find(p=>p[0]===name);
+          if(provider)input(name+' API-Key',provider[1],'password');
+        });
       } else if(tab==='sab'){
         input('SABnzbd API-Adresse','sab_url','url');
         input('SABnzbd API-Key','sab_api_key','password');
+        body.append(button('Verbindung prüfen',checkConnection));
+        void checkConnection();
         const choices=[['*','Standard'],...draft.sab_categories.filter(c=>c.value!=='*').map(c=>[c.value,c.value])];
         if(!choices.some(c=>c[0]===draft.sab_default_category))choices.push([draft.sab_default_category,draft.sab_default_category]);
         select('Standardkategorie','sab_default_category',choices);
@@ -459,6 +517,24 @@
         line.append(check,element('span','Kategorien-Untermenü (Kompatibilität)'));
         body.append(line);
         body.append(button('Kategorien von SABnzbd laden',async()=>{draft.sab_categories=await categories(draft);draw('sab');},'btn-secondary'));
+        body.append(element('h3','Automatische Kategoriezuordnung'));
+        for(const [key,label] of [['series','Serien erkennen'],['games','Spiele erkennen'],['movies','Filme erkennen'],['misc','Diverses (sonstige Titel)']]){
+          const field='auto_'+key, options=[['','Deaktiviert'],...choices];
+          if(draft[field]&&!options.some(c=>c[0]===draft[field]))options.push([draft[field],draft[field]]);
+          select(label,field,options);
+        }
+        say(body,'Serien: Staffel-/Episodenkennung. Spiele: typische Plattform- und Release-Kennungen. Filme: typische Video-Release-Kennungen ohne Serien-/Spielekennung. Diverses: sonstige Titel. Individuelle Regeln haben Vorrang.','muted');
+        say(body,'Erste passende Regel gewinnt. Suchbegriff im Titel, ohne Beachtung der Großschreibung. Im Auswahlmenü bleibt die Kategorie änderbar. Ohne Treffer gilt die bisherige Auswahl bzw. Standardkategorie.','muted');
+        for(const rule of draft.category_rules){
+          const term=element('input',null,{value:rule.pattern,placeholder:'Suchbegriff',type:'text'});
+          term.setAttribute('aria-label','Suchbegriff');term.addEventListener('input',()=>rule.pattern=term.value);
+          const cat=element('select');cat.setAttribute('aria-label','Zielkategorie');
+          const ruleChoices=[...choices];if(!ruleChoices.some(c=>c[0]===rule.category))ruleChoices.push([rule.category,rule.category]);
+          for(const [value,name] of ruleChoices)cat.append(element('option',name,{value}));
+          cat.value=rule.category;cat.addEventListener('change',()=>rule.category=cat.value);
+          body.append(term,cat,button('Regel entfernen',()=>{draft.category_rules=draft.category_rules.filter(x=>x!==rule);draw('sab');},'btn-danger'));
+        }
+        body.append(button('Regel hinzufügen',()=>{draft.category_rules.push({pattern:'',category:draft.sab_default_category});draw('sab');}));
         body.append(element('h3','Kategorien'));
         for(const c of draft.sab_categories){
           const row=element('div',null,{className:'category-row'});
@@ -504,7 +580,7 @@
   async function obtainNZB(found){
     if(found.read) return found.read();
     const headers={Accept:'application/x-nzb, application/xml, text/xml'};
-    if(found.url.hostname==='nzbfinder.ws') headers['User-Agent']='NZBPort/0.1.2 (NZB link search; iOS Userscripts)';
+    if(found.url.hostname==='nzbfinder.ws') headers['User-Agent']='NZBPort/0.1.3 (NZB link search; iOS Userscripts)';
     return nzb(await request(found.url,{headers,allowSlugDownload:found.private&&found.url.hostname==='drunkenslug.com'}));
   }
   async function download(found,link){saveFile(await obtainNZB(found),filename(link),'application/x-nzb');}
@@ -524,7 +600,11 @@
     };
     function render(items){
       const hidden=new Set(config.sab_hidden_categories.map(x=>x.toLowerCase()));
-      list.replaceChildren(...items.filter(c=>!hidden.has(c.value.toLowerCase())).map(c=>button((c.fav?'★ ':'')+c.value,()=>send(c.value),c.fav?'btn-category btn-favorite':'btn-category')));
+      const suggested=suggestedCategory(link,items);
+      const visible=items.filter(c=>!hidden.has(c.value.toLowerCase()));
+      if(suggested==='*'&&!visible.some(c=>c.value==='*'))visible.unshift({value:'*',fav:false});
+      visible.sort((a,b)=>Number(b.value===suggested)-Number(a.value===suggested));
+      list.replaceChildren(...visible.map(c=>button((c.value===suggested?'Empfohlen: ':'')+(c.fav?'★ ':'')+(c.value==='*'?'Standard':c.value),()=>send(c.value),c.value===suggested?'btn-primary':c.fav?'btn-category btn-favorite':'btn-category')));
     }
     render(config.sab_categories);
     content.append(status,list,button('NZB-Datei speichern',async()=>{await download(found,link);if(content.isConnected)close();},'btn-save'),button('SABnzbd-Einstellungen',()=>settings('sab'),'btn-settings'));
@@ -532,11 +612,34 @@
     let timer;
     void Promise.race([categories(snapshot),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Keine rechtzeitige Antwort')),5000);})]).then(items=>{
       if(!content.isConnected||sending)return;
-      render(items);status.textContent='';
-    }).catch(()=>{
+      render(items);status.textContent='SABnzbd verbunden.';
+    }).catch(e=>{
       if(!content.isConnected||sending)return;
-      status.textContent='SABnzbd antwortet nicht – gespeicherte Kategorien werden angezeigt.';
+      status.textContent='SABnzbd-Verbindung nicht bestätigt – gespeicherte Kategorien. '+e.message;
     }).finally(()=>clearTimeout(timer));
+  }
+  async function output(found,link){
+    if(config.ausgabe==='download'){await download(found,link);close();return;}
+    const automatic=config.ausgabe==='sab_auto';
+    const cat=automatic?suggestedCategory(link):config.ausgabe==='sabnzbd'?(config.sab_default_category||'*'):undefined;
+    if(!cat||!config.sab_api_key||!config.sab_url){choose(found,link);return;}
+    const progress=dialog('NZBPort – Übertragung');
+    say(progress,link.title||link.header);
+    say(progress,'Übergabe an SABnzbd …');
+    try{
+      await submit(found,link,cat);
+      if(progress.isConnected)close();
+      if(automatic){
+        const notice=element('div','An SABnzbd gesendet – '+(cat==='*'?'Standard':cat));
+        notice.setAttribute('role','status');
+        notice.style.cssText='position:fixed;bottom: max(24px, env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:2147483647;background:#20534d;color:#fff;padding:12px 18px;border-radius:12px;font:600 15px -apple-system,BlinkMacSystemFont,Arial,sans-serif;max-width:85vw;box-shadow:0 4px 18px #0008;pointer-events:none';
+        document.documentElement.append(notice);setTimeout(()=>notice.remove(),3000);
+      }
+    }catch(e){
+      const err=dialog('Übergabe fehlgeschlagen');
+      say(err,e.message+'. Vor erneutem Senden die Warteschlange prüfen.');
+      err.append(button('NZB-Datei speichern',async()=>{await download(found,link);close();},'btn-save'),button('SABnzbd-Einstellungen',()=>settings('sab'),'btn-settings'));
+    }
   }
   async function process(raw) {
     if (active) return;
@@ -557,7 +660,9 @@
           .filter((p) => config[p[1]])
           .map((p) => ({ name: p[0], run: () => privateSearch(p, link), private: true })),
       ];
-      for (const job of jobs) {
+      const orderedJobs=config.indexer_order.filter(name=>!config.indexer_disabled.includes(name)).map(name=>jobs.find(job=>job.name===name)).filter(Boolean);
+      if(!orderedJobs.length){say(progress,'Keine aktiven oder konfigurierten Indexer.');return;}
+      for (const job of orderedJobs) {
         if (!panel) return;
         say(progress, 'Suche bei ' + job.name + ' …');
         try {
@@ -575,29 +680,7 @@
         say(progress, 'Keine passende NZB gefunden.');
         return;
       }
-      if (config.ausgabe === 'download') {
-        await download(found, link);
-        close();
-      } else if (config.ausgabe === 'sabnzbd' && config.sab_api_key && config.sab_url) {
-        try {
-          await submit(found, link, config.sab_default_category || '*');
-          close();
-        } catch (e) {
-          const err = dialog('Übergabe fehlgeschlagen');
-          say(err, e.message + '. Vor erneutem Senden die Warteschlange prüfen.');
-          err.append(
-            button(
-              'NZB-Datei speichern',
-              async () => {
-                await download(found, link);
-                close();
-              },
-              'btn-save',
-            ),
-            button('SABnzbd-Einstellungen', () => settings('sab'), 'btn-settings'),
-          );
-        }
-      } else await choose(found, link);
+      await output(found,link);
     } catch (e) {
       say(dialog('NZBPort – Fehler'), e.message);
     } finally {
@@ -646,7 +729,7 @@
           const entry=pageNZB(anchor,location.origin);
           if(!entry||active)return;
           active=true;
-          try{await ready;choose(pageSource(entry),{header:entry.title,title:entry.title,password:''});}
+          try{await ready;const link={header:entry.title,title:entry.title,password:''};if(config.ausgabe==='sab_auto')await output(pageSource(entry),link);else choose(pageSource(entry),link);}
           catch(error){say(dialog('NZBPort – Fehler'),error.message);}
           finally{active=false;}
         });

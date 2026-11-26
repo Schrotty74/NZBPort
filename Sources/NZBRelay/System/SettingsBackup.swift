@@ -41,6 +41,7 @@ struct SettingsBackup: Codable, Sendable {
     var downloadNotifications: Bool
     var launchAtLogin: Bool
     var watchedDownloadFolder: String?
+    var indexers: IndexerPreferences? = nil
 
     static func read(from url: URL) throws -> Self {
         let access = url.startAccessingSecurityScopedResource()

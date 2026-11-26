@@ -7,6 +7,7 @@
 ## Funktionen
 
 - Tippe auf einen NZBlnk, um nach dem passenden Release zu suchen. Ist die Kategorieauswahl eingestellt, öffnet sich nach einem Treffer das Menü. Sobald du eine Kategorie auswählst, sendet das Skript die NZB an SABnzbd.
-- Wähle auf NewzBay **Download → An SABnzbd senden**. Das Skript nutzt deine NewzBay-Anmeldung in Safari und öffnet das Kategorienmenü.
+- Wähle auf NewzBay **Download → An SABnzbd senden**. Das Skript nutzt deine NewzBay-Anmeldung in Safari. Bei aktivierter Erkennung sendet es direkt, wenn eine passende SABnzbd-Kategorie verfügbar ist. Sonst öffnet es das Kategorienmenü.
+- Im Bereich **Indexer** kannst du die Suchreihenfolge ändern und Dienste einzeln deaktivieren. Im Bereich **SABnzbd** legst du eigene Titelregeln und Zielkategorien fest. Seit 0.1.3 erkennt das Skript auch das eigenständige Wort „Complete“ als Serienmerkmal.
 - Mit **NZB-Datei speichern** kannst du die geprüfte NZB lokal ablegen.
 - In den Einstellungen kannst du API-Keys für Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder und Videothek hinterlegen. Videothek setzt API-Zugang und die Freigabe des Tools voraus. Die exportierte Einstellungsdatei enthält deine API-Keys. Bewahre sie privat auf.

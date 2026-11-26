@@ -7,6 +7,7 @@ Open [NZBPort.user.js](https://raw.githubusercontent.com/Schrotty74/NZBPort/main
 ## What it does
 
 - Tap an NZBlnk to look up the release. With category selection enabled, the script opens the menu after a match and sends the NZB to SABnzbd when you choose a category.
-- On NewzBay, select **Download → Send to SABnzbd**. The script uses your NewzBay sign-in in Safari and opens the category menu.
+- On NewzBay, select **Download → Send to SABnzbd**. The script uses your NewzBay sign-in in Safari. When automatic detection is on and a matching SABnzbd category is available, it sends the job directly. Otherwise, it opens the category menu.
+- In **Indexers**, you can change the search order and disable individual services. In **SABnzbd**, you can set custom title rules and target categories. Starting with 0.1.3, the script also recognizes the standalone word “Complete” as a TV series marker.
 - Choose **Save NZB file** to keep a local copy. The script checks that the response is an NZB file before saving it.
 - Add API keys for Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder or Videothek in the settings. Videothek requires API access and approval for the tool. Exported settings include the API keys, so keep the backup private.

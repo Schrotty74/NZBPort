@@ -1,19 +1,18 @@
 # Projektkontext – NZBPort
 
-Stand: 24. November 2026.
+Stand: 26. November 2026.
 
 ## Projekt und Git-Stand
 
 - Repository: https://github.com/Schrotty74/NZBPort
 - Projektpfade beziehen sich auf den Repository-Root; der lokale Ordner trägt historisch den Namen `NZBRelay`.
-- Entwicklungsbranch: `main`. Der App-Quellcommit für 0.2 war `74c25ba`; danach folgten Dokumentationscommits.
-- Vorheriger Release-Stand: Testversion 0.2.5, Build 9, mit NinjaCentral, DrunkenSlug und NZBFinder, NZB-Speicherung, eigenem Kategorienbereich sowie überarbeiteten Verbindungsansichten und Fensterhöhen. GitHub-Tag: `v0.2.5`.
-- Testversion 0.2.4, Build 8, ergänzte Treasure Maps und NewzBay. In 0.2.3, Build 7, kam das Warten auf SABnzbd beim Anmeldestart hinzu.
+- `main` ist der einzige Entwicklungs- und Veröffentlichungsbranch. Lokale Dev-Builds und GitHub-Releases werden über den Build- und Veröffentlichungsablauf getrennt.
+- [GitHub-Vorabrelease](https://github.com/Schrotty74/NZBPort/releases/tag/v0.2.8): 0.2.8, Build 12. Der Release-Tag verweist auf den gebauten Quellstand. Die Downloadpakete verwenden die öffentliche Bundle-ID.
 - Root-`AGENTS.md` verweist auf die vier vollständigen Dateien unter `Documentation/Project/`; alle fünf sind auf GitHub enthalten.
 
 ## Produkt
 
-NZBPort öffnet NZBlnk-Links und NZB-Dateien und übergibt sie nach Kategorieauswahl an SABnzbd. Die App bleibt in der Menüleiste; SABnzbd übernimmt den eigentlichen Usenet-Download, Reparatur und Entpacken. Ein eigener NNTP-Downloader ist nicht implementiert und wurde nur als mögliche Erweiterung besprochen.
+NZBPort öffnet NZBlnk-Links und NZB-Dateien und übergibt sie an SABnzbd. Die Kategorie wird manuell gewählt oder auf Wunsch aus dem Titel erkannt. Die App bleibt in der Menüleiste. SABnzbd übernimmt den Usenet-Download, die Reparatur und das Entpacken. Ein eigener NNTP-Downloader ist als mögliche Erweiterung dokumentiert.
 
 Die App ist in Swift 6 mit SwiftUI und AppKit geschrieben. Mindestversion ist macOS 26; die vorhandenen Pakete sind für Apple Silicon. Das Projekt verwendet Apple-Systemframeworks und keine externen Swift-Paketabhängigkeiten. Lizenz: GPLv3, siehe `LICENSE`.
 
@@ -175,7 +174,7 @@ Alle 85 automatisierten Tests bestanden. Der lokale Build, die Sprachdateien und
 
 ## Zusätzliche App-Kopien
 
-22. November 2026: Auf Nutzerauftrag liegt eine identische, signaturgeprüfte Kopie des aktuellen lokalen Builds auf dem Datenträger MacSoftware unter Download/NZBPort.app. Künftige App-Änderungen sollen nach erfolgreichem Build auch dorthin übernommen werden. Der Nutzer hat die zunächst gewünschte iCloud-App-Kopie zurückgenommen; sie wird nicht angelegt oder gepflegt. GitHub wird erst bei einem ausdrücklichen Release-Auftrag aktualisiert. Der Nutzer wartet damit vorerst, da möglicherweise weitere Suchdienste hinzukommen. Das separate iOS-Userscript bleibt davon unabhängig.
+Seit dem 25. November 2026 liegt die App-Kopie auf dem Datenträger MacSoftware unter `Download/NZBPort/NZBPort.app`. Nach App-Änderungen übernimmt der lokale Build die bestehende lokale Bundle-ID und wird auch an dieses Ziel kopiert. Die iCloud-App-Kopie wurde vom Nutzer abbestellt. Das separate iPhone-Userscript hat einen eigenen Veröffentlichungsablauf.
 
 ## Korrigierte automatische Fensterhöhe
 
@@ -308,3 +307,53 @@ Beim iPhone-Test am 24. November 2026 erschien mit aktiviertem iCloud Privat-Rel
 Das Zahnradmenü bündelt die Einstellungen. Unter **Einstellungen → Sicherung** lassen sich Einstellungen einschließlich API-Keys als JSON exportieren, importieren und zurücksetzen. Export, Zurücksetzen und Import wurden lokal ausprobiert. Die tatsächliche Wiederherstellung des macOS-Anmeldeobjekts wurde dabei nicht gesondert bestätigt.
 
 Die lokale App-Kopie liegt auf MacSoftware unter `Download/NZBPort/NZBPort.app`. Die separate Sicherungsdatei im selben Ordner gehört nicht zum App-Bundle.
+
+Für das Vorabrelease bestanden 134 automatisierte Swift-Tests. Die Syntax des iPhone-Userscripts, die App-Signatur in beiden Paketen und die Prüfsummen der GitHub-Uploads wurden geprüft. Der lokale Release-Ordner wurde danach in den Papierkorb gelegt. Der lokale Build und die MacSoftware-Kopie stehen auf Build 11.
+
+Unter macOS 27 bindet diese Fassung Kopf- und Fußleiste über `safeAreaBar` an die Scrollansicht. Die Wirkung der Scrollkante wurde im veröffentlichten Build noch nicht visuell geprüft.
+
+## Automatische Kategoriezuordnung im lokalen Entwicklungsbuild
+
+26. November 2026. Unter „Kategorien …“ lassen sich SABnzbd-Ziele für Serien, Spiele, Filme und sonstige Titel festlegen. Eigene Titelregeln haben Vorrang. Die Mac-App verwendet die Erkennungsregeln des iPhone-Userscripts für NZBlnk-Titel und Dateinamen von NZB-Dateien.
+
+„Automatisch erkennen und senden“ ist anfangs ausgeschaltet. Ist der Modus eingeschaltet und die passende Kategorie verfügbar, sendet NZBPort direkt an SABnzbd. Ohne passende Zuordnung bleibt die manuelle Auswahl. Ausgeblendete Kategorien werden bei der Erkennung übersprungen. Bei unklarer Übergabe greift der bestehende Duplikatschutz. Die Zuordnung wird mit den Mac-Einstellungen gesichert.
+
+Alle 141 automatisierten Tests bestanden. Die neuen Prüfungen decken Erkennung, Titelregeln, Übergabe mit simuliertem SABnzbd, manuelle Auswahl, Duplikatschutz und ältere Einstellungssicherungen ab. Einstellungsblock und empfohlene Kategorie wurden im Hintergrund in Hell und Dunkel gerendert und visuell geprüft. Die Bilder unter `Build/Verification/category-recognition` dokumentieren diese beiden Ansichten. Die laufende App wurde nicht neu gestartet. Eine Bedienungsprüfung und ein Versand an den echten SABnzbd-Server fanden nicht statt.
+
+Der lokale Entwicklungsbuild und die identische Kopie auf MacSoftware unter Download sind signiert und geprüft. Beide führen weiterhin die Versionsangabe 0.2.7, Build 11. Die GitHub-Pakete wurden nicht aktualisiert.
+
+### Serienpakete mit „Complete“
+
+26. November 2026. Die Mac-App erkennt „Complete“ als eigenständiges Wort im Titel als Serienmerkmal, auch ohne Staffel- oder Episodennummer. Diese Regel hat Vorrang vor den eingebauten Spiele- und Filmkennungen. Eigene Titelregeln gelten weiterhin zuerst.
+
+Alle 142 automatisierten Tests bestanden. Der gemeldete Titel „Blade Runner 2099“ wird als Serie erkannt. Die Tests decken auch andere Titel mit „Complete“ sowie Wörter wie „Incomplete“ und „Completed“ ab. Der lokale Build und die identische MacSoftware-Kopie wurden signaturgeprüft. Die App wurde nicht neu gestartet.
+
+### Verbindungsstatus, Versandbestätigung und Sicherung
+
+26. November 2026. Die Verbindungseinstellungen zeigen den Status der aktuell eingetragenen SABnzbd-Daten. Änderungen an Adresse oder API-Key setzen die Anzeige auf „Verbindung nicht geprüft“ zurück. Der Verbindungstest speichert keine Zugangsdaten und ersetzt die Kategorien der gespeicherten Verbindung nicht.
+
+Nach einer bestätigten automatischen Übergabe zeigt NZBPort drei Sekunden lang die Zielkategorie. Bei einer fehlgeschlagenen Übergabe erscheint die Fehlermeldung. Die Mac-Sicherung enthält unter anderem die Erkennungseinstellungen und Titelregeln. Vor dem Wiederherstellen zeigt NZBPort die SABnzbd-Adresse, den gesicherten Downloadordner und einen Hinweis, falls der automatische Versand aktiviert wird. Die Mac-App verwendet weiterhin ihr eigenes Sicherungsformat.
+
+Alle 145 automatisierten Swift-Tests bestanden. Der Verbindungsstatus und die Versandbestätigung wurden in Hell und Dunkel im Hintergrund gerendert und geprüft. Die Nachweise liegen unter `Build/Verification/sabnzbd-feedback`. Der lokale Entwicklungsbuild und seine identische MacSoftware-Kopie wurden signaturgeprüft.
+
+### Menü am Symbol in der macOS-Menüleiste
+
+26. November 2026. Das Symbol in der macOS-Menüleiste verwendet dieselben Untermenüs „Einstellungen“ und „Über NZBPort“ wie das Zahnrad im App-Fenster. Der Warteschlangenstatus, „NZBPort öffnen“, die Zwischenablage und „NZBPort beenden“ bleiben direkt erreichbar.
+
+Alle 146 automatisierten Swift-Tests bestanden. Ein Menütest verglich die Einträge und Untermenüs beider Menüs. Der lokale Build und seine identische MacSoftware-Kopie wurden signaturgeprüft. Die App wurde für diese Änderung nicht neu gestartet und das geöffnete Menü nicht visuell geprüft.
+
+### Suchreihenfolge auf dem Mac und Userscript 0.1.3
+
+26. November 2026. Unter „Verbindung …“ lassen sich alle neun Suchdienste einzeln aktivieren, deaktivieren und mit Pfeilen umsortieren. Die Reihenfolge und die Schalter werden sofort gespeichert. API-Keys werden weiterhin über „Speichern“ übernommen. Die Suchreihenfolge gilt beim Senden eines Links und beim Speichern seiner NZB-Datei. Die Mac-Sicherung enthält die Auswahl. Ältere Mac-Sicherungen stellen die Standardreihenfolge wieder her.
+
+Das iPhone-Userscript unter `Userscripts/NZBPort.user.js` übernimmt die neuere iCloud-Fassung und erkennt in Version 0.1.3 „Complete“ als eigenständiges Serienmerkmal. Eigene Titelregeln gelten zuerst. Die Videothek-Präfixe bleiben `NZBPort/` und `NZBPort/nzb-load/`.
+
+Alle 149 Swift-Tests bestanden. Die Tests prüften Reihenfolge, deaktivierte und nicht eingerichtete Suchdienste, Speicherung und Wiederherstellung. Die Indexer-Liste wurde in Hell und Dunkel im Hintergrund gerendert und visuell geprüft. Die Nachweise liegen unter `Build/Verification/indexer-preferences`. Der Mac-Build und seine identische MacSoftware-Kopie wurden signaturgeprüft. JavaScript-Syntax, „Complete“-Erkennung, Titelregeln und der Import älterer Script-Sicherungen wurden mit Testdaten geprüft. Die Bedienung auf dem iPhone wurde für 0.1.3 nicht geprüft.
+
+Auf MacSoftware liegt das iPhone-Userscript 0.1.3 unter `Download/NZBPort/NZBPort.user.js` neben der App. Die Kopie ist bytegleich mit der Projektdatei.
+
+## Testversion 0.2.8, Build 12
+
+26. November 2026. Die Testversion enthält den automatischen Versand mit Kategorieerkennung und eigenen Titelregeln, die einstellbare Suchreihenfolge, den Verbindungsstatus, die Versandbestätigung, die Wiederherstellungsvorschau und die gemeinsamen Untermenüs. Die Funktionslisten sind auf Deutsch und Englisch aktualisiert. Der Release-Quellstand enthält das separate iPhone-Userscript 0.1.3.
+
+Alle 149 automatisierten Swift-Tests bestanden. Die Sprachdateien und die JavaScript-Syntax wurden geprüft. DMG und ZIP enthalten die ad hoc signierte App mit öffentlicher Bundle-ID für Apple Silicon ab macOS 26. Signaturen, Paketinhalt, Applications-Verknüpfung und SHA-256-Prüfsummen wurden geprüft. Die lokalen App-Kopien behalten ihre bisherige Bundle-ID. Der Release-Build wurde für die Paketprüfung nicht geöffnet. Ein Test des Userscripts 0.1.3 auf dem iPhone steht weiterhin aus.

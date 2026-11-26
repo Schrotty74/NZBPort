@@ -21,6 +21,13 @@ private struct BackupTestTransport: HTTPTransport {
                               ninjaCentral: "test-ninja", drunkenSlug: "test-slug",
                               nzbFinder: "test-finder", videothek: "test-videothek")
     backup.categories = CategoryPreferences(hidden: ["Archive"], favorites: ["Movies"])
+    backup.categories.recognition.automaticallySends = true
+    backup.categories.recognition[.movies] = "Movies"
+    backup.categories.recognition.rules = [.init(pattern: "Fixture", category: "Movies")]
+    var indexers = IndexerPreferences()
+    indexers.move(.newzBay, by: -4)
+    indexers.setEnabled(false, for: .newzBay)
+    backup.indexers = indexers
     backup.language = .english
     backup.appearance = .dark
     backup.colorTheme = .coffee
@@ -42,6 +49,8 @@ private struct BackupTestTransport: HTTPTransport {
     #expect(exported.connection.nzbFinder == backup.connection.nzbFinder)
     #expect(exported.connection.videothek == backup.connection.videothek)
     #expect(exported.categories == backup.categories)
+    #expect(exported.indexers == indexers)
+    #expect(AppModel(defaults: defaults, client: SABClient(transport: BackupTestTransport())).indexerPreferences == indexers)
     #expect(exported.language == .english && exported.appearance == .dark)
     #expect(exported.colorTheme == .coffee && exported.backgroundStyle == .opaque)
     #expect(exported.includeTestUpdates)
@@ -55,6 +64,7 @@ private struct BackupTestTransport: HTTPTransport {
     #expect(defaults.string(forKey: "sabAPIKey") == "")
     #expect(defaults.string(forKey: "videothekAPIKey") == nil)
     #expect(model.preferences == CategoryPreferences())
+    #expect(model.indexerPreferences == IndexerPreferences())
     #expect(model.settingsBackup().watchedDownloadFolder == nil)
     #expect(defaults.string(forKey: "unrelatedPreference") == "preserve")
 }
@@ -66,4 +76,14 @@ private struct BackupTestTransport: HTTPTransport {
     #expect(throws: RelayError.self) { try SettingsBackup.decode(json) }
     backup.connection.address = "https://user:password@sab.example.invalid"
     #expect(throws: RelayError.self) { try backup.connection.validatedServer() }
+}
+
+@Test func existingSettingsBackupWithoutRecognitionKeepsManualCategorySelection() throws {
+    let encoded = try SettingsBackup.standard.encoded()
+    var object = try #require(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+    object["categories"] = ["favorites": ["TV"], "hidden": []]
+    let restored = try SettingsBackup.decode(JSONSerialization.data(withJSONObject: object))
+    #expect(restored.categories.favorites == ["TV"])
+    #expect(restored.categories.recognition == CategoryRecognition())
+    #expect(restored.indexers == nil)
 }

@@ -27,6 +27,36 @@ private actor SearchTransport: HTTPTransport {
     #expect(await transport.requests().count == 1)
 }
 
+@Test func exportUsesSavedIndexerOrderAndSkipsDisabledAndUnconfiguredServices() async throws {
+    let preferences = try JSONDecoder().decode(IndexerPreferences.self, from: Data("""
+        {"order":["Unknown","Treasure Maps","NewzBay","NewzBay","NZBKing"],"disabled":["NZBIndex","Unknown"]}
+        """.utf8))
+    #expect(Array(preferences.order.prefix(3)) == [.treasureMaps, .newzBay, .nzbKing])
+    #expect(preferences.order.count == IndexerPreferences.Indexer.allCases.count)
+    #expect(preferences.disabled == [.nzbIndex])
+
+    let transport = SearchTransport(["<rss><channel></channel></rss>", "<a href='/nzb:fixture/'>NZB</a>", "<nzb/>"])
+    let client = NewznabClient(apiKey: "test-only-key", service: .newzBay, transport: transport)
+    let resolver = NZBResolver(transport: transport, newznabClients: [client], preferences: preferences)
+    let link = try NZBLink("nzblnk:?h=fixture&t=Fixture")
+    let file = try await resolver.fileForExport(link)
+    #expect(file.data == Data("<nzb/>".utf8))
+    #expect(await transport.requests().map { $0.url?.host } == ["newzbay.cc", "www.nzbking.com", "www.nzbking.com"])
+}
+
+@Test func searchingWithAllPublicIndexersDisabledMakesNoRequests() async throws {
+    var preferences = IndexerPreferences()
+    for indexer in [IndexerPreferences.Indexer.nzbIndex, .nzbKing, .binSearch] {
+        preferences.setEnabled(false, for: indexer)
+    }
+    let transport = SearchTransport([])
+    let resolver = NZBResolver(transport: transport, preferences: preferences)
+    await #expect(throws: RelayError.self) {
+        try await resolver.resolve(NZBLink("nzblnk:?h=fixture&t=Fixture"))
+    }
+    #expect(await transport.requests().isEmpty)
+}
+
 @Test func kingFallbackSelectsSameOriginLinkAndPreservesEntities() async throws {
     let transport = SearchTransport([
         #"{"data":{"content":[]},"error":false}"#,

@@ -14,20 +14,22 @@
 
 - **Fetch categories:** NZBPort reads the current SABnzbd categories at startup, when you open a submission, and on request. The startup check runs in the background.
 - **Find a category:** Filter the category buttons by name before sending.
+- **Automatic category assignment:** In **Categories**, map series, games, movies and other titles to SABnzbd categories. The first matching custom title rule with an available target takes precedence. Otherwise, NZBPort checks release markers. The standalone word “Complete” counts as a series marker even without an episode number. NZBlnk links use their title, and NZB files use their filename.
+- **Detect and send automatically:** Enable this option in **Categories** to send directly when NZBPort finds a matching visible category. If there is no match, NZBPort opens the category picker. With automatic sending off, a matching category is marked as recommended.
 - **Add a category:** On the dedicated **Categories** page, add a category to SABnzbd.
 - **Delete a category:** Confirm before deleting an existing category in SABnzbd. The default category is protected. Deleting a category changes SABnzbd’s configuration; it does not delete queued jobs or downloaded files.
 - **Local category preferences:** On the **Categories** page, hide or restore categories and pin or reorder favorites. These choices affect only NZBPort. New categories from SABnzbd appear automatically.
 - **Priority:** Choose Low, Normal, High, or Force before sending. Use **Add Paused** to add a job without starting it.
 - **Title and archive password:** NZBPort passes the title and any archive password from the NZBlnk link to SABnzbd with the selected category.
-- **Submission feedback:** After SABnzbd confirms the job, NZBPort shows the next submission or closes the window and stays in the menu bar. The app shows connection and submission failures.
+- **Submission feedback:** After SABnzbd accepts an automatic submission, NZBPort shows the target category for three seconds. It advances to the next waiting submission or closes the window when idle. The app shows connection and submission failures.
 - **Duplicate warning:** NZBPort asks you to confirm repeat attempts detected within ten minutes, including after an uncertain transfer. It keeps only hashes and timestamps for this check in memory. If the outcome is unclear, check the SABnzbd queue before sending again.
 
 ## Search providers
 
-- **Public search:** NZBIndex, NZBKing and BinSearch are tried in that order. NZBIndex uses its public API and does not need a search API key.
-- **Optional indexers:** If public search finds nothing, NZBPort tries providers with saved API keys in order. Each provider has its own optional API key in Connection Settings. The search ends when a provider returns a valid result; errors, unmatched titles and ambiguous API results let it continue to the next provider.
+- **Search order:** In **Settings → Connection → Search Services**, reorder providers with the arrow buttons and disable services individually. The same order applies when sending a link to SABnzbd and when saving its NZB. NZBPort skips disabled providers and those missing a required API key.
+- **Search results:** The first valid result ends the search. Errors, unmatched titles and ambiguous API results let it continue to the next provider.
 
-| Order | Provider | Search API key |
+| Default position | Provider | Search API key |
 | --- | --- | --- |
 | 1 | NZBIndex | No, public API |
 | 2 | NZBKing | No |
@@ -39,14 +41,14 @@
 | 8 | NZBFinder | Optional, saved separately; premium membership required for API access |
 | 9 | Videothek | Optional, saved separately; API permission and an approved tool required |
 
-- **Provider requests:** A configured provider receives the release title and its own API key. Keys are stored locally without encryption only after you explicitly save them. To disable a provider, clear its key and save.
+- **Provider requests:** A configured indexer receives the release title and its own API key. NZBPort stores keys locally without encryption after you save them. Disabling a provider keeps its key for later use.
 - **NZB retrieval:** NZBPort downloads indexer results itself and passes the NZB file to SABnzbd. The indexer key is not sent to SABnzbd.
 - **Provider limits:** A direct authenticated NinjaCentral test returned a matching result and a valid NZB file. NZBPort follows HTTPS redirects to NewzBay’s own NZB download endpoint. A live search and NZB retrieval succeeded for DrunkenSlug with a 40-character hexadecimal ID. NZBFinder requires a premium membership for API access; a free account may return HTTP 401 with API error 102. Provider availability and terms can change. HTML fallbacks may stop working if a provider changes its pages or blocks automated access. NZBPort does not bypass access controls or CAPTCHAs.
 
 ## Watched folder and settings backup
 
-- Choose a folder under **Settings → Download Folder**. When a new NZB file is ready, NZBPort asks for a category. After SABnzbd accepts the job, NZBPort moves the original file to the Trash. Failed or canceled submissions leave the file in place.
-- Use **Settings → Backup** to export or import settings as JSON, including API keys, category favorites and appearance. The export contains keys in plain text. You can also reset NZBPort to defaults here. After an import, select the watched folder again if macOS no longer grants access.
+- Choose a folder under **Settings → Download Folder**. NZBPort handles new NZB files with the same category settings as files you open manually. After SABnzbd accepts the job, NZBPort moves the original file to the Trash. Failed or canceled submissions leave the file in place.
+- Use **Settings → Backup** to export or restore Mac settings as JSON, including API keys, category favorites, detection rules and search provider preferences. Before confirming a restore, review the saved SABnzbd address and download folder, and whether the backup enables automatic sending. The export contains keys in plain text. You can also reset NZBPort to defaults. Select the watched folder again if macOS no longer grants access.
 
 ## Downloads, menu bar and notifications
 
@@ -55,6 +57,7 @@
 - **Recent history:** See the ten most recent entries shown by the app, with their status.
 - **Status refresh:** Refresh Downloads on demand. While Downloads is visible or notifications are enabled, NZBPort waits two seconds after each status request before starting the next one.
 - **Quick status in the menu bar:** Open the NZBPort menu to request a fresh queue count and speed. It also shows when the queue is empty or paused, the connection is not set up, or the status is unavailable.
+- **Shared submenus:** The menu bar icon and the gear use the same **Settings** and **About NZBPort** submenus. The menu bar icon also offers the queue summary and shortcuts for opening and quitting the app.
 - **macOS notifications:** Opt in to notifications for finished or failed downloads. The first refresh skips existing history, and a job that is still unpacking is not reported as finished.
 - **Open SABnzbd in Browser:** Open the configured server without putting the API key in the browser URL.
 
@@ -64,6 +67,7 @@
 - **Color themes:** Choose Standard, Coffee, Ivory, or Mint. Themes adapt to light and dark mode.
 - **Appearance and background:** Choose system, light, or dark appearance independently of the theme. The window background can follow the system or be transparent or opaque.
 - **Native macOS design:** NZBPort uses Liquid Glass controls. Its Icon Composer app icon supports the system icon appearances.
+- **Connection status:** **Test Connection** checks the address and API key currently entered. Editing either field clears the previous result. Testing does not save credentials.
 - **Connection settings and window height:** Separate group boxes organize the SABnzbd connection and optional search provider keys. The window grows or shrinks to fit its content within the available screen height. Scroll when more space is needed. A size you set by hand stays in effect until you reopen the window.
 - **Launch at login:** Enable or disable startup from the app menu, menu bar menu, or gear menu. Choose **Allow in macOS…** if macOS asks for approval. NZBPort stays in the menu bar at login; launching it manually opens the window. If SABnzbd is still starting, NZBPort retries the category request up to three times, waiting 2, 5, then 10 seconds. It still reports persistent failures and rejected credentials. Manual launches keep their existing behavior.
 
@@ -78,7 +82,7 @@
 1. A browser hands a `nzblnk:` URL to the registered macOS app. A browser confirmation may appear first.
 2. NZBPort parses the search identifier (`h`), title (`t`), optional password (`p`) and repeated group fields (`g`). It accepts percent-encoded text and expands abbreviated `a.b.` groups for NZBIndex.
 3. The app fetches the current SABnzbd categories and applies your local hidden-category choices. You can filter the category buttons by name.
-4. Selecting a category starts the lookup in NZBIndex, NZBKing and BinSearch. If none finds the NZB, the app searches configured providers by release title, in order: Treasure Maps, NewzBay, NinjaCentral, DrunkenSlug, NZBFinder and Videothek. Each provider needs its own saved API key.
+4. After you select a category, or NZBPort selects one in automatic mode, it searches enabled providers in the configured order. Public providers use the search identifier, and authenticated indexers search by release title.
 5. NZBPort sends SABnzbd the public download URL or the NZB file it retrieved from an indexer, along with the title, category and optional archive password. SABnzbd downloads the Usenet articles.
 6. A confirmed submission closes the window or advances to the next waiting link. An error remains visible in the window. If a submission times out, check the SABnzbd queue before trying again to avoid duplicate jobs.
 

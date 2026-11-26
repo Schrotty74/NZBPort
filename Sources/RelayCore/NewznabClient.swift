@@ -2,7 +2,7 @@ import Foundation
 
 /// Searches Newznab-compatible RSS APIs and resolves downloads without forwarding API credentials.
 public actor NewznabClient: NZBSearchProvider {
-    public static let userAgent = "NZBPort/0.2.7 (+https://github.com/Schrotty74/NZBPort)"
+    public static let userAgent = "NZBPort/0.2.8 (+https://github.com/Schrotty74/NZBPort)"
     public enum Service: Sendable, Equatable { case treasureMaps, newzBay, ninjaCentral, drunkenSlug, nzbFinder, videothek }
 
     nonisolated public var name: String {

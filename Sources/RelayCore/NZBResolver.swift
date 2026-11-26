@@ -11,14 +11,24 @@ public actor NZBResolver {
     private let newznabClients: [NewznabClient]
     private let transport: any HTTPTransport
 
-    public init(transport: any HTTPTransport = SessionTransport(), newznabClients: [NewznabClient] = []) {
-        self.transport = transport
-        self.providers = [
+    public init(transport: any HTTPTransport = SessionTransport(), newznabClients: [NewznabClient] = [],
+                preferences: IndexerPreferences? = nil) {
+        let available: [any NZBSearchProvider] = [
             NZBIndexClient(transport: transport),
             WebNZBSearch(provider: .king, transport: transport),
             WebNZBSearch(provider: .binsearch, transport: transport)
         ] + newznabClients
-        self.newznabClients = newznabClients
+        let selected: [any NZBSearchProvider]
+        if let preferences {
+            selected = preferences.order.filter { !preferences.disabled.contains($0) }.compactMap { indexer in
+                available.first { $0.name == indexer.rawValue }
+            }
+        } else {
+            selected = available
+        }
+        self.transport = transport
+        self.providers = selected
+        self.newznabClients = selected.compactMap { $0 as? NewznabClient }
     }
 
     public init(providers: [any NZBSearchProvider]) {
@@ -71,6 +81,7 @@ public actor NZBResolver {
     }
 
     public func resolve(_ link: NZBLink, onAttempt: (@Sendable (String) async -> Void)? = nil) async throws -> URL {
+        guard !providers.isEmpty else { throw RelayError.message("No search services are enabled and configured.") }
         var failures: [String] = []
         for provider in providers {
             try Task.checkCancellation()

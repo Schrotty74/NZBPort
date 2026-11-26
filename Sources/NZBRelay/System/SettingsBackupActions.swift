@@ -8,7 +8,7 @@ extension AppModel {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = "NZBPort-Einstellungen.json"
-        panel.message = L("Die Sicherung enthält deine API-Keys im Klartext.")
+        panel.message = L("Die Sicherung enthält alle NZBPort-Einstellungen und deine API-Keys im Klartext.")
         panel.begin { [weak self] result in
             guard result == .OK, let self, let url = panel.url else { return }
             let scoped = url.startAccessingSecurityScopedResource()
@@ -33,9 +33,15 @@ extension AppModel {
                 let server = try backup.connection.validatedServer()
                 let alert = NSAlert()
                 alert.messageText = L("Einstellungen importieren?")
-                alert.informativeText = L("Die Sicherung ersetzt die gespeicherten Einstellungen, auch die API-Keys und den Autostart.")
+                alert.informativeText = L("Die Sicherung ersetzt Verbindungen, API-Keys, Kategorien, Erkennungsregeln und die weiteren NZBPort-Einstellungen.")
                 if let endpoint = server?.endpoint {
                     alert.informativeText += "\n\n" + L("SABnzbd-Adresse: \(endpoint.absoluteString)")
+                }
+                if backup.categories.recognition.automaticallySends {
+                    alert.informativeText += "\n\n" + L("Diese Sicherung aktiviert „Automatisch erkennen und senden“.")
+                }
+                if let folder = backup.watchedDownloadFolder {
+                    alert.informativeText += "\n\n" + L("Überwachter Downloadordner: \(folder)")
                 }
                 alert.addButton(withTitle: L("Importieren"))
                 alert.addButton(withTitle: L("Abbrechen"))

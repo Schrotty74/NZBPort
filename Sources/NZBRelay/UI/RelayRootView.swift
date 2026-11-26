@@ -47,6 +47,9 @@ struct RelayRootView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: RelayTheme.sectionSpacing) {
                     if let notice = model.notice { NoticeView(notice: notice).id("relayNotice") }
+                    if let confirmation = model.automaticSubmissionNotice {
+                        SubmissionConfirmationView(notice: confirmation).id("submissionConfirmation")
+                    }
                     if model.screen == .settings { ConnectionSettingsView(model: model) }
                     else if model.screen == .categories { CategoriesView(model: model) }
                     else if model.screen == .overview { DownloadOverview(model: model) }
@@ -66,6 +69,9 @@ struct RelayRootView: View {
             }
             .onChange(of: model.notice) { _, notice in
                 if notice != nil { reader.scrollTo("relayNotice", anchor: .top) }
+            }
+            .onChange(of: model.automaticSubmissionNotice) { _, confirmation in
+                if confirmation != nil { reader.scrollTo("submissionConfirmation", anchor: .top) }
             }
         }
     }
@@ -175,6 +181,21 @@ struct RelayRootView: View {
     }
 }
 
+struct SubmissionConfirmationView: View {
+    let notice: Notice
+
+    var body: some View {
+        Label {
+            Text(notice.text)
+        } icon: {
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+        }
+        .font(.system(size: 13))
+        .padding(12).frame(maxWidth: .infinity, alignment: .leading)
+        .background(.green.opacity(0.08), in: RelayControlShape.notice)
+        .modifier(RelayControlBorder(shape: RelayControlShape.notice, tint: .green))
+    }
+}
 
 private struct RelayImportDropDelegate: DropDelegate {
     @Binding var isTargeted: Bool

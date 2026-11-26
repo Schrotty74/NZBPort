@@ -3,13 +3,17 @@ import RelayCore
 
 struct CategorySendButton: View {
     let name: String
+    var recommended = false
     let action: () -> Void
     @Environment(\.colorTheme) private var colorTheme
     var body: some View {
         Button(action: action) {
             HStack(spacing: 13) {
                 Image(systemName: "folder").font(.system(size: 18)).foregroundStyle(colorTheme.accent)
-                Text(name).font(.system(size: 15, weight: .medium)).lineLimit(2)
+                VStack(alignment: .leading, spacing: 2) {
+                    if recommended { Text(L("Empfohlen")).font(.caption).foregroundStyle(.secondary) }
+                    Text(name).font(.system(size: 15, weight: .medium)).lineLimit(2)
+                }
                 Spacer()
                 Image(systemName: "arrow.up.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
             }
@@ -20,6 +24,7 @@ struct CategorySendButton: View {
         .controlSize(.large)
         .modifier(RelayControlBorder(shape: ButtonBorderShape.roundedRectangle(radius: RelayTheme.rowRadius)))
         .accessibilityLabel(L("An SABnzbd senden: \(name)"))
+        .accessibilityValue(recommended ? L("Empfohlen") : "")
     }
 }
 

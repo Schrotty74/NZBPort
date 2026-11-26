@@ -1,7 +1,7 @@
 import RelayCore
 import AppKit
 
-/// Native appearance menu shared by the application menu and the status item.
+/// Native appearance submenu for the application menu.
 @MainActor
 final class AppearanceMenu: NSObject, NSMenuDelegate {
     private let settings: AppearanceSettings

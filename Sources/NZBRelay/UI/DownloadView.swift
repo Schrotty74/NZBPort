@@ -17,38 +17,11 @@ struct DownloadView: View {
                             .font(.system(size: 12)).foregroundStyle(.secondary)
                     }
                 }
-                Picker(L("Priorität"), selection: $model.selectedPriority) {
-                    ForEach(SABPriority.allCases) { priority in Text(priority.title).tag(priority) }
-                }.disabled(model.busy || model.addPaused)
-                Toggle(L("Pausiert hinzufügen"), isOn: $model.addPaused).disabled(model.busy)
-                Divider()
-                HStack {
-                    Text(L("Kategorie wählen")).font(.headline)
-                    Spacer()
-                    Button { model.loadCategories() } label: { Image(systemName: "arrow.clockwise") }
-                        .buttonBorderShape(.circle)
-                        .relayInteractiveRoundControl()
-                        .help(L("Kategorien aktualisieren")).disabled(model.busy)
+                if model.automaticallySending {
+                    BusyRow(text: L(model.progress))
+                } else {
+                    categorySelection
                 }
-                if model.busy { BusyRow(text: L(model.progress)) }
-                if !model.categories.isEmpty {
-                    SearchField(text: $model.query)
-                    GlassEffectContainer(spacing: 12) {
-                        VStack(spacing: 8) {
-                            ForEach(model.visibleCategories, id: \.self) { category in
-                                CategorySendButton(name: model.categoryName(category)) { model.send(category: category) }
-                                    .disabled(model.busy)
-                            }
-                        }
-                    }
-                    if model.visibleCategories.isEmpty {
-                        Text(model.query.isEmpty ? L("Alle Kategorien sind ausgeblendet. Du kannst sie in den Einstellungen wieder einblenden.") : L("Keine passende Kategorie."))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                SaveNZBButton(model: model)
-                Button(L("Link verwerfen")) { model.discardCurrent() }
-                    .foregroundStyle(.secondary).disabled(model.sending)
             } else {
                 VStack(alignment: .leading, spacing: 10) {
                     Image(systemName: "tray.and.arrow.down")
@@ -89,6 +62,46 @@ struct DownloadView: View {
                 Text(L("Falls eine Browser-Erweiterung den Klick abfängt, deaktiviere deren Link-Verarbeitung in Safari."))
                     .font(.system(size: 12)).foregroundStyle(.secondary)
             }
+        }
+    }
+
+    private var categorySelection: some View {
+        Group {
+            Picker(L("Priorität"), selection: $model.selectedPriority) {
+                ForEach(SABPriority.allCases) { priority in Text(priority.title).tag(priority) }
+            }.disabled(model.busy || model.addPaused)
+            Toggle(L("Pausiert hinzufügen"), isOn: $model.addPaused).disabled(model.busy)
+            Divider()
+            HStack {
+                Text(L("Kategorie wählen")).font(.headline)
+                Spacer()
+                Button { model.loadCategories() } label: { Image(systemName: "arrow.clockwise") }
+                    .buttonBorderShape(.circle)
+                    .relayInteractiveRoundControl()
+                    .help(L("Kategorien aktualisieren")).disabled(model.busy)
+            }
+            if model.busy { BusyRow(text: L(model.progress)) }
+            if !model.categories.isEmpty {
+                SearchField(text: $model.query)
+                let suggestedCategory = model.suggestedCategory
+                GlassEffectContainer(spacing: 12) {
+                    VStack(spacing: 8) {
+                        ForEach(model.visibleCategories, id: \.self) { category in
+                            CategorySendButton(name: model.categoryName(category), recommended: category == suggestedCategory) {
+                                model.send(category: category)
+                            }
+                            .disabled(model.busy)
+                        }
+                    }
+                }
+                if model.visibleCategories.isEmpty {
+                    Text(model.query.isEmpty ? L("Alle Kategorien sind ausgeblendet. Du kannst sie in den Einstellungen wieder einblenden.") : L("Keine passende Kategorie."))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            SaveNZBButton(model: model)
+            Button(L("Link verwerfen")) { model.discardCurrent() }
+                .foregroundStyle(.secondary).disabled(model.sending)
         }
     }
 }

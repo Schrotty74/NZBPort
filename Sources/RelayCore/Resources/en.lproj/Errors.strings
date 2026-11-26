@@ -25,6 +25,7 @@
 "SABnzbd returned HTTP status %lld." = "SABnzbd returned HTTP status %lld.";
 "SABnzbd returned an invalid JSON response." = "SABnzbd returned an invalid JSON response.";
 "No NZB was found by any search service.\n%@" = "No NZB was found by any search service.\n%@";
+"No search services are enabled and configured." = "No search services are enabled and configured.";
 "Choose an NZB file smaller than 16 MiB." = "Choose an NZB file smaller than 16 MiB.";
 "Choose a valid .nzb file." = "Choose a valid .nzb file.";
 "The NZB file is invalid." = "The NZB file is invalid.";

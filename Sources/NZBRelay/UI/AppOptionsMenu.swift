@@ -52,25 +52,24 @@ struct AppOptionsMenu: View {
         Button(L("SABnzbd öffnen"), systemImage: "safari") { model.openSABnzbd() }
             .disabled(!model.configured)
         Divider()
-        Menu(L("Einstellungen"), systemImage: "gearshape") { settingsMenuContent }
+        Menu(L("Einstellungen"), systemImage: "gearshape") { SettingsMenuContent(model: model) }
         Menu(L("Über NZBPort"), systemImage: "info.circle") {
-            Button(L("Nach Updates suchen …"), systemImage: "arrow.triangle.2.circlepath") {
-                model.screen = .updates
-                Task { await model.updateSettings.check() }
-            }
-            Divider()
-            Link("GitHub", destination: AppLinks.github)
-            Link(L("Homepage"), destination: AppLinks.homepage)
+            AboutMenuContent(model: model)
         }
     }
+}
 
-    @ViewBuilder
-    private var settingsMenuContent: some View {
+struct SettingsMenuContent: View {
+    let model: AppModel
+    var showWindow: () -> Void = {}
+
+    var body: some View {
         @Bindable var appearance = model.appearanceSettings
         @Bindable var language = model.languageSettings
         let login = model.loginItemSettings
         Button(L("Verbindung …"), systemImage: "network") {
             model.openSettings()
+            showWindow()
         }
         .disabled(model.sending || model.categoryMutationInProgress || model.screen == .settings)
         Menu(L("Downloadordner"), systemImage: "folder.badge.plus") {
@@ -78,7 +77,10 @@ struct AppOptionsMenu: View {
                 Text(folder.lastPathComponent)
                 Button(L("Überwachung beenden")) { model.downloadFolder.stop() }
             }
-            Button(L("Downloadordner wählen …")) { model.downloadFolder.chooseFolder() }
+            Button(L("Downloadordner wählen …")) {
+                showWindow()
+                model.downloadFolder.chooseFolder()
+            }
         }
         Picker(L("Sprache"), selection: $language.selection) {
             ForEach(AppLanguage.allCases) { choice in
@@ -118,12 +120,37 @@ struct AppOptionsMenu: View {
         }
         Divider()
         Menu(L("Sicherung"), systemImage: "externaldrive") {
-            Button(L("Einstellungen exportieren …")) { model.exportSettings() }
-            Button(L("Einstellungen importieren …")) { model.importSettings() }
+            Button(L("Einstellungen exportieren …")) {
+                showWindow()
+                model.exportSettings()
+            }
+            Button(L("Einstellungen importieren …")) {
+                showWindow()
+                model.importSettings()
+            }
             Divider()
-            Button(L("Einstellungen zurücksetzen …"), role: .destructive) { model.resetSettings() }
+            Button(L("Einstellungen zurücksetzen …"), role: .destructive) {
+                showWindow()
+                model.resetSettings()
+            }
         }
         .disabled(!model.canManageSettings)
+    }
+}
+
+struct AboutMenuContent: View {
+    let model: AppModel
+    var showWindow: () -> Void = {}
+
+    var body: some View {
+        Button(L("Nach Updates suchen …"), systemImage: "arrow.triangle.2.circlepath") {
+            model.screen = .updates
+            showWindow()
+            Task { await model.updateSettings.check() }
+        }
+        Divider()
+        Link("GitHub", destination: AppLinks.github)
+        Link(L("Homepage"), destination: AppLinks.homepage)
     }
 }
 
